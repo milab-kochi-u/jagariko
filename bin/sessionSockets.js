@@ -108,30 +108,6 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
         })
 
-        socket.on("giveWithSubmit",function(msg){
-            console.log(msg)
-            steps(function(){
-
-                if(msg.giveWithSubmitResult == 1){
-                    mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},function(){
-                        msg.position = session.debateLogin.position
-                        socket.emit("receiveConfirm",msg)
-                        socket.broadcast.emit("receiveConfirm",msg)
-                    })
-                }else{
-                    mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1}},function(){
-                        msg.position = session.debateLogin.position
-                        socket.emit("receiveConfirm",msg)
-                        socket.broadcast.emit("receiveConfirm",msg)
-                    })
-                }
-
-            })()
-
-        })
-
-
-
     })
 
 

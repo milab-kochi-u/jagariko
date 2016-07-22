@@ -35,7 +35,6 @@
     <li role="presentation" class="{{changeTabVal[1]}}"><a ng-click="changeTab(1)">主張履歴</a></li>
     <li role="presentation" class="{{changeTabVal[2]}}"><a ng-click="changeTab(2)">分析履歴</a></li>
 </ul>
-
 </div>
 
 <div>
@@ -188,27 +187,8 @@
     </div>
 </div>
 <div class="row">
-    <ul class="nav nav-pills nav-justified">
-        <li role="presentation" class="{{changeFormVal[0]}}"><a ng-click="changeForm(0)">分析入力</a></li>
-        <li role="presentation" class="{{changeFormVal[1]}}"><a ng-click="changeForm(1)">主張入力</a></li>
-    </ul>
-
-<br/>
-    <ul class="nav nav-pills nav-justified" ng-if="changeFormVal[0] == 'active'">
-        <li role="presentation" class="{{changeAnalysisFormVal[0]}}"><a ng-click="changeAnalysisForm(0)">分析します</a></li>
-        <li role="presentation" class="{{changeAnalysisFormVal[1]}}"><a ng-click="changeAnalysisForm(1)">再投稿のお願いします</a></li>
-    </ul>
+    <my-sub-navy></my-sub-navy>
 </div>
-
-<div class="row">
-<my-form ng-if="changeFormVal[0] == 'active' && changeAnalysisFormVal[0] == 'active'" obj="obj" addClaim="addClaim"></my-form>
-<my-input-form input-message="inputMessage" ng-if="changeFormVal[1] == 'active' && changeAnalysisFormVal[0] == 'active'"></my-input-form>
-<my-input-request-form ng-if="changeFormVal[0] == 'active' && changeAnalysisFormVal[1] == 'active'"  request-statement-message="requestStatementMessage"></my-input-request-form>
-
-<wait-for-confirm ng-if="waitForConfirmVal[0] == 'active'"></wait-for-confirm>
-<give-with-confirm ng-if="waitForConfirmVal[1] == 'active'"></give-with-confirm>
-</div>
-
 </div>
 </body>
 <script>
@@ -309,12 +289,6 @@
              })
 
 
-
-             coreSocket.on("receiveConfirm",function(_res){
-                 getDebateInformation()
-                 $scope.giveWithSubmitResult = _res.giveWithSubmitResult
-                 $scope.giveWithSubmitMsg = _res.giveWithSubmitMsg
-             })
             $scope.$watch("debateInfo.status",function(val,preVal){
                 if(parseInt(preVal) == -2 && parseInt(val) == 0 && parseInt($scope.debateInfo.position) == 1){
                     alert(1)
@@ -363,8 +337,6 @@
 
             $scope.changeTabVal = ["active","",""]
             $scope.changeFormVal = ["",""]
-            $scope.changeAnalysisFormVal = ["active",""]
-            $scope.waitForConfirmVal = ["",""]
 
 
             $scope.changeTab = function(n){
@@ -380,15 +352,6 @@
                 }
                 $scope.changeFormVal[n] = "active"
             }
-
-            $scope.changeAnalysisForm = function(n){
-                for(var i=0;i<$scope.changeAnalysisFormVal.length;i++){
-                    $scope.changeAnalysisFormVal[i] = ""
-                }
-                $scope.changeAnalysisFormVal[n] = "active"
-            }
-
-            $scope.testValue = "testValue"
 
             $scope.obj=[{
                                         "claimTxt": "",
@@ -413,7 +376,7 @@
                         {title:"this is the message for statement",dissent:0,content:""}
                     ]
 
-            $scope.requestStatementMessage = ""
+
 
             $scope.statement = [
                  {title:"this is the message for statement",dissent:0,content:"this is the message for statement"}
@@ -548,17 +511,29 @@
         }
     })
 
-    myApp.directive("myInputRequestForm",function(coreSocket){
+    myApp.directive("requestForTwiceStatement",function(){
         return{
-            scope:{requestStatementMessage:"="},
+            scope:{},
             controller:function($scope){
-                $scope.requestStatement = function(){
-                   coreSocket.emit("requestStatement",{msg:$scope.requestStatementMessage})
+                $scope.requestStatementMessage = ""
+                $scope.submit = function(){
+                    alert($scope.requestStatementMessage)
                 }
             },
-            templateUrl:"/angularTemplate/inputRequestForm.html"
+            templateUrl:"/angularTemplate/requestForTwiceStatement.html"
         }
     })
+
+    myApp.directive("mySubNavy",function(coreSocket){
+        return {
+           scope:false,
+           controller:function($scope){
+
+           },
+           templateUrl:"/angularTemplate/mySubNavy.html"
+        }
+    })
+
 
     myApp.directive("settingPart",function(){
            return {
@@ -570,29 +545,55 @@
            }
     })
 
-    myApp.directive("waitForConfirm",function(){
-           return {
-                scope:{
 
-                },
-                templateUrl:"/angularTemplate/waitForConfirm.html"
-           }
+
+    myApp.directive("pro11",function(){
+            return {
+                scope:false,
+                templateUrl:"/angularTemplate/status/pro11.html"
+            }
     })
 
-    myApp.directive("giveWithConfirm",function(coreSocket){
-           return {
-                scope:{
+    myApp.directive("con11",function(){
+            return {
+                scope:false,
+                templateUrl:"/angularTemplate/status/con11.html"
+            }
+    })
 
-                },
+    myApp.directive("pro21",function(){
+            return {
+                scope:false,
+                templateUrl:"/angularTemplate/status/pro21.html"
+            }
+    })
+
+    myApp.directive("con21",function(){
+            return {
+                scope:{obj:"="},
                 controller:function($scope){
-                    $scope.giveWithSubmitResult = 1
-                    $scope.giveWithSubmit = function(){
-                        coreSocket.emit("giveWithSubmit",{giveWithSubmitResult:$scope.giveWithSubmitResult,giveWithSubmitMsg:$scope.giveWithSubmitMsg})
+                    $scope.changeFormVal = ["active",""]
+                    $scope.changeForm = function(n){
+                        for(var i=0;i<$scope.changeFormVal.length;i++){
+                            $scope.changeFormVal[i] = ""
+                        }
+                        $scope.changeFormVal[n] = "active"
                     }
                 },
-                templateUrl:"/angularTemplate/giveWithConfirm.html"
-           }
+                templateUrl:"/angularTemplate/status/con21.html"
+            }
     })
 
+    myApp.directive("")
+
+    myApp.directive("pro32",function(){
+            return {
+                scope:{inputMessage:"="},
+                controller:function($scope){
+
+                },
+                templateUrl:"/angularTemplate/status/pro32.html"
+            }
+    })
 </script>
 </html>
