@@ -1,0 +1,22 @@
+<div class="row">
+<div class="alert alert-warning" role="alert">
+    <a href="#" class="alert-link">分析の結果以下である</a>
+</div>
+</div>
+
+<div class="row">
+<every-analysis every-analysis-data="everyAnalysisData"></every-analysis>
+</div>
+
+<div class="row">
+    <ul class="nav nav-pills nav-justified">
+        <li role="presentation" class="{{confirmVal[0]}}"><a ng-click="confirm(0)">承諾</a></li>
+        <li role="presentation" class="{{confirmVal[1]}}"><a ng-click="confirm(1)">拒否</a></li>
+        <li role="presentation" class="{{confirmVal[2]}}"><a ng-click="confirm(2)">再投稿</a></li>
+    </ul>
+</div>
+
+<div class="row" ng-if="confirmVal[2] == 'active'">
+    <request-for-twice-statement></request-for-twice-statement>
+</div>
+

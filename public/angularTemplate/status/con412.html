@@ -1,0 +1,20 @@
+<div class="row">
+    <div class="alert alert-warning" role="alert">
+        <a href="#" class="alert-link">あなたの分析が拒否されました,もう一度分析するかまた再投稿をお願いするのかを選んでください</a>
+    </div>
+</div>
+
+<div class="row">
+    <ul class="nav nav-pills nav-justified">
+        <li role="presentation" class="{{changeFormVal[0]}}"><a ng-click="changeForm(0)">分析</a></li>
+        <li role="presentation" class="{{changeFormVal[1]}}"><a ng-click="changeForm(1)">再投稿のお願い</a></li>
+    </ul>
+</div>
+
+<div class="row">
+    <my-form ng-if="changeFormVal[0] == 'active'" obj="obj"></my-form>
+</div>
+
+<div class="row">
+    <request-for-twice-statement ng-if="changeFormVal[1] == 'active'" ></request-for-twice-statement>
+</div>

@@ -1,0 +1,75 @@
+<div class="row">
+    <div ng-repeat="(_key,_val) in everyAnalysisData.obj track by $index">
+        <div class="row">
+            <div class="col-sm-1">
+                <div ng-class="(everyAnalysis.position == 1)? 'panel-info':'panel-success'" class="panel">
+                    <div class="panel-heading">
+                        主張
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        主張内容:{{_val.claimTxt}}
+                    </div>
+                </div>
+            </div>
+
+            <div ng-if="_val.dissent == 1" class="col-sm-1" style="line-height:50px;">
+                <button class="btn btn-danger">意義</button>
+            </div>
+
+        </div>
+        <div ng-repeat="(__key,__val) in _val.warrant track by $index">
+            <div class="row">
+                <div class="col-sm-1 col-sm-offset-1">
+                    <div ng-class="(everyAnalysis.position == 1)? 'panel-info':'panel-success'" class="panel">
+                        <div class="panel-heading">
+                            論拠
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-9">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            論拠内容:{{__val.warrantTxt}}
+                        </div>
+                    </div>
+                </div>
+
+                <div ng-if="__val.dissent == 1" class="col-sm-1" style="line-height:50px;">
+                    <button class="btn btn-danger">意義</button>
+                </div>
+            </div>
+
+            <div ng-repeat="(___key,___val) in __val.evidence track by $index">
+                <div class="row">
+                    <div class="col-sm-1 col-sm-offset-2">
+                        <div ng-class="(everyAnalysis.position == 1)? 'panel-info':'panel-success'" class="panel">
+                            <div class="panel-heading">
+                                根拠
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-8">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                根拠内容:{{___val.evidenceTxt}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-if="___val.dissent == 1" class="col-sm-1" style="line-height:50px;">
+                        <button class="btn btn-danger">意義</button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

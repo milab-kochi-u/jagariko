@@ -107,8 +107,6 @@
 
 <div class="row" ng-show="changeTabVal[2] == 'active'">
 
-
-
     <div ng-repeat="(key,val) in analysis track by $index">
     <div ng-repeat="(_key,_val) in val.obj track by $index">
     <div class="row">
@@ -186,9 +184,10 @@
     </div>
     </div>
 </div>
-<div class="row">
-    <my-sub-navy></my-sub-navy>
-</div>
+
+<con312 obj="obj" every-analysis-data="everyAnalysisData"></con312>
+
+
 </div>
 </body>
 <script>
@@ -382,7 +381,30 @@
                  {title:"this is the message for statement",dissent:0,content:"this is the message for statement"}
             ]
 
+            $scope.everyStatementData = {
+                position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]
+            }
+
+
             $scope.analysis = []
+            $scope.everyAnalysisData = {obj:[{
+                                                                                "claimTxt": "",
+                                                                                "dissent":0,
+                                                                                "warrant": [
+                                                                                  {
+                                                                                    "warrantTxt": "",
+                                                                                    "evidence": [
+                                                                                      {
+                                                                                        "evidenceTxt": "",
+                                                                                        "dissent":0
+                                                                                     }
+
+                                                                                   ],
+                                                                                   "dissent":0
+                                                                                 }
+                                                                               ]
+                                        }],
+                                    position:1}
 
             $scope.settingInfo = {
                 timeNumbers:5,
@@ -545,7 +567,25 @@
            }
     })
 
+    myApp.directive("everyAnalysis",function(){
+            return {
+                scope:{everyAnalysisData:"="},
+                controller:function($scope){
 
+                },
+                templateUrl:"/angularTemplate/everyAnalysis.html"
+            }
+    })
+
+    myApp.directive("everyStatement",function(){
+            return {
+                scope:{everyStatementData:"="},
+                controller:function($scope){
+
+                },
+                templateUrl:"/angularTemplate/everyStatement.html"
+            }
+    })
 
     myApp.directive("pro11",function(){
             return {
@@ -570,7 +610,7 @@
 
     myApp.directive("con21",function(){
             return {
-                scope:{obj:"="},
+                scope:{obj:"=",everyStatementData:"="},
                 controller:function($scope){
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
@@ -584,7 +624,24 @@
             }
     })
 
-    myApp.directive("")
+    myApp.directive("pro31",function(){
+        return {
+            scope:{everyAnalysisData:"="},
+            controller:function($scope){
+
+                $scope.confirmVal = ["","",""]
+                $scope.confirm = function(n){
+                    for(var i=0;i<$scope.confirmVal.length;i++){
+                       $scope.confirmVal[i] = ""
+                    }
+                    $scope.confirmVal[n] = "active"
+                }
+            },
+            templateUrl:"/angularTemplate/status/pro31.html"
+        }
+    })
+
+
 
     myApp.directive("pro32",function(){
             return {
@@ -594,6 +651,33 @@
                 },
                 templateUrl:"/angularTemplate/status/pro32.html"
             }
+    })
+
+    myApp.directive("con411",function(){
+        return {
+
+        scope:{everyAnalysisData:"=",inputMessage:"="},
+        controller:function($scope){
+
+        },
+        templateUrl:"/angularTemplate/status/con411.html"
+        }
+    })
+
+    myApp.directive("con412",function(){
+        return {
+            scope:{everyAnalysisData:"=",obj:"="},
+            controller:function($scope){
+                    $scope.changeFormVal = ["active",""]
+                    $scope.changeForm = function(n){
+                        for(var i=0;i<$scope.changeFormVal.length;i++){
+                            $scope.changeFormVal[i] = ""
+                        }
+                        $scope.changeFormVal[n] = "active"
+                    }
+            },
+            templateUrl:"/angularTemplate/status/con412.html"
+        }
     })
 </script>
 </html>
