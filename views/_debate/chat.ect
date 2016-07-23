@@ -185,9 +185,7 @@
     </div>
 </div>
 
-<con312 obj="obj" every-analysis-data="everyAnalysisData"></con312>
-
-
+<con811122></con811122>
 </div>
 </body>
 <script>
@@ -626,7 +624,7 @@
 
     myApp.directive("pro31",function(){
         return {
-            scope:{everyAnalysisData:"="},
+            scope:{everyAnalysisData:"=",inputMessage:"="},
             controller:function($scope){
 
                 $scope.confirmVal = ["","",""]
@@ -641,16 +639,36 @@
         }
     })
 
+    myApp.directive("con31",function(){
+        return {
+            scope:{},
+            controller:function($scope){
+
+            },
+            templateUrl:"/angularTemplate/status/con31.html"
+        }
+    })
+
 
 
     myApp.directive("pro32",function(){
-            return {
-                scope:{inputMessage:"="},
-                controller:function($scope){
+        return {
+            scope:{inputMessage:"="},
+            controller:function($scope){
 
-                },
-                templateUrl:"/angularTemplate/status/pro32.html"
-            }
+            },
+            templateUrl:"/angularTemplate/status/pro32.html"
+        }
+    })
+
+    myApp.directive("con32",function(){
+        return{
+            scope:{},
+            controller:function($scope){
+
+            },
+            templateUrl:"/angularTemplate/status/con32.html",
+        }
     })
 
     myApp.directive("con411",function(){
@@ -664,9 +682,15 @@
         }
     })
 
+    myApp.directive("pro411",function(){
+        return {
+           templateUrl:"/angularTemplate/status/pro411.html"
+        }
+    })
+
     myApp.directive("con412",function(){
         return {
-            scope:{everyAnalysisData:"=",obj:"="},
+            scope:{everyStatementData:"=",obj:"="},
             controller:function($scope){
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
@@ -678,6 +702,191 @@
             },
             templateUrl:"/angularTemplate/status/con412.html"
         }
+    })
+
+    myApp.directive("pro412",function(){
+        return {
+            templateUrl:"/angularTemplate/status/pro412.html"
+        }
+    })
+
+    myApp.directive("con42",function(){
+        return{
+            scope:{obj:"=",everyStatementData:"="},
+            controller:function($scope){
+
+            },
+            templateUrl:"/angularTemplate/status/con42.html"
+        }
+    })
+
+    myApp.directive("pro42",function(){
+        templateUrl:"/angularTemplate/status/pro42.html"
+    })
+
+    myApp.directive("pro521",function(){
+
+        return {
+            scope:false,
+            templateUrl:"/angularTemplate/status/pro521.html"
+        }
+
+    })
+
+    myApp.directive("con521",function(){
+        return {
+            scope:false,
+            templateUrl:"/angularTemplate/status/con521.html"
+        }
+    })
+
+    myApp.directive("con522",function(){
+        return {
+            scope:false,
+            templateUrl:"/angularTemplate/status/con522.html"
+        }
+    })
+
+    myApp.directive("pro522",function(){
+
+        return {
+          scope:false,
+          templateUrl:"/angularTemplate/status/pro522.html"
+        }
+
+    })
+
+    myApp.directive("pro511",function(){
+            return {
+                scope:false,
+                controller:function($scope){
+                    $scope.changeFormVal = ["active",""]
+                    $scope.changeForm = function(n){
+                        for(var i=0;i<$scope.changeFormVal.length;i++){
+                            $scope.changeFormVal[i] = ""
+                        }
+                        $scope.changeFormVal[n] = "active"
+                    }
+                },
+                templateUrl:"/angularTemplate/status/pro511.html"
+            }
+    })
+
+    myApp.directive("con511",function(){
+            return {
+              templateUrl:"/angularTemplate/status/con511.html"
+            }
+    })
+
+    myApp.directive("pro5121",function(){
+            return {
+                scope:false,
+                templateUrl:"/angularTemplate/status/pro5121.html"
+            }
+    })
+
+    myApp.directive("con5121",function(){
+            return {
+                scope:false,
+                templateUrl:"/angularTemplate/status/con5121.html"
+            }
+    })
+
+    myApp.directive("pro5122",function(){
+            return {
+                scope:false,
+                templateUrl:"/angularTemplate/status/pro5122.html"
+            }
+    })
+
+    myApp.directive("con5122",function(){
+            return {
+                scope:false,
+                templateUrl:"/angularTemplate/status/con5122.html"
+            }
+    })
+
+    myApp.directive("con6111",function(){
+            return {
+                scope:{everyAnalysisData:"=",inputMessage:"="},
+                controller:function($scope){
+
+                    $scope.confirmVal = ["","",""]
+                    $scope.confirm = function(n){
+                        for(var i=0;i<$scope.confirmVal.length;i++){
+                           $scope.confirmVal[i] = ""
+                        }
+                        $scope.confirmVal[n] = "active"
+                    }
+                },
+                templateUrl:"/angularTemplate/status/con6111.html"
+            }
+    })
+
+    myApp.directive("pro6111",function(){
+            return {
+                templateUrl:"/angularTemplate/status/pro6111.html"
+            }
+    })
+
+    myApp.directive("con6112",function(){
+            return {
+                 templateUrl:"/angularTemplate/status/con6112.html"
+            }
+    })
+
+    myApp.directive("pro71111",function(){
+            return {
+                 templateUrl:"/angularTemplate/status/pro71111.html"
+            }
+    })
+
+    myApp.directive("con71111",function(){
+             return {
+                  templateUrl:"/angularTemplate/status/con71111.html"
+             }
+    })
+
+    myApp.directive("pro71112",function(){
+            return {
+                 templateUrl:"/angularTemplate/status/pro71112.html"
+            }
+    })
+
+    myApp.directive("pro81111",function(){
+            return {
+                 templateUrl:"/angularTemplate/status/pro81111.html"
+            }
+    })
+
+    myApp.directive("con81111",function(){
+            return {
+                 templateUrl:"/angularTemplate/status/con81111.html"
+            }
+    })
+
+    myApp.directive("pro811121",function(){
+            return {
+                templateUrl:"/angularTemplate/status/pro811121.html"
+            }
+    })
+
+    myApp.directive("con811121",function(){
+            return {
+                templateUrl:"/angularTemplate/status/con811121.html"
+            }
+    })
+
+    myApp.directive("pro811122",function(){
+            return {
+                templateUrl:"/angularTemplate/status/pro811122.html"
+            }
+    })
+
+    myApp.directive("con811122",function(){
+            return {
+                templateUrl:"/angularTemplate/status/con811122.html"
+            }
     })
 </script>
 </html>
