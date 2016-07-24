@@ -10,8 +10,8 @@
 
 <div class="row">
     <ul class="nav nav-pills nav-justified">
-        <li role="presentation" class="{{confirmVal[0]}}"><a ng-click="confirm(0)">承諾</a></li>
-        <li role="presentation" class="{{confirmVal[1]}}"><a ng-click="confirm(1)">拒否</a></li>
+        <li role="presentation" class="{{confirmVal[0]}}"><a ng-click="confirm(0);confirmAnalysisResult()">承諾</a></li>
+        <li role="presentation" class="{{confirmVal[1]}}"><a ng-click="confirm(1);refuseAnalysisResult()">拒否</a></li>
         <li role="presentation" class="{{confirmVal[2]}}"><a ng-click="confirm(2)">再投稿</a></li>
     </ul>
 </div>

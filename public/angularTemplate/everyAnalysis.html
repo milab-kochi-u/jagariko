@@ -2,7 +2,7 @@
     <div ng-repeat="(_key,_val) in everyAnalysisData.obj track by $index">
         <div class="row">
             <div class="col-sm-1">
-                <div ng-class="(everyAnalysis.position == 1)? 'panel-info':'panel-success'" class="panel">
+                <div ng-class="(everyAnalysisData.position == 1)? 'panel-info':'panel-success'" class="panel">
                     <div class="panel-heading">
                         主張
                     </div>
@@ -25,7 +25,7 @@
         <div ng-repeat="(__key,__val) in _val.warrant track by $index">
             <div class="row">
                 <div class="col-sm-1 col-sm-offset-1">
-                    <div ng-class="(everyAnalysis.position == 1)? 'panel-info':'panel-success'" class="panel">
+                    <div ng-class="(everyAnalysisData.position == 1)? 'panel-info':'panel-success'" class="panel">
                         <div class="panel-heading">
                             論拠
                         </div>
@@ -48,7 +48,7 @@
             <div ng-repeat="(___key,___val) in __val.evidence track by $index">
                 <div class="row">
                     <div class="col-sm-1 col-sm-offset-2">
-                        <div ng-class="(everyAnalysis.position == 1)? 'panel-info':'panel-success'" class="panel">
+                        <div ng-class="(everyAnalysisData.position == 1)? 'panel-info':'panel-success'" class="panel">
                             <div class="panel-heading">
                                 根拠
                             </div>

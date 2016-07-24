@@ -34,10 +34,10 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
         socket.on("debateSetting",function(msg){
             steps(function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{config:{timeNumbers:msg.timeNumbers,timeLimit:msg.timeLimit,timeLimitValDefault:msg.timeLimitValDefault,timeLimitValCustomize:msg.timeLimitValCustomize},setting:1}},function(_res){
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{config:{timeNumbers:msg.timeNumbers,timeLimit:msg.timeLimit,timeLimitValDefault:msg.timeLimitValDefault,timeLimitValCustomize:msg.timeLimitValCustomize},setting:1}},this.hold(function(_res){
                     socket.emit("systemSettingFinish",msg)
                     socket.broadcast.emit("systemSettingFinish",msg)
-                })
+                }))
             })()
         })
 
@@ -56,10 +56,10 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
                     if(parseInt(_res[0].conPrepare) == 1 && parseInt(_res[0].proPrepare) == 1){
                         this.step(function(){
-                            mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:0}},function(){
+                            mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:0}},this.hold(function(){
                                 socket.emit("prepareCompelete",{})
                                 socket.broadcast.emit("prepareCompelete",{})
-                            })
+                            }))
                         })
                     }
                 }))
@@ -69,23 +69,33 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
         socket.on("giveStatement",function(msg){
                 steps(function(){
-                    mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},function(){
+                    mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
+                        return _res[0].status
+                    }))
+                },function(status){
+                    if(status==6){
+                        mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:1}},this.hold(function(){
 
-                    })
-                },function(){
-                    for(var i=0;i<msg.length;i++){
-                        msg[i].position = session.debateLogin.position
+                        }))
+                    }else{
+                        mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},this.hold(function(){
+
+                        }))
                     }
-                    socket.emit("receiveStatement",msg)
-                    socket.broadcast.emit("receiveStatement",msg)
+                },function(){
+                    var sendObj = {}
+                    sendObj.position = session.debateLogin.position
+                    sendObj.obj = msg
+                    socket.emit("receiveStatement",sendObj)
+                    socket.broadcast.emit("receiveStatement",sendObj)
                 })()
         })
 
         socket.on("requestStatement",function(msg){
             steps(function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1}},function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1}},this.hold(function(){
 
-                })
+                }))
             },function(){
                 socket.emit("requestStatement",msg)
                 socket.broadcast.emit("requestStatement",msg)
@@ -94,18 +104,29 @@ var sessionSockets = function(sessionSockets,steps,mongo){
         })
 
         socket.on("giveAnalysis",function(msg){
-            console.log(msg)
             steps(function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},this.hold(function(){
 
-                })
+                }))
             },function(){
-                msg.position =  session.debateLogin.position
-            },function(){
-                socket.emit("receiveAnalysis",msg)
-                socket.broadcast.emit("receiveAnalysis",msg)
+                var sendObj = msg
+                sendObj.position = session.debateLogin.position
+                socket.emit("receiveAnalysis",sendObj)
+                socket.broadcast.emit("receiveAnalysis",sendObj)
             })()
 
+        })
+
+        socket.on("confirmAnalysisResult",function(msg){
+            steps(function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},this.hold(function(){
+
+                }))
+            },function(){
+                var sendObj = msg
+                socket.emit("confirmAnalysisResultFinish",sendObj)
+                socket.broadcast.emit("confirmAnalysisResultFinish",sendObj)
+            })()
         })
 
     })

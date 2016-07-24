@@ -138,13 +138,12 @@ module.exports = {
 
         var rNum = Math.round(Math.random()*10000)
         if(position == 1){
-            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finishi:0,setting:0,group:req.session.debateLogin.group}
+            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finishi:0,setting:0,status:-1,group:req.session.debateLogin.group}
         }else{
-            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finishi:0,setting:0,group:req.session.debateLogin.group}
+            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finishi:0,setting:0,status:-1,group:req.session.debateLogin.group}
         }
 
         req.session.debateLogin.position = position
-        console.log(req.session.debateLogin)
         steps(function(){
             mongo.insert("debateStatus",newRoom,{},this.hold(function(_res){
                 req.session.debateLogin.num = num

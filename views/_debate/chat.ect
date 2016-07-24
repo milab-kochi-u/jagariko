@@ -96,12 +96,14 @@
 <div class="row" ng-show="changeTabVal[1] == 'active'">
 
         <div ng-repeat="(key,val) in statement track by $index">
-        <div ng-class="(val.position == 1)? 'panel-info':'panel-success'" class="panel">
-          <div class="panel-heading">主張</div>
-          <div class="panel-body">
-                主張内容:{{val.content}}
-          </div>
-        </div>
+            <div ng-repeat="(_key,_val) in val.obj">
+                <div ng-class="(val.position == 1)? 'panel-info':'panel-success'" class="panel">
+                  <div class="panel-heading">主張</div>
+                  <div class="panel-body">
+                        主張内容:{{_val.content}}
+                  </div>
+                </div>
+            </div>
         </div>
 </div>
 
@@ -185,7 +187,24 @@
     </div>
 </div>
 
-<con811122></con811122>
+
+<pro11 ng-show="statusController.pro11"></pro11>
+<con11 ng-show="statusController.con11" input-message="inputMessage"></con11>
+<pro21 ng-show="statusController.pro21"></pro21>
+<con21 ng-show="statusController.con21" obj="obj" every-statement-data="everyStatementData"></con21>
+<pro31 ng-show="statusController.pro31" every-analysis-data="everyAnalysisData" input-message="inputMessage"></pro31>
+<con31 ng-show="statusController.con31"></con31>
+<pro411 ng-show="statusController.pro411"></pro411>
+<con411 ng-show="statusController.con411" every-analysis-data="everyAnalysisData" input-message="inputMessage"></con411>
+
+<pro511 ng-show="statusController.pro511"></pro511>
+<con511 ng-show="statusController.con511"></con511>
+
+<pro6111 ng-show="statusController.pro6111"></pro6111>
+<con6111 ng-show="statusController.con6111"></con6111>
+
+<pro71111 ng-show="statusController.pro71111"></pro71111>
+<con71111 ng-show="statusController.con71111"></con71111>
 </div>
 </body>
 <script>
@@ -250,6 +269,11 @@
                     $scope.debateInfo.status = _res.data.status
                     $scope.debateInfo.config = _res.data.config
 
+                    console.log("debate status is .....")
+                    console.log($scope.debateInfo.status)
+
+                    console.log("debate position is ....")
+                    console.log($scope.debateInfo.position)
                 })
             }
 
@@ -260,6 +284,7 @@
             coreSocket.on("systemSettingFinish",function(_res){
                 $scope.debateInfo.setting = 1
                 $scope.debateInfo.config = {timeNumbers:_res.timeNumbers,timeLimit:_res.timeLimit,timeLimitValDefault:_res.timeLimitValDefault,timeLimitValCustomize:_res.timeLimitValCustomize}
+
             })
 
             coreSocket.on("prepared",function(_res){
@@ -273,6 +298,7 @@
             coreSocket.on("receiveStatement",function(_res){
                 getDebateInformation()
                 $scope.statement = $scope.statement.concat(_res)
+                $scope.everyStatementData = _res
             })
 
              coreSocket.on("requestStatement",function(_res){
@@ -282,58 +308,93 @@
              coreSocket.on("receiveAnalysis",function(_res){
                  getDebateInformation()
                  $scope.analysis.push(_res)
-                 console.log($scope.obj)
+                 $scope.everyAnalysisData = _res
              })
 
 
+             coreSocket.on("confirmAnalysisResultFinish",function(_res){
+                 getDebateInformation()
+                 $scope.everyAnalysisData = _res.everyAnalysisData
+             })
+
+            $scope.statusController = {
+                con11:false,con21:false,con31:false,con32:false,con42:false,con411:false,con412:false,con511:false,
+                pro11:false,pro21:false,pro31:false,pro32:false
+            }
+
+            function changeStatusController(arr){
+                for(var i in $scope.statusController){
+                    $scope.statusController[i] = false
+                }
+
+                for(var i in arr){
+                    $scope.statusController[arr[i]] = true
+                }
+            }
+
+
             $scope.$watch("debateInfo.status",function(val,preVal){
-                if(parseInt(preVal) == -2 && parseInt(val) == 0 && parseInt($scope.debateInfo.position) == 1){
-                    alert(1)
-                    $scope.changeFormVal = ["","active"]
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == -2 && parseInt(val) == 0){
+                    changeStatusController(["pro11"])
                 }
 
-                if(parseInt(preVal) == 0 && parseInt(val) == 1){
-
-                    if(parseInt($scope.debateInfo.position) == 1){
-                        $scope.changeFormVal = ["",""]
-                    }else{
-                        $scope.changeFormVal = ["active",""]
-                    }
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == -2 && parseInt(val) == 0){
+                    changeStatusController(["con11"])
                 }
 
-                if(parseInt(preVal) == 1 && parseInt(val) == 0){
-
-                    if(parseInt($scope.debateInfo.position) == 1){
-                        $scope.changeFormVal = ["","active"]
-                    }else{
-                        $scope.changeFormVal = ["",""]
-                    }
+                if(parseInt($scope.debateInfo.position) == 1 && ((parseInt(preVal) == 0) || (parseInt(preVal == 6))) && parseInt(val) == 1){
+                    changeStatusController(["pro21"])
                 }
 
-                if(parseInt(preVal) == 1 && parseInt(val) == 2){
-
-                    if(parseInt($scope.debateInfo.position) == 1){
-                        $scope.changeFormVal = ["",""]
-                        $scope.waitForConfirmVal = ["","active"]
-                    }else{
-                        $scope.changeFormVal = ["",""]
-                        $scope.waitForConfirmVal = ["active",""]
-                    }
+                if(parseInt($scope.debateInfo.position) == 2 && ((parseInt(preVal) == 0) || (parseInt(preVal == 6))) && parseInt(val) == 1){
+                    changeStatusController(["con21"])
                 }
 
-                if(parseInt(preVal) == 2 && parseInt(val) == 1){
-
-                    if(parseInt($scope.debateInfo.position) == 1){
-                        $scope.waitForConfirmVal = ["",""]
-                    }else{
-                        $scope.waitForConfirmVal = ["active",""]
-                    }
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 1 && parseInt(val) == 2){
+                    changeStatusController(["pro31"])
                 }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 1 && parseInt(val) == 2){
+                    changeStatusController(["con31"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 2 && parseInt(val) == 3){
+                    changeStatusController(["pro411"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 2 && parseInt(val) == 3){
+                    changeStatusController(["con411"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 3 && parseInt(val) == 4){
+                    changeStatusController(["pro511"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 3 && parseInt(val) == 4){
+                    changeStatusController(["con511"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 4 && parseInt(val) == 5){
+                    changeStatusController(["pro6111"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 4 && parseInt(val) == 5){
+                    changeStatusController(["con6111"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 5 && parseInt(val) == 6){
+                    changeStatusController(["pro71111"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 5 && parseInt(val) == 6){
+                    changeStatusController(["con71111"])
+                }
+
 
             })
 
             $scope.changeTabVal = ["active","",""]
-            $scope.changeFormVal = ["",""]
 
 
             $scope.changeTab = function(n){
@@ -341,13 +402,6 @@
                     $scope.changeTabVal[i] = ""
                 }
                 $scope.changeTabVal[n] = "active"
-            }
-
-            $scope.changeForm = function(n){
-                for(var i=0;i<$scope.changeFormVal.length;i++){
-                    $scope.changeFormVal[i] = ""
-                }
-                $scope.changeFormVal[n] = "active"
             }
 
             $scope.obj=[{
@@ -375,34 +429,20 @@
 
 
 
-            $scope.statement = [
-                 {title:"this is the message for statement",dissent:0,content:"this is the message for statement"}
-            ]
+            //statement = [{position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]}]
 
-            $scope.everyStatementData = {
-                position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]
-            }
+            $scope.statement = []
+
+            //everyStatementData = {position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]}
+
+            $scope.everyStatementData = {}
 
 
+            //analysis = [{"obj":[{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}]}],"position":1}]
             $scope.analysis = []
-            $scope.everyAnalysisData = {obj:[{
-                                                                                "claimTxt": "",
-                                                                                "dissent":0,
-                                                                                "warrant": [
-                                                                                  {
-                                                                                    "warrantTxt": "",
-                                                                                    "evidence": [
-                                                                                      {
-                                                                                        "evidenceTxt": "",
-                                                                                        "dissent":0
-                                                                                     }
 
-                                                                                   ],
-                                                                                   "dissent":0
-                                                                                 }
-                                                                               ]
-                                        }],
-                                    position:1}
+            //everyAnalysisData = {"obj":[{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}]}],"position":1}
+            $scope.everyAnalysisData = {}
 
             $scope.settingInfo = {
                 timeNumbers:5,
@@ -622,7 +662,7 @@
             }
     })
 
-    myApp.directive("pro31",function(){
+    myApp.directive("pro31",function(coreSocket){
         return {
             scope:{everyAnalysisData:"=",inputMessage:"="},
             controller:function($scope){
@@ -633,6 +673,14 @@
                        $scope.confirmVal[i] = ""
                     }
                     $scope.confirmVal[n] = "active"
+                }
+
+                $scope.confirmAnalysisResult = function(){
+                    coreSocket.emit("confirmAnalysisResult",{everyAnalysisData:$scope.everyAnalysisData})
+                }
+
+                $scope.refuseAnalysisResult = function(){
+
                 }
             },
             templateUrl:"/angularTemplate/status/pro31.html"
@@ -806,9 +854,9 @@
             }
     })
 
-    myApp.directive("con6111",function(){
+    myApp.directive("con6111",function(coreSocket){
             return {
-                scope:{everyAnalysisData:"=",inputMessage:"="},
+                scope:false,
                 controller:function($scope){
 
                     $scope.confirmVal = ["","",""]
@@ -817,6 +865,14 @@
                            $scope.confirmVal[i] = ""
                         }
                         $scope.confirmVal[n] = "active"
+                    }
+
+                    $scope.confirmAnalysisResult = function(){
+                        coreSocket.emit("confirmAnalysisResult",{everyAnalysisData:$scope.everyAnalysisData})
+                    }
+
+                    $scope.refuseAnalysisResult = function(){
+
                     }
                 },
                 templateUrl:"/angularTemplate/status/con6111.html"
