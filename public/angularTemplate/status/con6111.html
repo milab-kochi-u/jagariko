@@ -11,11 +11,15 @@
 <div class="row">
     <ul class="nav nav-pills nav-justified">
         <li role="presentation" class="{{confirmVal[0]}}"><a ng-click="confirm(0);confirmAnalysisResult()">承諾</a></li>
-        <li role="presentation" class="{{confirmVal[1]}}"><a ng-click="confirm(1);refuseAnalysisResult()">拒否</a></li>
+        <li role="presentation" class="{{confirmVal[1]}}"><a ng-click="confirm(1);">拒否</a></li>
         <li role="presentation" class="{{confirmVal[2]}}"><a ng-click="confirm(2)">再投稿</a></li>
     </ul>
 </div>
 
+<div class="row" ng-if="confirmVal[1] == 'active'">
+    <refuse-analysis-result refuse-analysis-result-reason="refuseAnalysisResultReason"></refuse-analysis-result>
+</div>
+
 <div class="row" ng-if="confirmVal[2] == 'active'">
-    <my-input-form input-message="inputMessage"></my-input-form>
+    <my-input-twice-form input-message="inputMessage"></my-input-twice-form>
 </div>

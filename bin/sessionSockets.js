@@ -91,6 +91,22 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 })()
         })
 
+
+        socket.on("giveTwiceStatement",function(msg){
+            steps(function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1}},this.hold(function(){
+
+                }))
+            },function(){
+                var sendObj = {}
+                sendObj.position = session.debateLogin.position
+                sendObj.obj = msg
+                socket.emit("receiveTwiceStatement",sendObj)
+                socket.broadcast.emit("receiveTwiceStatement",sendObj)
+            })()
+        })
+
+
         socket.on("requestStatement",function(msg){
             steps(function(){
                 mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1}},this.hold(function(){
@@ -103,7 +119,40 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
         })
 
+        socket.on("refuseAnalysis",function(msg){
+            steps(function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1}},this.hold(function(){
+
+                }))
+            },function(){
+                socket.emit("refuseAnalysis",msg)
+                socket.broadcast.emit("refuseAnalysis",msg)
+            })()
+        })
+
         socket.on("giveAnalysis",function(msg){
+
+            // inputStatement = [{title:"this is the message for statement",dissent:0,content:""}]
+
+            var inputMessage = [{title:"this is the message for statement",dissent:0,content:""}]
+
+            for(var i=0;i<msg.obj.length;i++){
+               if(msg.obj[i].dissent){
+                   inputMessage.push({title:msg.obj[i].claimTxt,dissent:1,content:""})
+               }
+                for(var j=0;j<msg.obj[i].warrant.length;j++){
+                    if(msg.obj[i].warrant[j].dissent){
+                        inputMessage.push({title:msg.obj[i].warrant[j].warrantTxt,dissent:1,content:""})
+                    }
+
+                    for(var k=0;k<msg.obj[i].warrant[j].evidence.length;k++){
+                        if(msg.obj[i].warrant[j].evidence[k].dissent){
+                            inputMessage.push({title:msg.obj[i].warrant[j].evidence[k].evidenceTxt,dissent:1,content:""})
+                        }
+                    }
+                }
+            }
+
             steps(function(){
                 mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},this.hold(function(){
 
@@ -111,8 +160,8 @@ var sessionSockets = function(sessionSockets,steps,mongo){
             },function(){
                 var sendObj = msg
                 sendObj.position = session.debateLogin.position
-                socket.emit("receiveAnalysis",sendObj)
-                socket.broadcast.emit("receiveAnalysis",sendObj)
+                socket.emit("receiveAnalysis",{sendObj:sendObj,inputMessage:inputMessage})
+                socket.broadcast.emit("receiveAnalysis",{sendObj:sendObj,inputMessage:inputMessage})
             })()
 
         })

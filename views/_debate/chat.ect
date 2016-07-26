@@ -37,6 +37,8 @@
 </ul>
 </div>
 
+<div class="row">{{obj}}</div>
+<div class="row">{{inputMessage}}</div>
 <div>
 <div class="row" ng-show="changeTabVal[0] == 'active'">
    <table class="table table-striped ">
@@ -192,7 +194,7 @@
 <con11 ng-show="statusController.con11" input-message="inputMessage"></con11>
 <pro21 ng-show="statusController.pro21"></pro21>
 <con21 ng-show="statusController.con21" obj="obj" every-statement-data="everyStatementData"></con21>
-<pro31 ng-show="statusController.pro31" every-analysis-data="everyAnalysisData" input-message="inputMessage"></pro31>
+<pro31 ng-show="statusController.pro31" every-analysis-data="everyAnalysisData" input-message="inputMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></pro31>
 <con31 ng-show="statusController.con31"></con31>
 <pro411 ng-show="statusController.pro411"></pro411>
 <con411 ng-show="statusController.con411" every-analysis-data="everyAnalysisData" input-message="inputMessage"></con411>
@@ -201,10 +203,24 @@
 <con511 ng-show="statusController.con511"></con511>
 
 <pro6111 ng-show="statusController.pro6111"></pro6111>
-<con6111 ng-show="statusController.con6111"></con6111>
+<con6111 ng-show="statusController.con6111" every-analysis-data="everyAnalysisData" input-message="inputMessage" request-statement-message="requestStatementMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></con6111>
 
 <pro71111 ng-show="statusController.pro71111"></pro71111>
 <con71111 ng-show="statusController.con71111"></con71111>
+
+<pro32 ng-show="statusController.pro32"></pro32>
+<con32 ng-show="statusController.con32"></con32>
+
+
+<pro412 ng-show="statusController.pro412"></pro412>
+<con412 ng-show="statusController.con412" every-statement-data="everyStatementData" obj="obj" request-statement-message="requestStatementMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></con412>
+
+<pro6112 ng-show="statusController.pro6112"></pro6112>
+<con6112 ng-show="statusController.con6112"></con6112>
+
+<pro71112 ng-show="statusController.pro71112" every-statement-data="everyStatementData" obj="obj" request-statement-message="requestStatementMessage" input-message="inputMessage"></pro71112>
+<con71112 ng-show="statusController.con71112"></con71112>
+
 </div>
 </body>
 <script>
@@ -301,14 +317,25 @@
                 $scope.everyStatementData = _res
             })
 
+            coreSocket.on("receiveTwiceStatement",function(_res){
+                getDebateInformation()
+                $scope.statement = $scope.statement.concat(_res)
+                $scope.everyStatementData = _res
+            })
+
+
              coreSocket.on("requestStatement",function(_res){
                  getDebateInformation()
+                 $scope.requestStatementMessage = _res.requestStatementMessage
              })
 
              coreSocket.on("receiveAnalysis",function(_res){
+
                  getDebateInformation()
-                 $scope.analysis.push(_res)
-                 $scope.everyAnalysisData = _res
+                 $scope.analysis.push(_res.sendObj)
+                 $scope.everyAnalysisData = _res.sendObj
+                 $scope.inputMessage =  _res.inputMessage
+
              })
 
 
@@ -316,6 +343,12 @@
                  getDebateInformation()
                  $scope.everyAnalysisData = _res.everyAnalysisData
              })
+
+              coreSocket.on("refuseAnalysis",function(_res){
+                  getDebateInformation()
+                  $scope.refuseAnalysisResultReason = _res.refuseAnalysisResultReason
+              })
+
 
             $scope.statusController = {
                 con11:false,con21:false,con31:false,con32:false,con42:false,con411:false,con412:false,con511:false,
@@ -343,19 +376,68 @@
                     changeStatusController(["con11"])
                 }
 
-                if(parseInt($scope.debateInfo.position) == 1 && ((parseInt(preVal) == 0) || (parseInt(preVal == 6))) && parseInt(val) == 1){
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 0 && parseInt(val) == 1){
                     changeStatusController(["pro21"])
                 }
 
-                if(parseInt($scope.debateInfo.position) == 2 && ((parseInt(preVal) == 0) || (parseInt(preVal == 6))) && parseInt(val) == 1){
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 6 && parseInt(val) == 1){
+                    changeStatusController(["pro21"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 0 && parseInt(val) == 1){
                     changeStatusController(["con21"])
                 }
 
-                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 1 && parseInt(val) == 2){
+                //再投稿お願いされた
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 1 && parseInt(val) == 0){
+                    changeStatusController(["pro32"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 1 && parseInt(val) == 0){
+                    changeStatusController(["con32"])
+                }
+
+                //
+
+
+                //分析結果が拒否された
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 2 && parseInt(val) == 1){
+                    changeStatusController(["pro412"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 2 && parseInt(val) == 1){
+                    changeStatusController(["con412"])
+                }
+
+                //
+
+
+                //再投稿お願いされた
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 4 && parseInt(val) == 3){
+                    changeStatusController(["pro6112"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 4 && parseInt(val) == 3){
+                    changeStatusController(["con6112"])
+                }
+
+                //
+
+
+
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 6 && parseInt(val) == 1){
+                    changeStatusController(["con21"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 1  && parseInt(val) == 2){
                     changeStatusController(["pro31"])
                 }
 
-                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 1 && parseInt(val) == 2){
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 1  && parseInt(val) == 2){
                     changeStatusController(["con31"])
                 }
 
@@ -382,6 +464,20 @@
                 if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 4 && parseInt(val) == 5){
                     changeStatusController(["con6111"])
                 }
+
+
+                //分析結果が今日日された
+
+                if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 5 && parseInt(val) == 4){
+                     changeStatusController(["pro71112"])
+                }
+
+                if(parseInt($scope.debateInfo.position) == 2 && parseInt(preVal) == 5 && parseInt(val) == 4){
+                     changeStatusController(["con71112"])
+                }
+
+                //
+
 
                 if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 5 && parseInt(val) == 6){
                     changeStatusController(["pro71111"])
@@ -427,7 +523,8 @@
                         {title:"this is the message for statement",dissent:0,content:""}
                     ]
 
-
+            $scope.requestStatementMessage = ""
+            $scope.refuseAnalysisResultReason = ""
 
             //statement = [{position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]}]
 
@@ -571,13 +668,26 @@
         }
     })
 
-    myApp.directive("requestForTwiceStatement",function(){
+    myApp.directive("myInputTwiceForm",function(coreSocket){
+        return {
+           scope:{
+            inputMessage:"="
+           },
+           controller:function($scope){
+                $scope._submit = function(){
+                    coreSocket.emit("giveTwiceStatement",$scope.inputMessage)
+                }
+           },
+           templateUrl:"/angularTemplate/InputTwiceForm.html"
+        }
+    })
+
+    myApp.directive("requestForTwiceStatement",function(coreSocket){
         return{
-            scope:{},
+            scope:false,
             controller:function($scope){
-                $scope.requestStatementMessage = ""
                 $scope.submit = function(){
-                    alert($scope.requestStatementMessage)
+                    coreSocket.emit("requestStatement",{requestStatementMessage:$scope.requestStatementMessage})
                 }
             },
             templateUrl:"/angularTemplate/requestForTwiceStatement.html"
@@ -648,7 +758,7 @@
 
     myApp.directive("con21",function(){
             return {
-                scope:{obj:"=",everyStatementData:"="},
+                scope:{obj:"=",everyStatementData:"=",requestStatementMessage:"="},
                 controller:function($scope){
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
@@ -664,7 +774,7 @@
 
     myApp.directive("pro31",function(coreSocket){
         return {
-            scope:{everyAnalysisData:"=",inputMessage:"="},
+            scope:{everyAnalysisData:"=",inputMessage:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
             controller:function($scope){
 
                 $scope.confirmVal = ["","",""]
@@ -677,10 +787,6 @@
 
                 $scope.confirmAnalysisResult = function(){
                     coreSocket.emit("confirmAnalysisResult",{everyAnalysisData:$scope.everyAnalysisData})
-                }
-
-                $scope.refuseAnalysisResult = function(){
-
                 }
             },
             templateUrl:"/angularTemplate/status/pro31.html"
@@ -701,7 +807,7 @@
 
     myApp.directive("pro32",function(){
         return {
-            scope:{inputMessage:"="},
+            scope:false,
             controller:function($scope){
 
             },
@@ -738,7 +844,7 @@
 
     myApp.directive("con412",function(){
         return {
-            scope:{everyStatementData:"=",obj:"="},
+            scope:{everyStatementData:"=",obj:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
             controller:function($scope){
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
@@ -855,28 +961,24 @@
     })
 
     myApp.directive("con6111",function(coreSocket){
-            return {
-                scope:false,
-                controller:function($scope){
+        return {
+            scope:{everyAnalysisData:"=",inputMessage:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
+            controller:function($scope){
 
-                    $scope.confirmVal = ["","",""]
-                    $scope.confirm = function(n){
-                        for(var i=0;i<$scope.confirmVal.length;i++){
-                           $scope.confirmVal[i] = ""
-                        }
-                        $scope.confirmVal[n] = "active"
+                $scope.confirmVal = ["","",""]
+                $scope.confirm = function(n){
+                    for(var i=0;i<$scope.confirmVal.length;i++){
+                       $scope.confirmVal[i] = ""
                     }
+                    $scope.confirmVal[n] = "active"
+                }
 
-                    $scope.confirmAnalysisResult = function(){
-                        coreSocket.emit("confirmAnalysisResult",{everyAnalysisData:$scope.everyAnalysisData})
-                    }
-
-                    $scope.refuseAnalysisResult = function(){
-
-                    }
-                },
-                templateUrl:"/angularTemplate/status/con6111.html"
-            }
+                $scope.confirmAnalysisResult = function(){
+                    coreSocket.emit("confirmAnalysisResult",{everyAnalysisData:$scope.everyAnalysisData})
+                }
+            },
+            templateUrl:"/angularTemplate/status/con6111.html"
+        }
     })
 
     myApp.directive("pro6111",function(){
@@ -905,7 +1007,23 @@
 
     myApp.directive("pro71112",function(){
             return {
-                 templateUrl:"/angularTemplate/status/pro71112.html"
+                scope:{everyStatementData:"=",obj:"=",requestStatementMessage:"="},
+                controller:function($scope){
+                    $scope.changeFormVal = ["active",""]
+                    $scope.changeForm = function(n){
+                        for(var i=0;i<$scope.changeFormVal.length;i++){
+                            $scope.changeFormVal[i] = ""
+                        }
+                        $scope.changeFormVal[n] = "active"
+                    }
+                },
+                templateUrl:"/angularTemplate/status/pro71112.html"
+            }
+    })
+
+    myApp.directive("con71112",function(){
+            return {
+                 templateUrl:"/angularTemplate/status/con71112.html"
             }
     })
 
@@ -942,6 +1060,18 @@
     myApp.directive("con811122",function(){
             return {
                 templateUrl:"/angularTemplate/status/con811122.html"
+            }
+    })
+
+    myApp.directive("refuseAnalysisResult",function(coreSocket){
+            return {
+                scope:{refuseAnalysisResultReason:"="},
+                controller:function($scope){
+                    $scope.refuse = function(){
+                        coreSocket.emit("refuseAnalysis",{refuseAnalysisResultReason:$scope.refuseAnalysisResultReason})
+                    }
+                },
+                templateUrl:"/angularTemplate/refuseAnalysisResult.html"
             }
     })
 </script>

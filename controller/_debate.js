@@ -177,10 +177,20 @@ module.exports = {
     chatController:function(req,res){
         if(tool.isEmpty(req.session.debateLogin)){
             res.redirect("login")
-            return;
         }
 
-        res.render("_debate/chat",{})
+        steps(function(){
+            mongo.find("debateStatus",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum},{},this.hold(function(_res){
+                if(tool.isEmpty(_res)){
+                    res.redirect("group")
+                    return
+                }else{
+                    res.render("_debate/chat",{})
+                }
+            }))
+        })()
+
+
     },
     getDebateInformationController:function(req,res){
         mongo.find("debateStatus",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum},{},function(_res){
