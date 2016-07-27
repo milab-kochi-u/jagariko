@@ -56,7 +56,7 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
                     if(parseInt(_res[0].conPrepare) == 1 && parseInt(_res[0].proPrepare) == 1){
                         this.step(function(){
-                            mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:0}},this.hold(function(){
+                            mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:0,preStatus:parseInt(_res[0].status)}},this.hold(function(){
                                 socket.emit("prepareCompelete",{})
                                 socket.broadcast.emit("prepareCompelete",{})
                             }))
@@ -74,11 +74,11 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                     }))
                 },function(status){
                     if(status==6){
-                        mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:1}},this.hold(function(){
+                        mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:1,preStatus:status}},this.hold(function(){
 
                         }))
                     }else{
-                        mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},this.hold(function(){
+                        mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1},$set:{preStatus:status}},this.hold(function(){
 
                         }))
                     }
@@ -93,10 +93,14 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
 
         socket.on("giveTwiceStatement",function(msg){
-            steps(function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1}},this.hold(function(){
+            steps(function() {
+                    mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
+                        return  _res[0].status
+                    }))
+            },function(status){
+                    mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1},$set:{preStatus:status}},this.hold(function(){
 
-                }))
+                    }))
             },function(){
                 var sendObj = {}
                 sendObj.position = session.debateLogin.position
@@ -108,8 +112,12 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
 
         socket.on("requestStatement",function(msg){
-            steps(function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1}},this.hold(function(){
+            steps(function() {
+                mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
+                    return  _res[0].status
+                }))
+            },function(status){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1},$set:{preStatus:status}},this.hold(function(){
 
                 }))
             },function(){
@@ -120,8 +128,12 @@ var sessionSockets = function(sessionSockets,steps,mongo){
         })
 
         socket.on("refuseAnalysis",function(msg){
-            steps(function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1}},this.hold(function(){
+            steps(function() {
+                mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
+                    return  _res[0].status
+                }))
+            },function(status){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:-1},$set:{preStatus:status}},this.hold(function(){
 
                 }))
             },function(){
@@ -136,25 +148,32 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
             var inputMessage = [{title:"this is the message for statement",dissent:0,content:""}]
 
-            for(var i=0;i<msg.obj.length;i++){
-               if(msg.obj[i].dissent){
-                   inputMessage.push({title:msg.obj[i].claimTxt,dissent:1,content:""})
-               }
-                for(var j=0;j<msg.obj[i].warrant.length;j++){
-                    if(msg.obj[i].warrant[j].dissent){
-                        inputMessage.push({title:msg.obj[i].warrant[j].warrantTxt,dissent:1,content:""})
+            for(var t=0;t<msg.objs.length;t++){
+                for(var i=0;i<msg.objs[t].length;i++){
+                    if(msg.objs[t][i].dissent){
+                        inputMessage.push({title:msg.objs[t][i].claimTxt,dissent:1,content:""})
                     }
+                    for(var j=0;j<msg.objs[t][i].warrant.length;j++){
+                        if(msg.objs[t][i].warrant[j].dissent){
+                            inputMessage.push({title:msg.objs[t][i].warrant[j].warrantTxt,dissent:1,content:""})
+                        }
 
-                    for(var k=0;k<msg.obj[i].warrant[j].evidence.length;k++){
-                        if(msg.obj[i].warrant[j].evidence[k].dissent){
-                            inputMessage.push({title:msg.obj[i].warrant[j].evidence[k].evidenceTxt,dissent:1,content:""})
+                        for(var k=0;k<msg.objs[t][i].warrant[j].evidence.length;k++){
+                            if(msg.objs[t][i].warrant[j].evidence[k].dissent){
+                                inputMessage.push({title:msg.objs[t][i].warrant[j].evidence[k].evidenceTxt,dissent:1,content:""})
+                            }
                         }
                     }
                 }
             }
 
-            steps(function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},this.hold(function(){
+
+            steps(function() {
+                mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
+                    return  _res[0].status
+                }))
+            },function(status){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1},$set:{preStatus:status}},this.hold(function(){
 
                 }))
             },function(){
@@ -167,8 +186,12 @@ var sessionSockets = function(sessionSockets,steps,mongo){
         })
 
         socket.on("confirmAnalysisResult",function(msg){
-            steps(function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1}},this.hold(function(){
+            steps(function() {
+                mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
+                    return  _res[0].status
+                }))
+            },function(status){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1},$set:{preStatus:status}},this.hold(function(){
 
                 }))
             },function(){

@@ -195,6 +195,7 @@ module.exports = {
     getDebateInformationController:function(req,res){
         mongo.find("debateStatus",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum},{},function(_res){
             _res[0].position = req.session.debateLogin.position
+            _res[0].username = req.session.debateLogin.username
             _res[0].status = (parseInt(_res[0].status +1 ) || -1) - 1
             res.end(JSON.stringify(_res[0]))
         })

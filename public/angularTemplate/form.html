@@ -1,23 +1,23 @@
 <form class="form-group" >
-    <div class="claim" ng-repeat="(_key,_obj) in obj track by $index">
+    <div class="claim" ng-repeat="(_key,_obj) in objs[key] track by $index">
         <div class="row">
             <div class="col-sm-11">
                 <div class="input-group">
                     <span class="input-group-addon">主張: </span>
-                    <input type="text" class="form-control claimTxt" ng-model="_obj.claimTxt"  placeholder="">
+                    <input type="text" class="form-control claimTxt" ng-model="objs[key][_key].claimTxt"  placeholder="">
 
                     <span class="input-group-addon"><input value="1" ng-model="_obj.dissent" type="checkbox"> 異議つけ</span>
                 </div>
             </div>
-            <div class="col-sm-1 col-sm-offset-0 remove">
-                <button class="btn btn-default btn-xm glyphicon glyphicon-ban-circle" ng-click="removeClaim(_key)" ></button>
-            </div>
+            <divf class="col-sm-1 col-sm-offset-0 remove">
+                <button class="btn btn-default btn-xm glyphicon glyphicon-ban-circle" ng-click="removeClaim(key,_key)" ></button>
+            </divf>
         </div>
 
         <div class="warrant" ng-repeat="(__key,__obj) in _obj.warrant track by $index">
             <div class="row">
                 <div class="col-sm-offset-0 col-sm-1">
-                    <button ng-if="(_key == obj.length-1)&&(__key == 0)" class="btn btn-default btn-xs addClaim" ng-click="addClaim()"><i class="fa fa-plus-square"></i> 主張</button>
+                    <button ng-if="(_key == objs[key].length-1)&&(__key == 0)" class="btn btn-default btn-xs addClaim" ng-click="addClaim(key)"><i class="fa fa-plus-square"></i> 主張</button>
                 </div>
 
                 <div class="col-sm-10 col-sm-offset-0">
@@ -29,7 +29,7 @@
                 </div>
 
                 <div class="col-sm-1 col-sm-offset-0 remove">
-                    <button class="btn btn-default btn-xm glyphicon glyphicon-ban-circle" ng-click="removeWarrant(_key,__key)" ></button>
+                    <button class="btn btn-default btn-xm glyphicon glyphicon-ban-circle" ng-click="removeWarrant(key,_key,__key)" ></button>
                 </div>
 
             </div>
@@ -38,7 +38,7 @@
             <div class="evidence" ng-repeat="(___key,___obj) in __obj.evidence track by $index">
                 <div class="row">
                     <div class="col-sm-offset-1 col-sm-1">
-                        <button ng-if="(__key== _obj['warrant'].length-1)&&(___key==0)" class="btn btn-default btn-xs addWarrant" ng-click="addWarrant(_key,__key)"><i class="fa fa-plus-square"></i> 論拠</button>
+                        <button ng-if="(__key== _obj['warrant'].length-1)&&(___key==0)" class="btn btn-default btn-xs addWarrant" ng-click="addWarrant(key,_key,__key)"><i class="fa fa-plus-square"></i> 論拠</button>
                     </div>
                     <div class="col-sm-9 col-sm-offset-0">
                         <div class="input-group">
@@ -48,7 +48,7 @@
                         </div>
                     </div>
                     <div class="col-sm-1 col-sm-offset-0 remove">
-                        <button class="btn btn-default btn-xm glyphicon glyphicon-ban-circle" ng-click="removeEvidence(_key,__key,___key)" ></button>
+                        <button class="btn btn-default btn-xm glyphicon glyphicon-ban-circle" ng-click="removeEvidence(key,_key,__key,___key)" ></button>
                     </div>
                 </div>
 
@@ -56,7 +56,7 @@
 
                 <div class="row">
                     <div class="col-sm-offset-2 col-sm-1">
-                        <button ng-if="___key == __obj['evidence'].length-1" class="btn btn-default btn-xs addEvidence" ng-click="addEvidence(_key,__key)"><span class="fa fa-plus-square"></span>根拠</button>
+                        <button ng-if="___key == __obj['evidence'].length-1" class="btn btn-default btn-xs addEvidence" ng-click="addEvidence(key,_key,__key)"><span class="fa fa-plus-square"></span>根拠</button>
                     </div>
                 </div>
 

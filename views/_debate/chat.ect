@@ -37,13 +37,20 @@
 </ul>
 </div>
 
-<div class="row">{{obj}}</div>
-<div class="row">{{inputMessage}}</div>
 <div>
 <div class="row" ng-show="changeTabVal[0] == 'active'">
    <table class="table table-striped ">
      <!-- On rows -->
      <tr class="info"><th>テーマ</th><td>information</td><td></td></tr>
+
+         <tr class="info">
+            <th>立場</th>
+            <td>
+            <span ng-if="debateInfo.position == 1">賛成</span>
+            <span ng-if="debateInfo.position == 2">反対</span>
+            </td>
+            <td></td>
+         </tr>
 
      <tr class="active">
      <th>肯定側</th>
@@ -92,6 +99,7 @@
 
      <tr class="warning"><th>回数</th><td>{{debateInfo.config.timeNumbers}}</td><td></td></tr>
      <tr class="danger"><th>時間制限</th><td>{{debateInfo.config.timeLimitValDefault}}</td><td></td></tr>
+
    </table>
 </div>
 
@@ -112,7 +120,8 @@
 <div class="row" ng-show="changeTabVal[2] == 'active'">
 
     <div ng-repeat="(key,val) in analysis track by $index">
-    <div ng-repeat="(_key,_val) in val.obj track by $index">
+        <div ng-repeat="(keys,vals) in val.objs">
+            <div ng-repeat="(_key,_val) in vals track by $index">
     <div class="row">
                             <div class="col-sm-1">
                                 <div ng-class="(val.position == 1)? 'panel-info':'panel-success'" class="panel">
@@ -187,19 +196,20 @@
     </div>
     </div>
     </div>
+    </div>
 </div>
 
 
 <pro11 ng-show="statusController.pro11"></pro11>
 <con11 ng-show="statusController.con11" input-message="inputMessage"></con11>
 <pro21 ng-show="statusController.pro21"></pro21>
-<con21 ng-show="statusController.con21" obj="obj" every-statement-data="everyStatementData"></con21>
+<con21 ng-show="statusController.con21" objs="objs" every-statement-data="everyStatementData"></con21>
 <pro31 ng-show="statusController.pro31" every-analysis-data="everyAnalysisData" input-message="inputMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></pro31>
 <con31 ng-show="statusController.con31"></con31>
 <pro411 ng-show="statusController.pro411"></pro411>
 <con411 ng-show="statusController.con411" every-analysis-data="everyAnalysisData" input-message="inputMessage"></con411>
 
-<pro511 ng-show="statusController.pro511"></pro511>
+<pro511 every-statement-data="everyStatementData" obj="obj" objs="objs" ng-show="statusController.pro511"></pro511>
 <con511 ng-show="statusController.con511"></con511>
 
 <pro6111 ng-show="statusController.pro6111"></pro6111>
@@ -213,7 +223,7 @@
 
 
 <pro412 ng-show="statusController.pro412"></pro412>
-<con412 ng-show="statusController.con412" every-statement-data="everyStatementData" obj="obj" request-statement-message="requestStatementMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></con412>
+<con412 ng-show="statusController.con412" every-statement-data="everyStatementData" objs="objs" request-statement-message="requestStatementMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></con412>
 
 <pro6112 ng-show="statusController.pro6112"></pro6112>
 <con6112 ng-show="statusController.con6112"></con6112>
@@ -284,6 +294,7 @@
                     $scope.debateInfo.position = _res.data.position
                     $scope.debateInfo.status = _res.data.status
                     $scope.debateInfo.config = _res.data.config
+                    $scope.debateInfo.username = _res.data.username
 
                     console.log("debate status is .....")
                     console.log($scope.debateInfo.status)
@@ -315,6 +326,10 @@
                 getDebateInformation()
                 $scope.statement = $scope.statement.concat(_res)
                 $scope.everyStatementData = _res
+                $scope.objs = []
+                for(var i=0;i<_res.obj.length;i++){
+                      $scope.objs.push([{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}],random:Math.round(Math.random()*100000)}])
+                }
             })
 
             coreSocket.on("receiveTwiceStatement",function(_res){
@@ -327,10 +342,13 @@
              coreSocket.on("requestStatement",function(_res){
                  getDebateInformation()
                  $scope.requestStatementMessage = _res.requestStatementMessage
+
+
              })
 
              coreSocket.on("receiveAnalysis",function(_res){
-
+                 console.log("receive analysis _res is ......")
+                 console.log(_res)
                  getDebateInformation()
                  $scope.analysis.push(_res.sendObj)
                  $scope.everyAnalysisData = _res.sendObj
@@ -500,6 +518,7 @@
                 $scope.changeTabVal[n] = "active"
             }
 
+            //obj = [{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}]}]
             $scope.obj=[{
                                         "claimTxt": "",
                                         "dissent":0,
@@ -518,6 +537,11 @@
                                        ]
                         }]
 
+
+
+            //objs = [[{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}]}],[{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}]}]]
+
+            $scope.objs = []
 
             $scope.inputMessage = [
                         {title:"this is the message for statement",dissent:0,content:""}
@@ -572,6 +596,7 @@
 
     myApp.directive("myNavy",function(){
         return {
+            scope:false,
             templateUrl:"/_debate/navy.html"
         }
     })
@@ -616,39 +641,39 @@
 
           return{
               controller:function($scope){
-                    $scope.addClaim = function(){
-                            $scope.obj.push(JSON.parse(JSON.stringify(claim)))
+                    $scope.addClaim = function(key){
+                            $scope.objs[key].push(JSON.parse(JSON.stringify(claim)))
                     }
 
-                    $scope.addWarrant = function(_key,__key){
-                            $scope.obj[_key]['warrant'].push(JSON.parse(JSON.stringify(warrant)))
+                    $scope.addWarrant = function(key,_key,__key){
+                            $scope.objs[key][_key]['warrant'].push(JSON.parse(JSON.stringify(warrant)))
                     }
 
-                    $scope.addEvidence = function(_key,__key){
-                            $scope.obj[_key]['warrant'][__key]['evidence'].push(JSON.parse(JSON.stringify(evidence)))
+                    $scope.addEvidence = function(key,_key,__key){
+                            $scope.objs[key][_key]['warrant'][__key]['evidence'].push(JSON.parse(JSON.stringify(evidence)))
 
                     }
 
-                    $scope.removeClaim = function(_key){
-                            $scope.obj.splice(_key,1)
+                    $scope.removeClaim = function(key,_key){
+                            $scope.objs[key].splice(_key,1)
                     }
 
-                    $scope.removeWarrant = function(_key,__key){
-                            console.log($scope.obj[_key].warrant.splice(__key,1))
-                            console.log($scope.obj)
+                    $scope.removeWarrant = function(key,_key,__key){
+                            $scope.objs[key][_key].warrant.splice(__key,1)
                     }
 
-                    $scope.removeEvidence = function(_key,__key,___key){
-                            $scope.obj[_key].warrant[__key].evidence.splice(___key,1)
+                    $scope.removeEvidence = function(key,_key,__key,___key){
+                            $scope.objs[key][_key].warrant[__key].evidence.splice(___key,1)
                     }
 
                     $scope.submit = function(){
-                        coreSocket.emit("giveAnalysis",{obj:$scope.obj})
+                        coreSocket.emit("giveAnalysis",{objs:$scope.objs})
                     }
 
               },
               scope:{
-                obj:"="
+                objs:"=",
+                key:"="
               },
               templateUrl:"/angularTemplate/form.html"
           }
@@ -729,7 +754,9 @@
             return {
                 scope:{everyStatementData:"="},
                 controller:function($scope){
-
+                    $scope.selectTitle = function(msg){
+                        alert(msg)
+                    }
                 },
                 templateUrl:"/angularTemplate/everyStatement.html"
             }
@@ -758,7 +785,7 @@
 
     myApp.directive("con21",function(){
             return {
-                scope:{obj:"=",everyStatementData:"=",requestStatementMessage:"="},
+                scope:{everyStatementData:"=",objs:"=",requestStatementMessage:"="},
                 controller:function($scope){
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
@@ -766,6 +793,18 @@
                             $scope.changeFormVal[i] = ""
                         }
                         $scope.changeFormVal[n] = "active"
+                    }
+
+                    $scope.changeAnalysisVal = []
+                    for(var i=0;i<$scope.everyStatementData.length;i++){
+                        $scope.changeAnalysisVal.push("")
+                    }
+
+                    $scope.changeAnalysis = function(n){
+                        for(var i=0;i<$scope.changeAnalysisVal.length;i++){
+                            $scope.changeAnalysisVal[i] = ""
+                        }
+                        $scope.changeAnalysisVal[n] = "active"
                     }
                 },
                 templateUrl:"/angularTemplate/status/con21.html"
@@ -844,8 +883,8 @@
 
     myApp.directive("con412",function(){
         return {
-            scope:{everyStatementData:"=",obj:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
-            controller:function($scope){
+                scope:{everyStatementData:"=",objs:"=",requestStatementMessage:"="},
+                controller:function($scope){
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
@@ -853,7 +892,19 @@
                         }
                         $scope.changeFormVal[n] = "active"
                     }
-            },
+
+                    $scope.changeAnalysisVal = []
+                    for(var i=0;i<$scope.everyStatementData.length;i++){
+                        $scope.changeAnalysisVal.push("")
+                    }
+
+                    $scope.changeAnalysis = function(n){
+                        for(var i=0;i<$scope.changeAnalysisVal.length;i++){
+                            $scope.changeAnalysisVal[i] = ""
+                        }
+                        $scope.changeAnalysisVal[n] = "active"
+                    }
+                },
             templateUrl:"/angularTemplate/status/con412.html"
         }
     })
@@ -912,7 +963,7 @@
 
     myApp.directive("pro511",function(){
             return {
-                scope:false,
+                scope:{everyStatementData:"=",objs:"="},
                 controller:function($scope){
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
@@ -920,6 +971,18 @@
                             $scope.changeFormVal[i] = ""
                         }
                         $scope.changeFormVal[n] = "active"
+                    }
+
+                    $scope.changeAnalysisVal = []
+                    for(var i=0;i<$scope.everyStatementData.length;i++){
+                        $scope.changeAnalysisVal.push("")
+                    }
+
+                    $scope.changeAnalysis = function(n){
+                        for(var i=0;i<$scope.changeAnalysisVal.length;i++){
+                            $scope.changeAnalysisVal[i] = ""
+                        }
+                        $scope.changeAnalysisVal[n] = "active"
                     }
                 },
                 templateUrl:"/angularTemplate/status/pro511.html"

@@ -1,6 +1,6 @@
 <div ng-repeat="(key,val) in everyStatementData.obj track by $index">
     <div ng-class="(everyStatementData.position == 1)? 'panel-info':'panel-success'" class="panel">
-        <div class="panel-heading">主張</div>
+        <div class="panel-heading" ng-click="selectTitle(val.title)"><div ng-if="key==0">主張:</div><div ng-if="key!=0">意義説明{{key}}:</div>{{val.title}}</div>
         <div class="panel-body">
             主張内容:{{val.content}}
         </div>

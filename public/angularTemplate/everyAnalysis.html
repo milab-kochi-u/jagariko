@@ -1,5 +1,6 @@
 <div class="row">
-    <div ng-repeat="(_key,_val) in everyAnalysisData.obj track by $index">
+    <div ng-repeat="(key,val) in everyAnalysisData.objs track by $index">
+    <div ng-repeat="(_key,_val) in val track by $index">
         <div class="row">
             <div class="col-sm-1">
                 <div ng-class="(everyAnalysisData.position == 1)? 'panel-info':'panel-success'" class="panel">
@@ -71,5 +72,6 @@
 
             </div>
         </div>
+    </div>
     </div>
 </div>
