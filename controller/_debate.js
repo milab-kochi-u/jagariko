@@ -106,11 +106,7 @@ module.exports = {
             }))
 
         },function(){
-
             mongo.find("themes",{group:req.session.debateLogin.group},{},this.hold(function(list){
-
-                console.log("debatingList is the following.....")
-                console.log(debatingList)
                 themes = list
             }))
         },function(){
@@ -197,6 +193,7 @@ module.exports = {
             _res[0].position = req.session.debateLogin.position
             _res[0].username = req.session.debateLogin.username
             _res[0].status = (parseInt(_res[0].status +1 ) || -1) - 1
+            console.log(JSON.stringify(_res[0]))
             res.end(JSON.stringify(_res[0]))
         })
     }

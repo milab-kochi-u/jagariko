@@ -276,12 +276,18 @@
 
             function init(){
                 coreSocket.emit("enterRoom",{})
-                getDebateInformation()
+                getDebateInformation(function(){
+                    console.log("debate preStatus is .....")
+                    console.log($scope.debateInfo.preStatus)
+                    checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+                })
+
+
             }
 
-            init()
 
-            function getDebateInformation(){
+
+            function getDebateInformation(cb){
                 myPost.postData("/_debate/getDebateInformation").then(function(_res){
                     console.log(_res)
                     $scope.debateInfo.pro = _res.data.pro
@@ -293,99 +299,38 @@
                     $scope.debateInfo.conPrepare = _res.data.conPrepare
                     $scope.debateInfo.position = _res.data.position
                     $scope.debateInfo.status = _res.data.status
+                    $scope.debateInfo.preStatus = _res.data.preStatus
                     $scope.debateInfo.config = _res.data.config
                     $scope.debateInfo.username = _res.data.username
 
-                    console.log("debate status is .....")
-                    console.log($scope.debateInfo.status)
+                    $scope.everyStatementData = _res.data.everyStatement
+                    $scope.objs = _res.data.objs
 
+                    $scope.requestStatementMessage = _res.data.requestStatementMessage
+                    $scope.refuseAnalysisResultReason = _res.data.refuseAnalysisResultReason
+                    $scope.everyAnalysisData = _res.data.everyAnalysisData
+                    $scope.inputMessage = _res.data.inputMessage || $scope.inputMessage
+
+                    console.log("debate preStatus is .....")
+                    console.log($scope.debateInfo.preStatus)
                     console.log("debate position is ....")
                     console.log($scope.debateInfo.position)
+
+                    if(cb){
+                        cb()
+                    }
+
                 })
             }
 
-            coreSocket.on("enterRoom",function(_res){
-                console.log(_res)
-            })
-
-            coreSocket.on("systemSettingFinish",function(_res){
-                $scope.debateInfo.setting = 1
-                $scope.debateInfo.config = {timeNumbers:_res.timeNumbers,timeLimit:_res.timeLimit,timeLimitValDefault:_res.timeLimitValDefault,timeLimitValCustomize:_res.timeLimitValCustomize}
-
-            })
-
-            coreSocket.on("prepared",function(_res){
-                getDebateInformation()
-            })
-
-            coreSocket.on("prepareCompelete",function(_res){
-                getDebateInformation()
-            })
-
-            coreSocket.on("receiveStatement",function(_res){
-                getDebateInformation()
-                $scope.statement = $scope.statement.concat(_res)
-                $scope.everyStatementData = _res
-                $scope.objs = []
-                for(var i=0;i<_res.obj.length;i++){
-                      $scope.objs.push([{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}],random:Math.round(Math.random()*100000)}])
-                }
-            })
-
-            coreSocket.on("receiveTwiceStatement",function(_res){
-                getDebateInformation()
-                $scope.statement = $scope.statement.concat(_res)
-                $scope.everyStatementData = _res
-            })
 
 
-             coreSocket.on("requestStatement",function(_res){
-                 getDebateInformation()
-                 $scope.requestStatementMessage = _res.requestStatementMessage
+            var checkStatus = function(val,preVal){
 
-
-             })
-
-             coreSocket.on("receiveAnalysis",function(_res){
-                 console.log("receive analysis _res is ......")
-                 console.log(_res)
-                 getDebateInformation()
-                 $scope.analysis.push(_res.sendObj)
-                 $scope.everyAnalysisData = _res.sendObj
-                 $scope.inputMessage =  _res.inputMessage
-
-             })
-
-
-             coreSocket.on("confirmAnalysisResultFinish",function(_res){
-                 getDebateInformation()
-                 $scope.everyAnalysisData = _res.everyAnalysisData
-             })
-
-              coreSocket.on("refuseAnalysis",function(_res){
-                  getDebateInformation()
-                  $scope.refuseAnalysisResultReason = _res.refuseAnalysisResultReason
-              })
-
-
-            $scope.statusController = {
-                con11:false,con21:false,con31:false,con32:false,con42:false,con411:false,con412:false,con511:false,
-                pro11:false,pro21:false,pro31:false,pro32:false
-            }
-
-            function changeStatusController(arr){
-                for(var i in $scope.statusController){
-                    $scope.statusController[i] = false
-                }
-
-                for(var i in arr){
-                    $scope.statusController[arr[i]] = true
-                }
-            }
-
-
-            $scope.$watch("debateInfo.status",function(val,preVal){
-
+                console.log("val is ..")
+                console.log(val)
+                console.log("preVal is ..")
+                console.log(preVal)
                 if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == -2 && parseInt(val) == 0){
                     changeStatusController(["pro11"])
                 }
@@ -506,7 +451,94 @@
                 }
 
 
+            }
+
+            coreSocket.on("enterRoom",function(_res){
+                console.log(_res)
             })
+
+            coreSocket.on("systemSettingFinish",function(_res){
+                $scope.debateInfo.setting = 1
+                $scope.debateInfo.config = {timeNumbers:_res.timeNumbers,timeLimit:_res.timeLimit,timeLimitValDefault:_res.timeLimitValDefault,timeLimitValCustomize:_res.timeLimitValCustomize}
+
+            })
+
+            coreSocket.on("prepared",function(_res){
+                getDebateInformation()
+            })
+
+            coreSocket.on("prepareCompelete",function(_res){
+                getDebateInformation()
+            })
+
+            coreSocket.on("receiveStatement",function(_res){
+                getDebateInformation(function(){
+                    $scope.statement = $scope.statement.concat(_res.sendObj)
+                    $scope.everyStatementData = _res.sendObj
+                    $scope.objs = _res.objs
+                    //$scope.objs = []
+                    //for(var i=0;i<_res.obj.length;i++){
+                    //      $scope.objs.push([{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}],random:Math.round(Math.random()*100000)}])
+                    //}
+                })
+
+            })
+
+            coreSocket.on("receiveTwiceStatement",function(_res){
+                getDebateInformation(function(){
+                    $scope.statement = $scope.statement.concat(_res)
+                    $scope.everyStatementData = _res
+                })
+            })
+
+
+             coreSocket.on("requestStatement",function(_res){
+                 getDebateInformation(function(){
+                      $scope.requestStatementMessage = _res.requestStatementMessage
+                 })
+             })
+
+             coreSocket.on("receiveAnalysis",function(_res){
+                 getDebateInformation(function(){
+                     $scope.analysis.push(_res.sendObj)
+                     $scope.everyAnalysisData = _res.sendObj
+                     $scope.inputMessage =  _res.inputMessage
+                 })
+             })
+
+
+             coreSocket.on("confirmAnalysisResultFinish",function(_res){
+                 getDebateInformation(function(){
+                    $scope.everyAnalysisData = _res.everyAnalysisData
+                 })
+
+             })
+
+              coreSocket.on("refuseAnalysis",function(_res){
+                  getDebateInformation(function(){
+                    $scope.refuseAnalysisResultReason = _res.refuseAnalysisResultReason
+                  })
+
+              })
+
+
+            $scope.statusController = {
+                con11:false,con21:false,con31:false,con32:false,con42:false,con411:false,con412:false,con511:false,
+                pro11:false,pro21:false,pro31:false,pro32:false
+            }
+
+            function changeStatusController(arr){
+                for(var i in $scope.statusController){
+                    $scope.statusController[i] = false
+                }
+
+                for(var i in arr){
+                    $scope.statusController[arr[i]] = true
+                }
+            }
+
+
+            $scope.$watch("debateInfo.status",checkStatus)
 
             $scope.changeTabVal = ["active","",""]
 
@@ -591,8 +623,10 @@
                 coreSocket.emit("prepare",{})
             }
 
-
+            init()
     })
+
+
 
     myApp.directive("myNavy",function(){
         return {
@@ -686,7 +720,7 @@
            },
            controller:function($scope){
                 $scope._submit = function(){
-                    coreSocket.emit("giveStatement",$scope.inputMessage)
+                    coreSocket.emit("giveStatement",{inputMessage:$scope.inputMessage})
                 }
            },
            templateUrl:"/angularTemplate/inputForm.html"

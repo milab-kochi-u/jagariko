@@ -56,7 +56,7 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
                     if(parseInt(_res[0].conPrepare) == 1 && parseInt(_res[0].proPrepare) == 1){
                         this.step(function(){
-                            mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:0,preStatus:parseInt(_res[0].status)}},this.hold(function(){
+                            mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:0,preStatus:-2}},this.hold(function(){
                                 socket.emit("prepareCompelete",{})
                                 socket.broadcast.emit("prepareCompelete",{})
                             }))
@@ -86,11 +86,15 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 },function(){
                     var sendObj = {}
                     sendObj.position = session.debateLogin.position
-                    sendObj.obj = msg
-                    console.log(sendObj)
-                    mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{everyStatement:sendObj}},{},this.hold(function(_res){
-                        socket.emit("receiveStatement",sendObj)
-                        socket.broadcast.emit("receiveStatement",sendObj)
+                    sendObj.obj = msg.inputMessage
+                    var objs = []
+                    for(var i=0;i<sendObj.obj.length;i++){
+                        objs.push([{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}],random:Math.round(Math.random()*100000)}])
+                    }
+                    mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{everyStatement:sendObj,objs:objs}},{},this.hold(function(_res){
+                        socket.emit("receiveStatement",{sendObj:sendObj,objs:objs})
+                        socket.broadcast.emit("receiveStatement",{sendObj:sendObj,objs:objs})
+
                     }))
                 },function(){
 
@@ -199,6 +203,7 @@ var sessionSockets = function(sessionSockets,steps,mongo){
             },function(){
                 sendObj = msg
                 sendObj.position = session.debateLogin.position
+                console.log(sendObj)
                 socket.emit("receiveAnalysis",{sendObj:sendObj,inputMessage:inputMessage})
                 socket.broadcast.emit("receiveAnalysis",{sendObj:sendObj,inputMessage:inputMessage})
             },function(){
