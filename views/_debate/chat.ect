@@ -272,57 +272,69 @@
         }
     })
 
-    myApp.controller("myCtr",function($scope,coreSocket,myPost){
+    myApp.controller("myCtr",function($scope,$q,coreSocket,myPost){
 
             function init(){
                 coreSocket.emit("enterRoom",{})
-                getDebateInformation(function(){
-                    console.log("debate preStatus is .....")
-                    console.log($scope.debateInfo.preStatus)
+                //getDebateInformation(function(){
+                //    console.log("debate preStatus is .....")
+                //    console.log($scope.debateInfo.preStatus)
+                //    checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+                //})
+
+                var promise = _getDebateInformation()
+
+                promise.then(function(msg){
+
+                    console.log("promise msg is ...")
+                    console.log(msg)
+                    console.log("status is ...")
+                    console.log($scope.debateInfo.status)
                     checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
                 })
-
-
             }
 
 
 
-            function getDebateInformation(cb){
-                myPost.postData("/_debate/getDebateInformation").then(function(_res){
-                    console.log(_res)
-                    $scope.debateInfo.pro = _res.data.pro
-                    $scope.debateInfo.con = _res.data.con
-                    $scope.debateInfo.finish = _res.data.finish
-                    $scope.debateInfo.setting = _res.data.setting
-                    $scope.debateInfo.group = _res.data.group
-                    $scope.debateInfo.proPrepare = _res.data.proPrepare
-                    $scope.debateInfo.conPrepare = _res.data.conPrepare
-                    $scope.debateInfo.position = _res.data.position
-                    $scope.debateInfo.status = _res.data.status
-                    $scope.debateInfo.preStatus = _res.data.preStatus
-                    $scope.debateInfo.config = _res.data.config
-                    $scope.debateInfo.username = _res.data.username
 
-                    $scope.everyStatementData = _res.data.everyStatement
-                    $scope.objs = _res.data.objs
 
-                    $scope.requestStatementMessage = _res.data.requestStatementMessage
-                    $scope.refuseAnalysisResultReason = _res.data.refuseAnalysisResultReason
-                    $scope.everyAnalysisData = _res.data.everyAnalysisData
-                    $scope.inputMessage = _res.data.inputMessage || $scope.inputMessage
+            function _getDebateInformation(){
 
-                    console.log("debate preStatus is .....")
-                    console.log($scope.debateInfo.preStatus)
-                    console.log("debate position is ....")
-                    console.log($scope.debateInfo.position)
+                    var deferred = $q.defer();
 
-                    if(cb){
-                        cb()
+                    myPost.postData("/_debate/getDebateInformation").then(function(_res){
+
+                    if(_res.data){
+                            $scope.debateInfo.pro = _res.data.pro
+                            $scope.debateInfo.con = _res.data.con
+                            $scope.debateInfo.finish = _res.data.finish
+                            $scope.debateInfo.setting = _res.data.setting
+                            $scope.debateInfo.group = _res.data.group
+                            $scope.debateInfo.proPrepare = _res.data.proPrepare
+                            $scope.debateInfo.conPrepare = _res.data.conPrepare
+                            $scope.debateInfo.position = _res.data.position
+                            $scope.debateInfo.status = _res.data.status
+                            $scope.debateInfo.preStatus = _res.data.preStatus
+                            $scope.debateInfo.config = _res.data.config
+                            $scope.debateInfo.username = _res.data.username
+
+                            $scope.everyStatementData = _res.data.everyStatement
+                            $scope.objs = _res.data.objs
+
+                            $scope.requestStatementMessage = _res.data.requestStatementMessage
+                            $scope.refuseAnalysisResultReason = _res.data.refuseAnalysisResultReason
+                            $scope.everyAnalysisData = _res.data.everyAnalysisData
+                            $scope.inputMessage = _res.data.inputMessage || $scope.inputMessage
+                            deferred.resolve({err:0,msg:"data acquired"});
+                    }else{
+                            deferred.reject({err:1,msg:"data not acquired"});
                     }
 
-                })
-            }
+                    })
 
+
+                    return deferred.promise;
+            }
 
 
             var checkStatus = function(val,preVal){
@@ -464,15 +476,16 @@
             })
 
             coreSocket.on("prepared",function(_res){
-                getDebateInformation()
+                 var promise = _getDebateInformation()
             })
 
             coreSocket.on("prepareCompelete",function(_res){
-                getDebateInformation()
+                var promise = _getDebateInformation()
             })
 
             coreSocket.on("receiveStatement",function(_res){
-                getDebateInformation(function(){
+                var promise = _getDebateInformation()
+                promise.then(function(){
                     $scope.statement = $scope.statement.concat(_res.sendObj)
                     $scope.everyStatementData = _res.sendObj
                     $scope.objs = _res.objs
@@ -485,7 +498,8 @@
             })
 
             coreSocket.on("receiveTwiceStatement",function(_res){
-                getDebateInformation(function(){
+                var promise = _getDebateInformation()
+                promise.then(function(){
                     $scope.statement = $scope.statement.concat(_res)
                     $scope.everyStatementData = _res
                 })
@@ -493,13 +507,15 @@
 
 
              coreSocket.on("requestStatement",function(_res){
-                 getDebateInformation(function(){
+                 var promise = _getDebateInformation()
+                 promise.then(function(){
                       $scope.requestStatementMessage = _res.requestStatementMessage
                  })
              })
 
              coreSocket.on("receiveAnalysis",function(_res){
-                 getDebateInformation(function(){
+                 var promise = _getDebateInformation()
+                 promise.then(function(){
                      $scope.analysis.push(_res.sendObj)
                      $scope.everyAnalysisData = _res.sendObj
                      $scope.inputMessage =  _res.inputMessage
@@ -508,14 +524,16 @@
 
 
              coreSocket.on("confirmAnalysisResultFinish",function(_res){
-                 getDebateInformation(function(){
+                 var promise = _getDebateInformation()
+                 promise.then(function(){
                     $scope.everyAnalysisData = _res.everyAnalysisData
                  })
 
              })
 
               coreSocket.on("refuseAnalysis",function(_res){
-                  getDebateInformation(function(){
+                  var promise = _getDebateInformation()
+                  promise.then(function(){
                     $scope.refuseAnalysisResultReason = _res.refuseAnalysisResultReason
                   })
 
