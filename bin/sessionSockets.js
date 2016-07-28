@@ -68,17 +68,18 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
 
         socket.on("giveStatement",function(msg){
+
                 steps(function(){
                     mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
                         return _res[0].status
                     }))
                 },function(status){
                     if(status==6){
-                        mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:1,preStatus:status}},this.hold(function(){
+                        mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{status:1,preStatus:status}},this.hold(function(_res){
 
                         }))
                     }else{
-                        mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1},$set:{preStatus:status}},this.hold(function(){
+                        mongo.update("debateStatus",{num:session.debateLogin.num},{$inc:{status:1},$set:{preStatus:status}},this.hold(function(_res){
 
                         }))
                     }
@@ -86,8 +87,14 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                     var sendObj = {}
                     sendObj.position = session.debateLogin.position
                     sendObj.obj = msg
-                    socket.emit("receiveStatement",sendObj)
-                    socket.broadcast.emit("receiveStatement",sendObj)
+                    console.log(sendObj)
+                    mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{everyStatement:sendObj}},{},this.hold(function(_res){
+                        socket.emit("receiveStatement",sendObj)
+                        socket.broadcast.emit("receiveStatement",sendObj)
+                    }))
+                },function(){
+
+
                 })()
         })
 
@@ -107,6 +114,10 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 sendObj.obj = msg
                 socket.emit("receiveTwiceStatement",sendObj)
                 socket.broadcast.emit("receiveTwiceStatement",sendObj)
+            },function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{everyStatement:sendObj}},this.hold(function(_res){
+
+                }))
             })()
         })
 
@@ -123,6 +134,10 @@ var sessionSockets = function(sessionSockets,steps,mongo){
             },function(){
                 socket.emit("requestStatement",msg)
                 socket.broadcast.emit("requestStatement",msg)
+            },function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{requestStatementMessage:msg.requestStatementMessage}},this.hold(function(_res){
+
+                }))
             })()
 
         })
@@ -139,6 +154,10 @@ var sessionSockets = function(sessionSockets,steps,mongo){
             },function(){
                 socket.emit("refuseAnalysis",msg)
                 socket.broadcast.emit("refuseAnalysis",msg)
+            },function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{refuseAnalysisResultReason:msg.refuseAnalysisResultReason}},this.hold(function(_res){
+
+                }))
             })()
         })
 
@@ -167,6 +186,7 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 }
             }
 
+            var sendObj
 
             steps(function() {
                 mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
@@ -177,10 +197,14 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
                 }))
             },function(){
-                var sendObj = msg
+                sendObj = msg
                 sendObj.position = session.debateLogin.position
                 socket.emit("receiveAnalysis",{sendObj:sendObj,inputMessage:inputMessage})
                 socket.broadcast.emit("receiveAnalysis",{sendObj:sendObj,inputMessage:inputMessage})
+            },function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{everyAnalysisData:sendObj,inputMessage:inputMessage}},this.hold(function(){
+
+                }))
             })()
 
         })
