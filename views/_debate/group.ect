@@ -138,8 +138,18 @@ myApp.controller("debatingCtr",function($scope,getDataFromServer){
     }
 })
 
-myApp.controller("finishedCtr",function($scope){
+myApp.controller("finishedCtr",function($scope,getDataFromServer){
     $scope.title = "finishedCtr"
+    getDataFromServer.getData("/_debate/getDebateFinishList",{}).then(function(_res){
+        $scope.getDebateFinishList = _res.data
+    })
+    $scope.reviewRoom = function(num,rNum){
+        getDataFromServer.getData("/_debate/reviewRoom",{num:num,rNum:rNum}).then(function(_res){
+                if(parseInt(_res.data.err) == 0){
+                    location = "/_debate/review"
+                }
+        })
+    }
 })
 
 myApp.directive("myNavy",function(){

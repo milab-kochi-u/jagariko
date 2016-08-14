@@ -73,7 +73,7 @@ module.exports = {
 
         steps(function(){
 
-            mongo.find("debateStatus",{group:req.session.debateLogin.group,finishi:0,setting:1},{},this.hold(function(result){
+            mongo.find("debateStatus",{group:req.session.debateLogin.group,finish:false,setting:1},{},this.hold(function(result){
 
                 for(var i=0;i<result.length;i++){
 
@@ -90,7 +90,7 @@ module.exports = {
 
         },function(){
 
-            mongo.find("debateStatus",{group:req.session.debateLogin.group,finishi:1,setting:1},{},this.hold(function(result){
+            mongo.find("debateStatus",{group:req.session.debateLogin.group,finish:true,setting:1},{},this.hold(function(result){
 
                 for(var i=0;i<result.length;i++){
 
@@ -122,7 +122,14 @@ module.exports = {
     },
     getDebatingListController:function(req,res){
         steps(function(){
-            mongo.find("debateStatus",{group:req.session.debateLogin.group,setting:1},{},this.hold(function(_res){
+            mongo.find("debateStatus",{group:req.session.debateLogin.group,setting:1,finish:false},{},this.hold(function(_res){
+                res.end(JSON.stringify(_res))
+            }))
+        })()
+    },
+    getDebateFinishListController:function(req,res){
+        steps(function(){
+            mongo.find("debateStatus",{group:req.session.debateLogin.group,setting:1,finish:true},{},this.hold(function(_res){
                 res.end(JSON.stringify(_res))
             }))
         })()
@@ -134,9 +141,9 @@ module.exports = {
 
         var rNum = Math.round(Math.random()*10000)
         if(position == 1){
-            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finishi:0,setting:0,status:-1,preStatus:null,group:req.session.debateLogin.group}
+            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,setting:0,status:-1,preStatus:null,group:req.session.debateLogin.group}
         }else{
-            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finishi:0,setting:0,status:-1,preStatus:null,group:req.session.debateLogin.group}
+            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,setting:0,status:-1,preStatus:null,group:req.session.debateLogin.group}
         }
 
         req.session.debateLogin.position = position
@@ -144,6 +151,7 @@ module.exports = {
             mongo.insert("debateStatus",newRoom,{},this.hold(function(_res){
                 req.session.debateLogin.num = num
                 req.session.debateLogin.rNum = rNum
+                req.session.debateLogin.model = "debate"
                 res.end(JSON.stringify({err:0,msg:"successfully"}))
             }))
         })()
@@ -166,9 +174,18 @@ module.exports = {
             mongo.update("debateStatus",{num:num},{$set:_update},this.hold(function(){
                 req.session.debateLogin.num = num
                 req.session.debateLogin.rNum = rNum
+                req.session.debateLogin.model = "debate"
                 res.end(JSON.stringify({err:0,msg:"successfully"}))
             }))
         })()
+    },
+    reviewRoomController:function(req,res){
+        var num = req.body.num
+        var rNum = req.body.rNum
+        req.session.debateLogin.num = num
+        req.session.debateLogin.rNum = rNum
+        req.session.debateLogin.model = "review"
+        res.end(JSON.stringify({err:0,msg:"successfully"}))
     },
     chatController:function(req,res){
         if(tool.isEmpty(req.session.debateLogin)){
@@ -196,5 +213,23 @@ module.exports = {
             console.log(JSON.stringify(_res[0]))
             res.end(JSON.stringify(_res[0]))
         })
+    },
+    reviewController:function(req,res){
+        res.render("_debate/review",{})
+    },
+    fetchAnalysisLogController:function(req,res){
+
+
+        if(!req.session.debateLogin.rNum){
+            res.end(JSON.stringify({err:1,msg:"illegal session"}))
+            return;
+        }
+
+        steps(function(){
+             mongo.find("analysisLog",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum},{},function(_res){
+                    res.end(JSON.stringify(_res))
+             })
+        })()
+
     }
 }
