@@ -10,5 +10,15 @@
         stroke-width: 1.5px;
     }
 
+    .nodes text{
+        fill:pink;
+    }
+
+    .zoom {
+        fill: none;
+        pointer-events: all;
+    }
 </style>
-<svg width="460" height="600"></svg>
+<button ng-click="rebuild()">再作成</button>
+<button ng-click="changeLayout()">{{changeLayoutDataArray[changeLayoutData]}}</button>
+<svg width="{{width}}" height="{{height}}"></svg>

@@ -180,6 +180,7 @@ module.exports = {
         })()
     },
     reviewRoomController:function(req,res){
+
         var num = req.body.num
         var rNum = req.body.rNum
         req.session.debateLogin.num = num
@@ -215,6 +216,9 @@ module.exports = {
         })
     },
     reviewController:function(req,res){
+        if(tool.isEmpty(req.session.debateLogin)){
+            res.redirect("login")
+        }
         res.render("_debate/review",{})
     },
     fetchAnalysisLogController:function(req,res){
@@ -231,5 +235,18 @@ module.exports = {
              })
         })()
 
+    },
+    fetchStatementLogController:function(req,res){
+        if(!req.session.debateLogin.rNum){
+            res.end(JSON.stringify({err:1,msg:"illegal session"}))
+            return;
+        }
+
+        steps(function(){
+            mongo.find("statementLog",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum},{},function(_res){
+                
+                res.end(JSON.stringify(_res))
+            })
+        })()
     }
 }

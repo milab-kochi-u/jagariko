@@ -91,7 +91,6 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
                     }))
                 },function(_update){
-
                         mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},_update,{},this.hold(function(_res){
 
                         }))
@@ -109,8 +108,10 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
                     }))
                 },function(){
+                    mongo.insert("statementLog",{num:session.debateLogin.num,rNum:session.debateLogin.rNum,inputMessage:msg.inputMessage,position:session.debateLogin.position,time:
+                        (new Date()).getTime(),type:"first"},{},this.hold(function(_res){
 
-
+                    }))
                 })()
         })
 
@@ -130,9 +131,15 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 sendObj.obj = msg
                 socket.emit("receiveTwiceStatement",sendObj)
                 socket.broadcast.emit("receiveTwiceStatement",sendObj)
+                return sendObj
+            },function(sendObj){
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyStatement:obj}},{},function(_res){
+                        console.log(_res)
+                })
             },function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyStatement:sendObj}},this.hold(function(_res){
-
+                console.log(msg)
+                mongo.insert("statementLog",{num:session.debateLogin.num,rNum:session.debateLogin.rNum,inputMessage:msg.obj,position:session.debateLogin.position,time:(new Date()).getTime(),type:"twice"},{},this.hold(function(_res){
+                        console.log(_res)
                 }))
             })()
         })
@@ -154,6 +161,13 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{requestStatementMessage:msg.requestStatementMessage}},this.hold(function(_res){
 
                 }))
+            },function(){
+
+                mongo.insert("statementLog",{num:session.debateLogin.num,rNum:session.debateLogin.rNum,requestStatementMessage:msg.requestStatementMessage,position:session.debateLogin.position,time:
+                (new Date()).getTime(),type:"request"},{},this.hold(function(_res){
+
+                }))
+
             })()
 
         })
@@ -181,7 +195,7 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
             // inputStatement = [{title:"this is the message for statement",dissent:0,content:""}]
 
-            var inputMessage = [{title:"this is the message for statement",dissent:0,content:"",index:0}]
+            var inputMessage = [{title:"this is the message for statement",dissent:0,content:"",index:Math.round(Math.random()*10000)}]
 
             for(var t=0;t<msg.objs.length;t++){
                 for(var i=0;i<msg.objs[t].length;i++){

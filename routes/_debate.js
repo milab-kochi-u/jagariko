@@ -27,5 +27,7 @@ router.get("/chat",_debateController.chatController)
 router.get("/review",_debateController.reviewController)
 router.post('/getDebateInformation',_debateController.getDebateInformationController)
 router.post('/fetchAnalysisLog',_debateController.fetchAnalysisLogController)
+router.post('/fetchStatementLog',_debateController.fetchStatementLogController)
+
 
 module.exports = router;

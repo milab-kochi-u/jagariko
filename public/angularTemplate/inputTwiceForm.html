@@ -1,4 +1,4 @@
-<div class="row" ng-repeat="(key,val) in everyStatementData.obj">
+<div class="row" ng-repeat="(key,val) in everyStatementData.obj track by $index">
 
     <form class="form-group" >
         <label>{{val.title}}:</label>

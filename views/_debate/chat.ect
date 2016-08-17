@@ -481,7 +481,6 @@
 
 
                 })
-
             })
 
             coreSocket.on("receiveTwiceStatement",function(_res){
@@ -588,7 +587,7 @@
             $scope.objs = []
 
             $scope.inputMessage = [
-                        {title:"this is the message for statement",dissent:0,content:"",index:0}
+                        {title:"this is the message for statement",dissent:0,content:"",index:Math.round(Math.random()*10000)}
                     ]
 
             $scope.requestStatementMessage = ""
@@ -746,7 +745,7 @@
            },
            controller:function($scope){
                 $scope._submit = function(){
-                    coreSocket.emit("giveTwiceStatement",$scope.inputMessage)
+                    coreSocket.emit("giveTwiceStatement",$scope.everyStatementData)
                 }
            },
            templateUrl:"/angularTemplate/InputTwiceForm.html"

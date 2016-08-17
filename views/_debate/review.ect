@@ -34,15 +34,17 @@
 
         <div class="row">
 
+            <home-map>
             <div class="row">
-              <div class="col-md-5">
+              <div class="col-md-5" id="statementMap" style="height:950px">
                     <statement-map></statement-map>
               </div>
 
-              <div class="col-md-7">
-                    <debate-map></debate-map>
+              <div class="col-md-7" id="debateMap" style="height:950px">
+                    <debate-map focus-zoom-index="focusZoomIndex"></debate-map>
               </div>
             </div>
+            <home-map>
 
         </div>
     </div>
@@ -128,6 +130,11 @@
 
             init()
 
+
+            $scope.showInMap = function(index){
+                $scope.focusZoomIndex = index
+            }
+
     })
 
     myApp.directive("myNavy",function(){
@@ -137,33 +144,107 @@
         }
     })
 
-    myApp.directive("debateMap",function(myPost){
+    myApp.directive("homeMap",function(){
         return {
             scope:false,
             controller:function($scope){
+                this.ijkByIndex = function(index,data){
+
+                                for(var i=0;i<data.length;i++){
+                                    for(var j=0;j<data[i].objs.length;j++){
+                                        for(var k=0;k<data[i].objs[j].length;k++){
+                                                if( index == parseInt(data[i].objs[j][k].random)){
+                                                    return {target:"i"+i+"j"+j+"k"+k,i:i,j:j,k:k}
+                                                }
+
+                                            for(var s=0;s<data[i].objs[j][k].warrant.length;s++){
+                                                    if( index == parseInt(data[i].objs[j][k].warrant[s].random)){
+                                                        return {target:"i"+i+"j"+j+"k"+k+"s"+s,i:i,j:j,k:k,s:s}
+                                                    }
+                                                for(var t=0;t<data[i].objs[j][k].warrant[s].evidence.length;t++){
+                                                            if( index == parseInt(data[i].objs[j][k].warrant[s].evidence[t].random)){
+                                                                return {target:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,i:i,j:j,k:k,s:s,t:t}
+                                                            }
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+
+                                return {source:null,target:null}
+
+                            }
+            }
+        }
+    })
 
 
-            myPost.postData("/_debate/fetchAnalysisLog").then(function(_res){
+    myApp.directive("debateMap",function(myPost){
+        return {
+            require:"^?homeMap",
+            scope:{focusZoomIndex:"="},
+            controller:function($scope){
 
-                    graph = {
-                      "nodes": [
-                        //{"id": "Myriel", "group": 1},
-                        //{"id": "Napoleon", "group": 1},
-                        //{"id": "Mlle.Baptistine", "group": 1},
-                        //{"id": "Mme.Magloire", "group": 1},
-                      ],
-                      "links": [
-                        //{"source": "Myriel", "target": "Napoleon", "value": 1},
-                        //{"source": "Mlle.Baptistine", "target": "Napoleon", "value": 8},
-                        //{"source": "Mme.Magloire", "target": "Myriel", "value": 10},
-                      ]
-                    }
+            this.aa = 11
+
+            $scope.changeLayoutDataArray = ["概要","詳細"]
+            $scope.changeLayoutData = 0
+            $scope.changeLayout = function(){
+               $scope.changeLayoutData = ($scope.changeLayoutData + 1) % 2
+               init()
+            }
+            $scope.rebuild = function(){
+                init()
+            }
+
+            init()
 
 
-                    graph = dealWithAnalysisLogData(_res.data)
-                    console.log(graph)
-                    drawMap(graph)
+            $scope.$watch("focusZoomIndex",function(preVal,val){
+                focusOnParticularNode()
             })
+
+
+            function focusOnParticularNode(){
+                var nodes = $scope.node._groups[0]
+                console.log(nodes)
+                //$scope.zoom.scaleTo($scope.rect,0)
+                var color = d3.scaleOrdinal(d3.schemeCategory20);
+                for(var i=0;i<nodes.length;i++){
+                       d3.select(nodes[i]).attr("fill",color(d3.select(nodes[i]).attr("position")))
+                       if(d3.select(nodes[i]).attr("index") == $scope.focusZoomIndex){
+                            d3.select(nodes[i]).attr("fill","green")
+                            //$scope.zoom.scaleBy(d3.select(nodes[i]),2.6)
+                       }
+                }
+            }
+
+
+            function init(){
+
+                myPost.postData("/_debate/fetchAnalysisLog").then(function(_res){
+
+                                    graph = {
+                                      "nodes": [
+                                        //{"id": "Myriel", "group": 1},
+                                        //{"id": "Napoleon", "group": 1},
+                                        //{"id": "Mlle.Baptistine", "group": 1},
+                                        //{"id": "Mme.Magloire", "group": 1},
+                                      ],
+                                      "links": [
+                                        //{"source": "Myriel", "target": "Napoleon", "value": 1},
+                                        //{"source": "Mlle.Baptistine", "target": "Napoleon", "value": 8},
+                                        //{"source": "Mme.Magloire", "target": "Myriel", "value": 10},
+                                      ]
+                                    }
+
+                                    graph = dealWithAnalysisLogData(_res.data)
+                                    drawMap(graph)
+                            })
+            }
+
+
 
             function dealWithAnalysisLogData(data){
 
@@ -173,13 +254,12 @@
                         for(var j=0;j<data[i].objs.length;j++){
                             for(var k=0;k<data[i].objs[j].length;k++){
 
-                                if(parseInt(data[i].objs[j][k].index) > 0){
-                                    links.push({"source":"i"+i+"j"+j+"k"+k,target:ijkByIndex(data[i].objs[j][k].index,data).target,"value":2})
+                                if(parseInt(data[i].objs[j][k].index) > 10000){
+                                    links.push({"source":"i"+i+"j"+j+"k"+k,target:$scope.ijkByIndex(data[i].objs[j][k].index,data).target,"value":2})
                                 }else{
-                                    console.log("ggggg")
                                 }
 
-                                nodes.push({id:"i"+i+"j"+j+"k"+k,name:"claim",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt})
+                                nodes.push({id:"i"+i+"j"+j+"k"+k,name:"claim",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
                                 for(var s=0;s<data[i].objs[j][k].warrant.length;s++){
                                     nodes.push({id:"i"+i+"j"+j+"k"+k+"s"+s,name:"warrant",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].warrantTxt})
                                     links.push({"source":"i"+i+"j"+j+"k"+k+"s"+s,target:"i"+i+"j"+j+"k"+k,"value":2})
@@ -198,41 +278,25 @@
             }
 
 
-            function ijkByIndex(index,data){
-                console.log("index:"+index)
-                console.log(data)
-
-                for(var i=0;i<data.length;i++){
-                    for(var j=0;j<data[i].objs.length;j++){
-                        for(var k=0;k<data[i].objs[j].length;k++){
-                                if( index == parseInt(data[i].objs[j][k].random)){
-                                    return {target:"i"+i+"j"+j+"k"+k}
-                                }
-
-                            for(var s=0;s<data[i].objs[j][k].warrant.length;s++){
-                                    if( index == parseInt(data[i].objs[j][k].warrant[s].random)){
-                                        return {target:"i"+i+"j"+j+"k"+k+"s"+s}
-                                    }
-                                for(var t=0;t<data[i].objs[j][k].warrant[s].evidence.length;t++){
-                                            if( index == parseInt(data[i].objs[j][k].warrant[s].evidence[t].random)){
-                                                return {target:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t}
-                                            }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-                return {source:null,target:null}
-
-            }
 
             function drawMap(graph){
+
+                var zoom = d3.zoom()
+                            .scaleExtent([1, 100])
+                            .on("zoom", zoomed);
+                $scope.zoom = zoom
+
+                function zoomed() {
+                    svg.attr("transform",
+                        d3.event.transform);
+                }
+
+                d3.selectAll("g").data([]).exit().remove()
+
                 var svg = d3.select("svg"),
                     width = +svg.attr("width"),
                     height = +svg.attr("height");
+                var svg = svg.append("g").call(zoom)
 
                 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -240,6 +304,15 @@
                     .force("link", d3.forceLink().distance(90).strength(2).id(function(d) { return d.id; }))
                     .force("charge", d3.forceManyBody().distanceMin([0,5]))
                     .force("center", d3.forceCenter(width / 2, height / 2));
+
+                var rect = svg.append("rect")
+                            .attr("x",0)
+                            .attr("y",0)
+                            .attr("width",10000)
+                            .attr("height",10000)
+                            .attr("fill","#fff");
+                $scope.rect = rect
+
 
                   var link = svg.append("g")
                       .attr("class", "links")
@@ -255,15 +328,39 @@
                     .enter().append("circle")
                       .attr("r", 12)
                       .attr("fill", function(d) { return color(d.position); })
+                      .attr("index",function(d){
+                            return d._index
+                      })
+                      .attr("position",function(d){
+                            return d.position
+                      })
                       .call(d3.drag()
                           .on("start", dragstarted)
                           .on("drag", dragged)
                           .on("end", dragended))
+                          .on("click",function(){
+                                zoom.translateBy(d3.select(this),0,0)
+                                zoom.scaleBy(d3.select(this),1.2)
+
+                          })
+
+                    $scope.node = node
 
 
 
                   node.append("title")
-                      .text(function(d) { return d.id; });
+                      .text(function(d) {
+
+                        return $scope.changeLayoutData==0?d.txt:d.name;
+
+                      });
+
+                  var text = svg.append("g").attr("class","nodes").selectAll("text").data(graph.nodes).enter().append("text").text(function(d){
+                      return $scope.changeLayoutData==0?d.name:d.txt;
+                  }).style("text-anchor", "middle")
+                    .style("fill", "#555")
+                    .style("font-family", "Arial")
+                    .style("font-size", 12);
 
                   simulation
                       .nodes(graph.nodes)
@@ -282,6 +379,10 @@
                     node
                         .attr("cx", function(d) { return d.x; })
                         .attr("cy", function(d) { return d.y; });
+
+                    text.attr("x", function(d){ return d.x; })
+                        .attr("y", function (d) {return d.y - 10; });
+
                   }
 
                 function dragstarted(d) {
@@ -305,16 +406,61 @@
 
             }
 
-
-
+            },
+            link:function(scope,element,attrs,homeMap){
+                    scope.width = document.getElementById("debateMap").offsetWidth
+                    scope.height = document.getElementById("debateMap").offsetHeight
+                    scope.ijkByIndex = homeMap.ijkByIndex
             },
             templateUrl:"/_debate/debateMap.html"
         }
     })
 
-    myApp.directive("statementMap",function(){
+    myApp.directive("statementMap",function(myPost){
         return {
+            require:"^?homeMap",
             scope:false,
+            link:function(scope,element,attrs,homeMap){
+                scope.ijkByIndex = homeMap.ijkByIndex
+            },
+            controller:function($scope){
+                myPost.postData("/_debate/fetchStatementLog").then(function(_res){
+                        $scope.statementList = _res.data
+                        myPost.postData("/_debate/fetchAnalysisLog").then(function(_res){
+                               for(var i=0;i<$scope.statementList.length;i++){
+                                    if(!$scope.statementList[i].inputMessage) continue;
+                                    for(var j=0;j<$scope.statementList[i].inputMessage.length;j++){
+                                        if($scope.statementList[i].inputMessage[j].index > 10000){
+                                            var s = $scope.ijkByIndex($scope.statementList[i].inputMessage[j].index,_res.data)
+
+                                             if(!isNaN(s.i)){
+                                                if(!isNaN(s.j)){
+                                                    if(!isNaN(s.k)){
+                                                        if(!isNaN(s.s)){
+                                                            if(!isNaN(s.t)){
+                                                                    //evidence
+                                                                    $scope.statementList[i].inputMessage[j].dissentTxt = _res.data[s.i].objs[s.j][s.k].warrant[s.s].evidence[s.t].evidenceTxt
+                                                            }else{
+                                                                    //warrant
+                                                                    $scope.statementList[i].inputMessage[j].dissentTxt = _res.data[s.i].objs[s.j][s.k].warrant[s.s].warrantTxt
+                                                            }
+                                                        }else{
+                                                                    //claim
+                                                                    $scope.statementList[i].inputMessage[j].dissentTxt = _res.data[s.i].objs[s.j][s.k].claimTxt
+                                                        }
+                                                    }
+                                                }
+                                             }
+                                        }
+                                    }
+                               }
+
+
+                        })
+
+
+                })
+            },
             templateUrl:"/_debate/statementMap.html"
         }
     })
