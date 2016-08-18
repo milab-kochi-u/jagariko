@@ -686,7 +686,7 @@
            },
            controller:function($scope){
                 $scope._submit = function(){
-                    coreSocket.emit("giveStatement",$scope.inputMessage)
+                    coreSocket.emit("giveStatement",{inputMessage:$scope.inputMessage})
                 }
            },
            templateUrl:"/angularTemplate/inputForm.html"

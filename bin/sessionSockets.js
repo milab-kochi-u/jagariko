@@ -69,6 +69,8 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
         socket.on("giveStatement",function(msg){
 
+                console.log(msg)
+
                 steps(function(){
                     mongo.find("debateStatus",{num:session.debateLogin.num},{},this.hold(function(_res){
                         return _res[0].status
@@ -86,9 +88,9 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 },function(){
                     var sendObj = {}
                     sendObj.position = session.debateLogin.position
-                    sendObj.obj = msg
+                    sendObj.obj = msg.inputMessage
                     console.log(sendObj)
-                    mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{everyStatement:sendObj}},{},this.hold(function(_res){
+                    mongo.update("debateStatus",{num:session.debateLogin.num},{$set:{everyStatement:{name:"sss"}}},{},this.hold(function(_res){
                         socket.emit("receiveStatement",sendObj)
                         socket.broadcast.emit("receiveStatement",sendObj)
                     }))
