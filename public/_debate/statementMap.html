@@ -1,0 +1,45 @@
+<div class="row" style="height:750px;overflow:auto">
+<div class="panel panel-default" ng-repeat="(key,val) in statementList track by $index">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+        <span>立場:</span>
+        <span ng-if="val.position==1">賛成</span>
+        <span ng-if="val.position==2">反対</span>
+
+        <span ng-if="val.type=='first'">意見</span>
+        <span ng-if="val.type=='request'">再投稿のお願い</span>
+        <span ng-if="val.type=='twice'">再びの投稿</span>
+        </h3>
+    </div>
+
+
+
+    <div ng-if="val.type == 'first' || val.type == 'twice'" class="panel-body" ng-repeat="(_key,_val) in val.inputMessage">
+        <p>時間:{{val.time | date:'yyyy-MM-dd HH:mm:ss '}}</p>
+
+        <nav ng-if="_val.index > 10000" class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">
+                        {{_val.dissentTxt}}
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+
+        内容:{{_val.content}}<br/>
+            <button class="btn btn-primary" type="button" ng-click="showInMap(_val.index)">
+                マップで見る
+            </button>
+    </div>
+
+
+    <div ng-if="val.type == 'request'" class="panel-body">
+        <p>時間:{{val.time | date:'yyyy-MM-dd HH:mm:ss '}}</p>
+        内容:{{val.requestStatementMessage}}
+    </div>
+
+</div>
+
+</div>

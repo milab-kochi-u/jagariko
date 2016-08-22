@@ -8,7 +8,6 @@
     <every-statement every-statement-data="everyStatementData"></every-statement>
 
 </div>
-
 <div class="row">
     <ul class="nav nav-pills nav-justified">
         <li role="presentation" class="{{changeFormVal[0]}}"><a ng-click="changeForm(0)">分析</a></li>
@@ -16,8 +15,32 @@
     </ul>
 </div>
 
-<div class="row">
-    <my-form ng-if="changeFormVal[0] == 'active'" obj="obj"></my-form>
+<div ng-if="changeFormVal[0] == 'active'" class="row">
+
+
+    <div class="row">
+        <ul class="nav nav-pills nav-justified">
+            <li ng-repeat="(key,val) in everyStatementData.obj track by $index" role="presentation" class="{{changeAnalysisVal[key]}}" >
+                <a ng-click="changeAnalysis(key)">
+                    <span ng-if="key==0">
+                        主張:
+                    </span>
+                    <span ng-if="key!=0">
+                        意義{{key}}:
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row" ng-repeat="(key,val) in everyStatementData.obj track by $index">
+        <div class="row" ng-show="changeAnalysisVal[key] == 'active'">
+            <span ng-if="key==0">主張を分析してください</span>
+            <span ng-if="key!=0">意義{{key}}を分析してください</span>
+            <my-form objs="objs" key="key"></my-form>
+        </div>
+    </div>
+
 </div>
 
 <div class="row">

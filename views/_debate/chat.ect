@@ -11,16 +11,8 @@
     <script src="/tmp/angular.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/tmp/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-    <!-- Latest compiled and minified JavaScript -->
     <script src="/tmp/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-    <!--
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-animate.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-touch.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.3.3/ui-bootstrap.min.js"></script>
-    -->
-
     <script type="text/javascript" src="/tmp/angular-route.min.js"></script>
-
 </head>
 <body ng-app="myApp">
 <div ng-controller="myCtr" class="container">
@@ -28,7 +20,6 @@
 <div class="row">
 <my-navy></my-navy>
 </div>
-
 <div class="row">
 <ul class="nav nav-pills nav-justified">
     <li role="presentation" class="{{changeTabVal[0]}}"><a ng-click="changeTab(0)">討論情報</a></li>
@@ -36,12 +27,11 @@
     <li role="presentation" class="{{changeTabVal[2]}}"><a ng-click="changeTab(2)">分析履歴</a></li>
 </ul>
 </div>
-
 <div>
 <div class="row" ng-show="changeTabVal[0] == 'active'">
    <table class="table table-striped ">
      <!-- On rows -->
-     <tr class="info"><th>テーマ</th><td>information</td><td></td></tr>
+     <tr class="info"><th>テーマ</th><td>{{debateInfo.title}}</td><td></td></tr>
 
          <tr class="info">
             <th>立場</th>
@@ -97,7 +87,8 @@
      </td>
      </tr>
 
-     <tr class="warning"><th>回数</th><td>{{debateInfo.config.timeNumbers}}</td><td></td></tr>
+     <tr class="warning"><th>総回数</th><td>{{debateInfo.config.timeNumbers}}</td><td></td></tr>
+     <tr class="warning"><th>回数</th><td>{{debateInfo.order}}</td><td></td></tr>
      <tr class="danger"><th>時間制限</th><td>{{debateInfo.config.timeLimitValDefault}}</td><td></td></tr>
 
    </table>
@@ -199,12 +190,11 @@
     </div>
 </div>
 
-
 <pro11 ng-show="statusController.pro11"></pro11>
 <con11 ng-show="statusController.con11" input-message="inputMessage"></con11>
 <pro21 ng-show="statusController.pro21"></pro21>
 <con21 ng-show="statusController.con21" objs="objs" every-statement-data="everyStatementData"></con21>
-<pro31 ng-show="statusController.pro31" every-analysis-data="everyAnalysisData" input-message="inputMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></pro31>
+<pro31 ng-show="statusController.pro31" every-analysis-data="everyAnalysisData" every-statement-data="everyStatementData" refuse-analysis-result-reason="refuseAnalysisResultReason"></pro31>
 <con31 ng-show="statusController.con31"></con31>
 <pro411 ng-show="statusController.pro411"></pro411>
 <con411 ng-show="statusController.con411" every-analysis-data="everyAnalysisData" input-message="inputMessage"></con411>
@@ -213,7 +203,7 @@
 <con511 ng-show="statusController.con511"></con511>
 
 <pro6111 ng-show="statusController.pro6111"></pro6111>
-<con6111 ng-show="statusController.con6111" every-analysis-data="everyAnalysisData" input-message="inputMessage" request-statement-message="requestStatementMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></con6111>
+<con6111 ng-show="statusController.con6111" every-analysis-data="everyAnalysisData" every-statement-data="everyStatementData" request-statement-message="requestStatementMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></con6111>
 
 <pro71111 ng-show="statusController.pro71111"></pro71111>
 <con71111 ng-show="statusController.con71111"></con71111>
@@ -221,15 +211,18 @@
 <pro32 ng-show="statusController.pro32"></pro32>
 <con32 ng-show="statusController.con32"></con32>
 
-
 <pro412 ng-show="statusController.pro412"></pro412>
+
 <con412 ng-show="statusController.con412" every-statement-data="everyStatementData" objs="objs" request-statement-message="requestStatementMessage" refuse-analysis-result-reason="refuseAnalysisResultReason"></con412>
 
 <pro6112 ng-show="statusController.pro6112"></pro6112>
 <con6112 ng-show="statusController.con6112"></con6112>
 
-<pro71112 ng-show="statusController.pro71112" every-statement-data="everyStatementData" obj="obj" request-statement-message="requestStatementMessage" input-message="inputMessage"></pro71112>
+
+<pro71112 ng-show="statusController.pro71112" every-statement-data="everyStatementData" objs="objs" request-statement-message="requestStatementMessage" input-message="inputMessage"></pro71112>
 <con71112 ng-show="statusController.con71112"></con71112>
+
+<debate-finish ng-show="statusController.debateFinish"></debate-finish>
 
 </div>
 </body>
@@ -272,120 +265,73 @@
         }
     })
 
-    myApp.controller("myCtr",function($scope,coreSocket,myPost){
+    myApp.controller("myCtr",function($scope,$q,coreSocket,myPost){
 
             function init(){
                 coreSocket.emit("enterRoom",{})
-                getDebateInformation()
-            }
-
-            init()
-
-            function getDebateInformation(){
-                myPost.postData("/_debate/getDebateInformation").then(function(_res){
-                    console.log(_res)
-                    $scope.debateInfo.pro = _res.data.pro
-                    $scope.debateInfo.con = _res.data.con
-                    $scope.debateInfo.finish = _res.data.finish
-                    $scope.debateInfo.setting = _res.data.setting
-                    $scope.debateInfo.group = _res.data.group
-                    $scope.debateInfo.proPrepare = _res.data.proPrepare
-                    $scope.debateInfo.conPrepare = _res.data.conPrepare
-                    $scope.debateInfo.position = _res.data.position
-                    $scope.debateInfo.status = _res.data.status
-                    $scope.debateInfo.config = _res.data.config
-                    $scope.debateInfo.username = _res.data.username
-
-                    console.log("debate status is .....")
+                var promise = _getDebateInformation()
+                promise.then(function(msg){
+                    console.log("promise msg is ...")
+                    console.log(msg)
+                    console.log("status is ...")
                     console.log($scope.debateInfo.status)
-
-                    console.log("debate position is ....")
-                    console.log($scope.debateInfo.position)
+                    checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
                 })
             }
 
-            coreSocket.on("enterRoom",function(_res){
-                console.log(_res)
-            })
-
-            coreSocket.on("systemSettingFinish",function(_res){
-                $scope.debateInfo.setting = 1
-                $scope.debateInfo.config = {timeNumbers:_res.timeNumbers,timeLimit:_res.timeLimit,timeLimitValDefault:_res.timeLimitValDefault,timeLimitValCustomize:_res.timeLimitValCustomize}
-
-            })
-
-            coreSocket.on("prepared",function(_res){
-                getDebateInformation()
-            })
-
-            coreSocket.on("prepareCompelete",function(_res){
-                getDebateInformation()
-            })
-
-            coreSocket.on("receiveStatement",function(_res){
-                getDebateInformation()
-                $scope.statement = $scope.statement.concat(_res)
-                $scope.everyStatementData = _res
-                $scope.objs = []
-                for(var i=0;i<_res.obj.length;i++){
-                      $scope.objs.push([{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}],random:Math.round(Math.random()*100000)}])
-                }
-            })
-
-            coreSocket.on("receiveTwiceStatement",function(_res){
-                getDebateInformation()
-                $scope.statement = $scope.statement.concat(_res)
-                $scope.everyStatementData = _res
-            })
 
 
-             coreSocket.on("requestStatement",function(_res){
-                 getDebateInformation()
-                 $scope.requestStatementMessage = _res.requestStatementMessage
 
 
-             })
+            function _getDebateInformation(){
 
-             coreSocket.on("receiveAnalysis",function(_res){
-                 console.log("receive analysis _res is ......")
-                 console.log(_res)
-                 getDebateInformation()
-                 $scope.analysis.push(_res.sendObj)
-                 $scope.everyAnalysisData = _res.sendObj
-                 $scope.inputMessage =  _res.inputMessage
+                    var deferred = $q.defer();
 
-             })
+                    myPost.postData("/_debate/getDebateInformation").then(function(_res){
+
+                    if(_res.data){
+
+                            $scope.debateInfo.title = _res.data.title
+                            $scope.debateInfo.pro = _res.data.pro
+                            $scope.debateInfo.con = _res.data.con
+                            $scope.debateInfo.finish = _res.data.finish
+                            $scope.debateInfo.setting = _res.data.setting
+                            $scope.debateInfo.group = _res.data.group
+                            $scope.debateInfo.proPrepare = _res.data.proPrepare
+                            $scope.debateInfo.conPrepare = _res.data.conPrepare
+                            $scope.debateInfo.position = _res.data.position
+                            $scope.debateInfo.status = _res.data.status
+                            $scope.debateInfo.preStatus = _res.data.preStatus
+                            $scope.debateInfo.config = _res.data.config
+                            $scope.debateInfo.username = _res.data.username
+
+                            $scope.everyStatementData = _res.data.everyStatement || {position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]}
+                            $scope.objs = _res.data.objs
+
+                            $scope.requestStatementMessage = _res.data.requestStatementMessage
+                            $scope.refuseAnalysisResultReason = _res.data.refuseAnalysisResultReason
+                            $scope.everyAnalysisData = _res.data.everyAnalysisData
+                            $scope.inputMessage = _res.data.inputMessage || $scope.inputMessage
+
+                            $scope.debateInfo.order =  _res.data.order
+                            deferred.resolve({err:0,msg:"data acquired"});
+                    }else{
+                            deferred.reject({err:1,msg:"data not acquired"});
+                    }
+
+                    })
 
 
-             coreSocket.on("confirmAnalysisResultFinish",function(_res){
-                 getDebateInformation()
-                 $scope.everyAnalysisData = _res.everyAnalysisData
-             })
-
-              coreSocket.on("refuseAnalysis",function(_res){
-                  getDebateInformation()
-                  $scope.refuseAnalysisResultReason = _res.refuseAnalysisResultReason
-              })
-
-
-            $scope.statusController = {
-                con11:false,con21:false,con31:false,con32:false,con42:false,con411:false,con412:false,con511:false,
-                pro11:false,pro21:false,pro31:false,pro32:false
-            }
-
-            function changeStatusController(arr){
-                for(var i in $scope.statusController){
-                    $scope.statusController[i] = false
-                }
-
-                for(var i in arr){
-                    $scope.statusController[arr[i]] = true
-                }
+                    return deferred.promise;
             }
 
 
-            $scope.$watch("debateInfo.status",function(val,preVal){
+            var checkStatus = function(val,preVal){
 
+                console.log("val is ..")
+                console.log(val)
+                console.log("preVal is ..")
+                console.log(preVal)
                 if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == -2 && parseInt(val) == 0){
                     changeStatusController(["pro11"])
                 }
@@ -506,7 +452,104 @@
                 }
 
 
+            }
+
+            coreSocket.on("enterRoom",function(_res){
+                console.log(_res)
             })
+
+            coreSocket.on("systemSettingFinish",function(_res){
+                $scope.debateInfo.setting = 1
+                $scope.debateInfo.config = {timeNumbers:_res.timeNumbers,timeLimit:_res.timeLimit,timeLimitValDefault:_res.timeLimitValDefault,timeLimitValCustomize:_res.timeLimitValCustomize}
+
+            })
+
+            coreSocket.on("prepared",function(_res){
+                 var promise = _getDebateInformation()
+            })
+
+            coreSocket.on("prepareCompelete",function(_res){
+                var promise = _getDebateInformation()
+            })
+
+            coreSocket.on("receiveStatement",function(_res){
+                var promise = _getDebateInformation()
+                promise.then(function(){
+                    $scope.statement = $scope.statement.concat(_res.sendObj)
+                    $scope.everyStatementData = _res.sendObj
+                    $scope.objs = _res.objs
+
+
+                })
+            })
+
+            coreSocket.on("receiveTwiceStatement",function(_res){
+                var promise = _getDebateInformation()
+                promise.then(function(){
+                    $scope.statement = $scope.statement.concat(_res)
+                    //$scope.everyStatementData = _res
+                })
+            })
+
+
+             coreSocket.on("requestStatement",function(_res){
+                 var promise = _getDebateInformation()
+                 promise.then(function(){
+                      $scope.requestStatementMessage = _res.requestStatementMessage
+                 })
+             })
+
+             coreSocket.on("receiveAnalysis",function(_res){
+                 var promise = _getDebateInformation()
+                 promise.then(function(){
+                     $scope.analysis.push(_res.sendObj)
+                     $scope.everyAnalysisData = _res.sendObj
+                     $scope.inputMessage =  _res.inputMessage
+                 })
+             })
+
+
+             coreSocket.on("confirmAnalysisResultFinish",function(_res){
+                 var promise = _getDebateInformation()
+                 promise.then(function(){
+                    $scope.everyAnalysisData = _res.everyAnalysisData
+                 })
+
+             })
+
+              coreSocket.on("refuseAnalysis",function(_res){
+                  var promise = _getDebateInformation()
+                  promise.then(function(){
+                    $scope.refuseAnalysisResultReason = _res.refuseAnalysisResultReason
+                  })
+
+              })
+
+
+            $scope.statusController = {
+                con11:false,con21:false,con31:false,con32:false,con42:false,con411:false,con412:false,con511:false,
+                pro11:false,pro21:false,pro31:false,pro32:false,debateFinish:false
+            }
+
+            function changeStatusController(arr){
+                for(var i in $scope.statusController){
+                    $scope.statusController[i] = false
+                }
+
+                for(var i in arr){
+                    $scope.statusController[arr[i]] = true
+                }
+            }
+
+
+            $scope.$watch("debateInfo.status",checkStatus)
+
+            $scope.$watch("debateInfo.finish",function(val,preVal){
+                   if(!preVal && val){
+                     changeStatusController(["debateFinish"])
+                   }
+            })
+
 
             $scope.changeTabVal = ["active","",""]
 
@@ -544,7 +587,7 @@
             $scope.objs = []
 
             $scope.inputMessage = [
-                        {title:"this is the message for statement",dissent:0,content:""}
+                        {title:"this is the message for statement",dissent:0,content:"",index:Math.round(Math.random()*10000)}
                     ]
 
             $scope.requestStatementMessage = ""
@@ -554,9 +597,9 @@
 
             $scope.statement = []
 
-            //everyStatementData = {position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]}
+            everyStatementData = {position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]}
 
-            $scope.everyStatementData = {}
+            $scope.everyStatementData = everyStatementData
 
 
             //analysis = [{"obj":[{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}]}],"position":1}]
@@ -591,8 +634,10 @@
                 coreSocket.emit("prepare",{})
             }
 
-
+            init()
     })
+
+
 
     myApp.directive("myNavy",function(){
         return {
@@ -696,11 +741,11 @@
     myApp.directive("myInputTwiceForm",function(coreSocket){
         return {
            scope:{
-            inputMessage:"="
+            everyStatementData:"="
            },
            controller:function($scope){
                 $scope._submit = function(){
-                    coreSocket.emit("giveTwiceStatement",$scope.inputMessage)
+                    coreSocket.emit("giveTwiceStatement",$scope.everyStatementData)
                 }
            },
            templateUrl:"/angularTemplate/InputTwiceForm.html"
@@ -796,7 +841,8 @@
                     }
 
                     $scope.changeAnalysisVal = []
-                    for(var i=0;i<$scope.everyStatementData.length;i++){
+
+                    for(var i=0;i<$scope.everyStatementData.obj.length;i++){
                         $scope.changeAnalysisVal.push("")
                     }
 
@@ -813,7 +859,7 @@
 
     myApp.directive("pro31",function(coreSocket){
         return {
-            scope:{everyAnalysisData:"=",inputMessage:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
+            scope:{everyAnalysisData:"=",everyStatementData:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
             controller:function($scope){
 
                 $scope.confirmVal = ["","",""]
@@ -894,7 +940,7 @@
                     }
 
                     $scope.changeAnalysisVal = []
-                    for(var i=0;i<$scope.everyStatementData.length;i++){
+                    for(var i=0;i<$scope.everyStatementData.obj.length;i++){
                         $scope.changeAnalysisVal.push("")
                     }
 
@@ -974,7 +1020,8 @@
                     }
 
                     $scope.changeAnalysisVal = []
-                    for(var i=0;i<$scope.everyStatementData.length;i++){
+
+                    for(var i=0;i<$scope.everyStatementData.obj.length;i++){
                         $scope.changeAnalysisVal.push("")
                     }
 
@@ -1025,7 +1072,7 @@
 
     myApp.directive("con6111",function(coreSocket){
         return {
-            scope:{everyAnalysisData:"=",inputMessage:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
+            scope:{everyAnalysisData:"=",everyStatementData:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
             controller:function($scope){
 
                 $scope.confirmVal = ["","",""]
@@ -1069,19 +1116,49 @@
     })
 
     myApp.directive("pro71112",function(){
-            return {
-                scope:{everyStatementData:"=",obj:"=",requestStatementMessage:"="},
-                controller:function($scope){
-                    $scope.changeFormVal = ["active",""]
-                    $scope.changeForm = function(n){
-                        for(var i=0;i<$scope.changeFormVal.length;i++){
-                            $scope.changeFormVal[i] = ""
+            //return {
+            //    scope:{everyStatementData:"=",obj:"=",requestStatementMessage:"="},
+            //    controller:function($scope){
+            //        $scope.changeFormVal = ["active",""]
+            //        $scope.changeForm = function(n){
+            //            for(var i=0;i<$scope.changeFormVal.length;i++){
+            //                $scope.changeFormVal[i] = ""
+            //            }
+            //            $scope.changeFormVal[n] = "active"
+            //        }
+            //    },
+            //    templateUrl:"/angularTemplate/status/pro71112.html"
+            //}
+
+
+                        return {
+                            scope:{everyStatementData:"=",objs:"="},
+                            controller:function($scope){
+                                $scope.changeFormVal = ["active",""]
+                                $scope.changeForm = function(n){
+                                    for(var i=0;i<$scope.changeFormVal.length;i++){
+                                        $scope.changeFormVal[i] = ""
+                                    }
+                                    $scope.changeFormVal[n] = "active"
+                                }
+
+                                $scope.changeAnalysisVal = []
+
+                                for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                                    $scope.changeAnalysisVal.push("")
+                                }
+
+                                $scope.changeAnalysis = function(n){
+                                    for(var i=0;i<$scope.changeAnalysisVal.length;i++){
+                                        $scope.changeAnalysisVal[i] = ""
+                                    }
+                                    $scope.changeAnalysisVal[n] = "active"
+                                }
+                            },
+                            templateUrl:"/angularTemplate/status/pro71112.html"
                         }
-                        $scope.changeFormVal[n] = "active"
-                    }
-                },
-                templateUrl:"/angularTemplate/status/pro71112.html"
-            }
+
+
     })
 
     myApp.directive("con71112",function(){
@@ -1123,6 +1200,12 @@
     myApp.directive("con811122",function(){
             return {
                 templateUrl:"/angularTemplate/status/con811122.html"
+            }
+    })
+
+    myApp.directive("debateFinish",function(){
+            return {
+                templateUrl:"/angularTemplate/status/debateFinish.html"
             }
     })
 

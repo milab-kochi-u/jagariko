@@ -1,4 +1,4 @@
-<div class="row" ng-repeat="(key,val) in inputMessage">
+<div class="row" ng-repeat="(key,val) in inputMessage track by $index">
 
     <form class="form-group" >
         <label>{{val.title}}:</label>

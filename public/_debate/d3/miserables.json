@@ -1,0 +1,17 @@
+{
+  "nodes": [
+    {"id": "claim1", "group": 1},
+    {"id":"claim1-warrant1","group":1},
+    {"id":"claim1-warrant1-evidence","group":1},
+    {"id":"claim1-warrant1-evidence-first","group":1},
+    {"id":"claim1-warrant1-evidence-second","group":1}
+  ],
+  "links": [
+    {"source": "claim1", "target": "claim1-warrant1", "value": 1},
+    {"source": "claim1-warrant1", "target": "claim1-warrant1-evidence", "value": 2},
+    {"source": "claim1-warrant1-evidence", "target": "claim1", "value": 3},
+    {"source":"claim1-warrant1-evidence","target":"claim1-warrant1-evidence-first","value":3},
+    {"source":"claim1-warrant1-evidence","target":"claim1-warrant1-evidence-second","value":3}
+  ]
+}
+

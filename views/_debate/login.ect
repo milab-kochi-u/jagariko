@@ -60,7 +60,6 @@ angular.controller("myForm",function($scope,$window,$timeout,myPost){
     $scope.submit = function(){
         myPost.postData({username:$scope.username,password:$scope.password}).then(function(res){
                 if(parseInt(res.data.error) == 0){
-                    $window.alert("loginSuccessfully!!!!")
                     $timeout(function(){
                         $window.location = "/_debate/group"
                     })
