@@ -69,12 +69,13 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
         socket.on("giveStatement",function(msg){
 
+                var order
                 steps(function(){
                     mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
 
                         var _update = {}
 
-
+                        order = _res[0].order
                         if(parseInt(_res[0].status)==6){
 
                             if(_res[0].order < _res[0].config.timeNumbers){
@@ -98,6 +99,7 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                     var sendObj = {}
                     sendObj.position = session.debateLogin.position
                     sendObj.obj = msg.inputMessage
+                    sendObj.order = order
                     var objs = []
                     for(var i=0;i<sendObj.obj.length;i++){
                         objs.push([{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0,random:Math.round(Math.random()*10000000)}],"dissent":0,random:Math.round(Math.random()*1000000)}],random:Math.round(Math.random()*100000),index:sendObj.obj[i].index}])
@@ -105,7 +107,6 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                     mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyStatement:sendObj,objs:objs}},{},this.hold(function(_res){
                         socket.emit("receiveStatement",{sendObj:sendObj,objs:objs})
                         socket.broadcast.emit("receiveStatement",{sendObj:sendObj,objs:objs})
-
                     }))
                 },function(){
                     mongo.insert("statementLog",{num:session.debateLogin.num,rNum:session.debateLogin.rNum,inputMessage:msg.inputMessage,position:session.debateLogin.position,time:
@@ -217,9 +218,11 @@ var sessionSockets = function(sessionSockets,steps,mongo){
             }
 
             var sendObj
+            var order
 
             steps(function() {
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
+                    order = _res[0].order
                     return  _res[0].status
                 }))
             },function(status){
@@ -229,7 +232,8 @@ var sessionSockets = function(sessionSockets,steps,mongo){
             },function(){
                 sendObj = msg
                 sendObj.position = session.debateLogin.position
-                console.log(sendObj)
+                sendObj.order = order
+
                 socket.emit("receiveAnalysis",{sendObj:sendObj,inputMessage:inputMessage})
                 socket.broadcast.emit("receiveAnalysis",{sendObj:sendObj,inputMessage:inputMessage})
             },function(){

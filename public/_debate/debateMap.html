@@ -5,14 +5,6 @@
         stroke-opacity: 0.6;
     }
 
-    .nodes circle {
-        stroke: #fff;
-        stroke-width: 1.5px;
-    }
-
-    .nodes text{
-        fill:pink;
-    }
 
     .zoom {
         fill: none;
@@ -21,4 +13,10 @@
 </style>
 <button ng-click="rebuild()">再作成</button>
 <button ng-click="changeLayout()">{{changeLayoutDataArray[changeLayoutData]}}</button>
+<div class="btn-group btn-group-justified"  role="group" aria-label="...">
+    <div ng-repeat='i in range(timeNumbers)' class="btn-group" role="group">
+        <button type="button" class="btn btn-default" ng-click="showSequence(i+1)">第{{i+1}}回</button>
+    </div>
+</div>
+
 <svg width="{{width}}" height="{{height}}"></svg>
