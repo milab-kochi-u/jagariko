@@ -102,7 +102,7 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                     sendObj.order = order
                     var objs = []
                     for(var i=0;i<sendObj.obj.length;i++){
-                        objs.push([{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0,random:Math.round(Math.random()*10000000)}],"dissent":0,random:Math.round(Math.random()*1000000)}],random:Math.round(Math.random()*100000),index:sendObj.obj[i].index}])
+                        objs.push([{"claimTxt":"","dissent":0,"warrant":[{"warrantTxt":"","evidence":[{"evidenceTxt":"","dissent":0}],"dissent":0}],index:sendObj.obj[i].index}])
                     }
                     mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyStatement:sendObj,objs:objs}},{},this.hold(function(_res){
                         socket.emit("receiveStatement",{sendObj:sendObj,objs:objs})
@@ -201,15 +201,18 @@ var sessionSockets = function(sessionSockets,steps,mongo){
             for(var t=0;t<msg.objs.length;t++){
                 for(var i=0;i<msg.objs[t].length;i++){
                     if(msg.objs[t][i].dissent){
+                        msg.objs[t][i].random = Math.round(Math.random()*10000000)
                         inputMessage.push({title:msg.objs[t][i].claimTxt,dissent:1,content:"",index:msg.objs[t][i].random})
                     }
                     for(var j=0;j<msg.objs[t][i].warrant.length;j++){
                         if(msg.objs[t][i].warrant[j].dissent){
+                            msg.objs[t][i].warrant[j].random = Math.round(Math.random()*10000000)
                             inputMessage.push({title:msg.objs[t][i].warrant[j].warrantTxt,dissent:1,content:"",index:msg.objs[t][i].warrant[j].random})
                         }
 
                         for(var k=0;k<msg.objs[t][i].warrant[j].evidence.length;k++){
                             if(msg.objs[t][i].warrant[j].evidence[k].dissent){
+                                msg.objs[t][i].warrant[j].evidence[k].random = Math.round(Math.random()*10000000)
                                 inputMessage.push({title:msg.objs[t][i].warrant[j].evidence[k].evidenceTxt,dissent:1,content:"",index:msg.objs[t][i].warrant[j].evidence[k].random})
                             }
                         }

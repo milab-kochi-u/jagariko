@@ -109,7 +109,6 @@
 
             $scope.debateInfo = {}
 
-
             function _getDebateInformation(){
 
                     var deferred = $q.defer();
@@ -132,13 +131,11 @@
                     return deferred.promise;
             }
 
-
             function init(){
                  var promise = _getDebateInformation()
             }
 
             init()
-
 
             $scope.showInMap = function(index){
                 $scope.focusZoomIndex = index
@@ -298,6 +295,9 @@
 
                     var nodes = []
                     var links = []
+
+                    console.log("data is ...")
+                    console.log(data)
                     for(var i=0;i<data.length;i++){
                         for(var j=0;j<data[i].objs.length;j++){
                             for(var k=0;k<data[i].objs[j].length;k++){
@@ -305,26 +305,20 @@
                                 if(parseInt(data[i].objs[j][k].index) > 10000){
                                     var _target = $scope.ijkByIndex(data[i].objs[j][k].index,data).target
                                     links.push({connect:true,order:data[i].order,position:data[i].position,class:_target,"source":"i"+i+"j"+j+"k"+k,target:_target,"value":2})
-                                    nodes.push({extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:_target,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
+                                    nodes.push({dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:_target,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
                                 }else{
-                                    nodes.push({extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:"i"+i+"j"+j+"k"+k,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
+                                    nodes.push({dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:"i"+i+"j"+j+"k"+k,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
                                 }
 
 
                                 for(var s=0;s<data[i].objs[j][k].warrant.length;s++){
-                                    nodes.push({extension:0,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s,class:"i"+i+"j"+j+"k"+k,name:"warrant",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].warrantTxt})
+                                    var extension = $scope.ijkByRandom(data[i].objs[j][k].warrant[s].random,data).source?1:0
+                                    nodes.push({dissent:data[i].objs[j][k].warrant[s].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s,class:"i"+i+"j"+j+"k"+k,name:"warrant",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].warrantTxt})
                                     links.push({order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s,target:"i"+i+"j"+j+"k"+k,"value":2})
                                     for(var t=0;t<data[i].objs[j][k].warrant[s].evidence.length;t++){
                                         links.push({order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,"target":"i"+i+"j"+j+"k"+k+"s"+s,value:3})
-
-
-                                        console.log($scope.ijkByRandom(data[i].objs[j][k].warrant[s].evidence[t].random,data))
-                                        if($scope.ijkByRandom(data[i].objs[j][k].warrant[s].evidence[t].random,data).source){
-                                            nodes.push({extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,class:"i"+i+"j"+j+"k"+k,name:"evidence",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].evidence[t].evidenceTxt})
-                                        }else{
-                                            nodes.push({extension:0,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,class:"i"+i+"j"+j+"k"+k,name:"evidence",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].evidence[t].evidenceTxt})
-                                        }
-
+                                        var extension = $scope.ijkByRandom(data[i].objs[j][k].warrant[s].evidence[t].random,data).source?1:0
+                                        nodes.push({dissent:data[i].objs[j][k].warrant[s].evidence[t].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,class:"i"+i+"j"+j+"k"+k,name:"evidence",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].evidence[t].evidenceTxt})
                                     }
                                 }
                             }
@@ -358,7 +352,7 @@
                 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
                 var simulation = d3.forceSimulation()
-                    .force("link", d3.forceLink().distance(90).strength(2).id(function(d) { return d.id; }))
+                    .force("link", d3.forceLink().distance(190).strength(2).id(function(d) { return d.id; }))
                     .force("charge", d3.forceManyBody().distanceMin([0,5]))
                     .force("center", d3.forceCenter(width / 3, height / 3));
 
@@ -393,11 +387,93 @@
 
 
 
-                  var node = svg.append("g")
+
+
+                   var gg = svg.append("g")
+                   .attr("class", "nodes")
+                   .selectAll("g")
+                   .data(graph.nodes)
+                   .enter()
+                   .append("g")
+                   .call(d3.drag()
+                   .on("start", dragstarted)
+                   .on("drag", dragged)
+                   .on("end", dragended))
+                   .attr("visibility", function(d) {
+                      return d.name=="claim"&&d._index<=10000?"visible":"hidden"
+                   })
+                   .attr("index",function(d){
+                       return d._index
+                   })
+                   .attr("extend",1)
+                   .attr("id",function(d){
+                       return d.id
+                   })
+                   .attr("order",function(d){
+                       return d.order
+                   })
+                   .attr("position",function(d){
+                       return d.position
+                   })
+                   .attr("class",function(d){
+                   return d.class
+                   })
+                   .attr("random",function(d){
+                     return d.random
+                   }).on("click",function(d){
+                     var val = parseInt(d3.select(this).attr("extend"))
+                     d3.select(this).attr("extend",val+1)
+                     if(val%2 == 1){
+                          d3.selectAll("g").filter(function(_d){
+                                if(!_d) return false;
+                                if($scope.showSequenceNum > 0){
+                                    return _d.class == d.id && _d.order == $scope.showSequenceNum
+                                }else{
+                                    return _d.class == d.id
+                                }
+                          }).style("visibility","visible")
+
+                         d3.selectAll("line").filter(function(_d){
+                                if(!_d) return false;
+                                if($scope.showSequenceNum > 0){
+                                    return _d.class == d.id && _d.order == $scope.showSequenceNum
+                                }else{
+                                    return _d.class == d.id
+                                }
+                         }).style("visibility","visible")
+
+                     }else{
+                          d3.selectAll("g").filter(function(_d){
+                             if(!_d) return false
+                             if($scope.showSequenceNum > 0){
+                                 return _d.class == d.id && _d.order == $scope.showSequenceNum
+                             }else{
+                                 return _d.class == d.id
+                             }
+                           }).style("visibility","hidden")
+
+                         d3.selectAll("line").filter(function(_d){
+                                if(!_d) return false;
+                                if($scope.showSequenceNum > 0){
+                                    return _d.class == d.id && _d.order == $scope.showSequenceNum
+                                }else{
+                                    return _d.class == d.id
+                                }
+                         }).style("visibility","hidden")
+
+
+                          d3.select(this).style("visibility","visible")
+                     }
+
+
+                    })
+/*
+                    var node = svg.append("g")
+                      .selectAll("circle")
+                      .data(graph.nodes)
+                      .enter()
+                      .append("circle")
                       .attr("class", "nodes")
-                    .selectAll("circle")
-                    .data(graph.nodes)
-                    .enter().append("circle")
                       .attr("r", 12)
                       .attr("fill",function(d){
                             return color(d.position)
@@ -429,9 +505,6 @@
                           .on("drag", dragged)
                           .on("end", dragended))
                           .on("click",function(d){
-                                //zoom.translateBy(d3.select(this),0,0)
-                                //zoom.scaleBy(d3.select(this),1.2)
-
                                     var val = parseInt(d3.select(this).attr("extend"))
                                     d3.select(this).attr("extend",val+1)
                                     if(val%2 == 1){
@@ -505,7 +578,6 @@
                                          d3.select(this).style("visibility","visible")
                                     }
 
-
                                         d3.selectAll("text").filter(function(_d){
                                             return _d.id == d.id
                                         }).style("visibility","visible")
@@ -514,13 +586,52 @@
 
                     $scope.node = node
 
-
                   node.append("title")
                       .text(function(d) {
                         return $scope.changeLayoutData==0?d.txt:d.name;
                       });
 
-                  var text = svg.append("g").attr("class","nodes").selectAll("text").data(graph.nodes).enter().append("text").text(function(d){
+                */
+
+                  var rects = gg.append('foreignObject')
+
+                      .attr("x",-120)
+                      .attr("y",-100)
+
+                    var tables = rects.append('xhtml:div')
+                    .append('table')
+                    .style("width","250px")
+                    .style("height","100px")
+                    .attr("class","table table-bordered")
+
+
+                    var tr1 = tables.append('tr')
+
+                    var td1_1 = tr1.append("td")
+                    .html(function(d){
+                        return d.name
+                    })
+
+
+                    var td1_2 = tr1.append("td")
+                    .html(function(d){
+                            if(d.dissent){
+                             console.log(d)
+                             return "意義"+d.extension
+                            }
+                    })
+                    .attr("width","20%")
+
+                    var tr2 = tables.append("tr")
+
+                    var td2_1 = tr2.append("td")
+                    .attr("colspan",2)
+                    .html(function(d){
+                        return d.txt.substring(1, 40) + "...";
+                    })
+                    .attr("width","100%")
+
+                  var text = gg.append("text").text(function(d){
                       return $scope.changeLayoutData==0?d.name:d.txt;
                   }).style("text-anchor", "middle")
                     .style("fill", "#555")
@@ -533,7 +644,8 @@
                         return d.order
                     })
                     .style("visibility",function(d){
-                        return d.name=="claim"&&d._index<=10000?"visible":"hidden"
+                        //return d.name=="claim"&&d._index<=10000?"visible":"hidden"
+                        return "hidden"
                     })
                     .attr("class",function(d){
                         return d.class
@@ -541,8 +653,12 @@
                     .attr("id",function(d){
                         return d.id
                     })
+                    .attr("y",20)
 
-                    var marks = svg.append("g").attr("class","images").selectAll("image").data(graph.nodes).enter().append("image")
+
+
+                    /*
+                    var marks = gg.append("image")
                       .attr("xlink:href",function(d){
                           if(d.extension==1){
                             return "/_debate/+.png"
@@ -551,6 +667,8 @@
                           }
 
                       })
+                      .attr("x",-10)
+                      .attr("y",-10)
                       .attr("id",function(d){
                           return d.id
                       })
@@ -586,8 +704,12 @@
                       .on("drag", dragged)
                       .on("end", dragended))
 
+                    */
+
+
                   simulation
                       .nodes(graph.nodes)
+                      .force("collide", d3.forceCollide().radius(function(d) { return 45 }))
                       .on("tick", ticked);
 
                   simulation.force("link")
@@ -600,16 +722,15 @@
                         .attr("x2", function(d) { return d.target.x; })
                         .attr("y2", function(d) { return d.target.y; });
 
-                    node
-                        .attr("cx", function(d) { return d.x; })
-                        .attr("cy", function(d) { return d.y; });
+                  /*
+                   node
+                        .attr("cx", function(d) { return d.x })
+                        .attr("cy", function(d) { return d.y })
+                  */
 
-                    text.attr("x", function(d){ return d.x; })
-                        .attr("y", function (d) {return d.y - 10; })
-
-                    marks.attr("x", function(d){ return d.x - 10; })
-                    .attr("y", function (d) {return d.y - 10; })
-
+                    gg
+                        .attr("transform", function(d) { return "translate("+d.x+","+d.y+")" })
+                        
                   }
 
                 function dragstarted(d) {
