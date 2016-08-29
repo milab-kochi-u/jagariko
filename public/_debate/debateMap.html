@@ -11,12 +11,29 @@
         pointer-events: all;
     }
 </style>
-<button ng-click="rebuild()">再作成</button>
-<button ng-click="changeLayout()">{{changeLayoutDataArray[changeLayoutData]}}</button>
+
 <div class="btn-group btn-group-justified"  role="group" aria-label="...">
+    <div class="btn-group" role="group">
+        <button  type="button" class="btn btn-default"  ng-click="rebuild()">再作成</button>
+    </div>
+
     <div ng-repeat='i in range(timeNumbers)' class="btn-group" role="group">
         <button type="button" class="btn btn-default" ng-click="showSequence(i+1)">第{{i+1}}回</button>
     </div>
 </div>
 
-<svg width="{{width}}" height="{{height}}"></svg>
+<svg width="{{width}}" height="{{height}}">
+    <g id="main" >
+
+    </g>
+
+    <g class="popUp" style="visibility: hidden">
+        <rect  width="650" height="450" fill="#F8F8F8" x="10" y="150" >
+
+        </rect>
+
+        <foreignObject width="600" height="450px" x="60" y="150" >
+            <svg-comment></svg-comment>
+        </foreignObject>
+    </g>
+</svg>
