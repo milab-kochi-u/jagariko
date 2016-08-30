@@ -169,9 +169,12 @@ module.exports = {
 
         req.session.debateLogin.position = position
 
-        console.log(req.session.debateLogin)
+        console.log("result ......")
+        console.log(_update)
+        console.log({num:num,rNum:rNum})
         steps(function(){
-            mongo.update("debateStatus",{num:num},{$set:_update},this.hold(function(){
+            mongo.update("debateStatus",{num:num,rNum:rNum},{$set:_update},this.hold(function(result){
+                console.log(result)
                 req.session.debateLogin.num = num
                 req.session.debateLogin.rNum = rNum
                 req.session.debateLogin.model = "debate"

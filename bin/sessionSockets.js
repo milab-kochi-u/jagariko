@@ -248,8 +248,12 @@ var sessionSockets = function(sessionSockets,steps,mongo){
         })
 
         socket.on("confirmAnalysisResult",function(msg){
+            var pro
+            var con
             steps(function() {
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
+                    pro = _res[0].pro
+                    con = _res[0].con
                     return  _res[0].status
                 }))
             },function(status){
@@ -263,6 +267,8 @@ var sessionSockets = function(sessionSockets,steps,mongo){
             },function(){
                 msg.everyAnalysisData.rNum = session.debateLogin.rNum
                 msg.everyAnalysisData.num = session.debateLogin.num
+                msg.everyAnalysisData.pro = pro
+                msg.everyAnalysisData.con = con
                 mongo.insert("analysisLog",msg.everyAnalysisData,{},this.hold(function(_res){
 
                 }))
@@ -798,6 +804,7 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
         })
 
+        /*
         socket.on('participate',function(jsonData){
             var position = jsonData.position
             var num = jsonData.num
@@ -818,6 +825,8 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 if(position == 2) var _update = {$set:{con:session.debateLogin.username}}
 
                 mongo.update("debateStatus",{group:session.debateLogin.group,num:num,rNum:rNum},_update,function(result){
+                    console.log("result is ....")
+                    console.log(result)
 
                     //在session中写入num
                     session.debateLogin.num = num
@@ -831,7 +840,9 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
         })
 
+        */
 
+        
         socket.on("loadThemes",function(jsonData){
 
             mongo.find("themes",{group:session.debateLogin.group},{},function(result){

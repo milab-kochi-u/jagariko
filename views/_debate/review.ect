@@ -221,8 +221,6 @@
                                 return {source:null}
                             }
 
-
-
             }
         }
     })
@@ -266,10 +264,10 @@
 
 
             $scope.$watch("focusZoomIndex",function(preVal,val){
-                focusOnParticularNode()
+                //focusOnParticularNode()
             })
 
-
+/*
             function focusOnParticularNode(){
                 var nodes = $scope.node._groups[0]
                 console.log(nodes)
@@ -283,7 +281,7 @@
                        }
                 }
             }
-
+*/
 
             function init(){
 
@@ -319,25 +317,30 @@
                     console.log(data)
                     for(var i=0;i<data.length;i++){
                         for(var j=0;j<data[i].objs.length;j++){
+                            var user = {pro:data[i].pro,con:data[i].con}
                             for(var k=0;k<data[i].objs[j].length;k++){
-
                                 if(parseInt(data[i].objs[j][k].index) > 10000){
-                                    var _target = $scope.ijkByIndex(data[i].objs[j][k].index,data).target
-                                    links.push({connect:true,order:data[i].order,position:data[i].position,class:_target,"source":"i"+i+"j"+j+"k"+k,target:_target,"value":2})
-                                    nodes.push({dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:_target,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
+                                    var target = $scope.ijkByIndex(data[i].objs[j][k].index,data)
+                                    var _target = target.target
+                                    var _target1 = target.target
+                                    var _target2 = "i"+target.i+"j"+target.j+"k"+target.k
+                                    var __target = _target1 + " " + _target2
+                                    console.log(__target)
+                                    links.push({user:user,connect:true,order:data[i].order,position:data[i].position,class:_target,"source":"i"+i+"j"+j+"k"+k,target:_target,"value":2})
+                                    nodes.push({user:user,dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:_target,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
                                 }else{
-                                    nodes.push({dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:"i"+i+"j"+j+"k"+k,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
+                                    nodes.push({user:user,dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:"i"+i+"j"+j+"k"+k,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
                                 }
 
 
                                 for(var s=0;s<data[i].objs[j][k].warrant.length;s++){
                                     var extension = $scope.ijkByRandom(data[i].objs[j][k].warrant[s].random,data).source?1:0
-                                    nodes.push({dissent:data[i].objs[j][k].warrant[s].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s,class:"i"+i+"j"+j+"k"+k,name:"warrant",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].warrantTxt})
-                                    links.push({order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s,target:"i"+i+"j"+j+"k"+k,"value":2})
+                                    nodes.push({user:user,dissent:data[i].objs[j][k].warrant[s].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s,class:"i"+i+"j"+j+"k"+k,name:"warrant",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].warrantTxt})
+                                    links.push({user:user,order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s,target:"i"+i+"j"+j+"k"+k,"value":2})
                                     for(var t=0;t<data[i].objs[j][k].warrant[s].evidence.length;t++){
-                                        links.push({order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,"target":"i"+i+"j"+j+"k"+k+"s"+s,value:3})
+                                        links.push({user:user,order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,"target":"i"+i+"j"+j+"k"+k+"s"+s,value:3})
                                         var extension = $scope.ijkByRandom(data[i].objs[j][k].warrant[s].evidence[t].random,data).source?1:0
-                                        nodes.push({dissent:data[i].objs[j][k].warrant[s].evidence[t].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,class:"i"+i+"j"+j+"k"+k,name:"evidence",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].evidence[t].evidenceTxt})
+                                        nodes.push({user:user,dissent:data[i].objs[j][k].warrant[s].evidence[t].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,class:"i"+i+"j"+j+"k"+k,name:"evidence",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].evidence[t].evidenceTxt})
                                     }
                                 }
                             }
@@ -390,6 +393,7 @@
                     .selectAll("line")
                     .data(graph.links)
                     .enter().append("line")
+                    .attr("stroke-width",2)
                     .attr("class",function(d){
                         return d.class
                     })
@@ -403,6 +407,8 @@
                         return d.order
                     })
                     .style("visibility","hidden")
+                    .style("cursor","pointer")
+
 
 
                    var gg = svg.append("g")
@@ -439,6 +445,8 @@
                    }).on("click",function(d){
                      var val = parseInt(d3.select(this).attr("extend"))
                      d3.select(this).attr("extend",val+1)
+
+
                      if(val%2 == 1){
                           d3.selectAll("g").filter(function(_d){
                                 if(!_d) return false;
@@ -525,7 +533,7 @@
                     var td2_1 = tr2.append("td")
                     .attr("colspan",2)
                     .html(function(d){
-                        return d.txt.substring(1, 40) + "...<span txt='"+ d.txt +"' class='detail' >詳細</span>";
+                        return d.txt.substring(1, 40) + "...<span _index='" + d._index + "' position='"+ d.position +"' pro='"+d.user.pro+"' con='"+d.user.con+"' name='"+d.name+"' txt='"+ d.txt +"' class='detail' >詳細</span>";
                     })
                     .attr("width","100%")
                     .attr("cx",350)
@@ -535,45 +543,42 @@
 
                         d3.selectAll("g").filter(".popUp").style("visibility","visible")
                         d3.selectAll("g").filter(".popUp").selectAll("div").filter(".content").html(d3.select(this).attr("txt"))
+                        var name = d3.select(this).attr("name")
+                        var position = d3.select(this).attr("position")
+                        var pro = d3.select(this).attr("pro")
+                        var con = d3.select(this).attr("con")
+                        var _index = d3.select(this).attr("_index")
 
-                        /*
-                        var fo = d3.select("svg").append('foreignObject')
-                        .attr("class","popUp")
-                        .style("width","640px")
-                        .style("height","350px")
-                        .attr("x",100)
-                        .attr("y",200)
 
-                        var div = fo.append('xhtml:div')
-                        .append('div').attr("class","row")
+                        d3.selectAll("g").filter(".popUp").selectAll("small").filter(".user").html(function(){
 
-                        var content = div.append('div')
-                        .style('width', '550px')
-                        .style('height','200px')
-                        .style('font-size',"25px")
-                        .html('<div class="row"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'+d3.select(this).attr("txt"));
+                            if(position == 1){
+                                return "賛成側"+ pro + "->" + "反対側" + con
+                            }else{
+                                return "反対側"+ con + "->" + "賛成側" + pro
+                            }
 
-                        content.selectAll(".close").on("click",function(){
-                            d3.selectAll("foreignObject").filter(".popUp").remove()
-                            d3.selectAll("rect").filter(".popUp").style("visibility","hidden")
                         })
 
-                        var comment = div.append('div')
-                        .style('width','500px')
-                        .style('height','80px')
-                        .style('font-size','20px')
-                        .html('<div class="row"><hr/></div><div class="row comment"></div>')
+                        d3.selectAll("g").filter(".popUp").selectAll("span").filter(".name").html(function(){
 
+                            switch(name){
+                                case 'claim':
+                                    if(_index>10000){
+                                        return '主張(意義説明)'
+                                    }else{
+                                        return '主張(オリジナル)'
+                                    }
+                                break;
+                                case 'warrant':
+                                    return '論拠'
+                                break;
+                                case 'evidence':
+                                    return '根拠'
+                                break;
+                            }
+                        })
 
-                        console.log("comment...")
-                        console.log(comment)
-
-                        comment.select(".comment").append("span").html('<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>気になる</button>')
-                        comment.select(".comment").append("span").html('<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>気になる</button>')
-                        comment.select(".comment").append("span").html('<button type="button" class="btn btn-default">コメント欄 <span class="badge">42</span></button>')
-                        comment.select(".comment").append("span").html('<button type="button" class="btn btn-default">参照例</button>')
-
-                        */
                     })
                     .style("cursor","pointer")
 
@@ -617,11 +622,10 @@
 
                   function ticked() {
                     link
-                        .attr("x1", function(d) { return d.source.x; })
-                        .attr("y1", function(d) { return d.source.y; })
+                        .attr("x1", function(d) { return d.source.x-120; })
+                        .attr("y1", function(d) { return d.source.y-100; })
                         .attr("x2", function(d) { return d.target.x; })
                         .attr("y2", function(d) { return d.target.y; });
-
 
                     gg
                         .attr("transform", function(d) { return "translate("+d.x+","+d.y+")" })
@@ -711,11 +715,49 @@
 
     myApp.directive("svgComment",function(){
         return {
-            scope:false,
+            scope:true,
             controller:function($scope){
+                $scope.commentContentList = []
+                $scope.showComment = 0
+                $scope.makeSenseNum = 0
+                $scope.makeLikeNum = 0
+                $scope.glyphiconStarEmpty = true
+                $scope.glyphiconStar = false
                 $scope.closePopUp = function(){
                     d3.select("svg").selectAll("g").filter(".popUp").style("visibility","hidden")
                 }
+
+                $scope.doComment = function(){
+                    $scope.showComment = $scope.showComment + 1
+
+                    if($scope.showComment % 2 == 1){
+                        d3.select("#popUpBackground").attr("height",750)
+                    }else{
+                        d3.select("#popUpBackground").attr("height",450)
+                    }
+
+                }
+
+                $scope.submitComment = function(isValid){
+                    if(!isValid) return;
+                    $scope.commentContentList.push($scope.commentContent)
+                }
+
+                $scope.makeSense = function(){
+                    $scope.makeSenseNum = $scope.makeSenseNum + 1
+                    if($scope.makeSenseNum %2 == 0){
+                        $scope.glyphiconStarEmpty = true
+                        $scope.glyphiconStar = false
+                    }else{
+                        $scope.glyphiconStarEmpty = false
+                        $scope.glyphiconStar = true
+                    }
+                }
+
+                $scope.makeLike = function(){
+                    $scope.makeLikeNum = $scope.makeLikeNum + 1
+                }
+
             },
             templateUrl:"/_debate/svgComment.html"
         }

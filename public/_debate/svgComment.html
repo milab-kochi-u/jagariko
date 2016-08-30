@@ -1,7 +1,9 @@
 <div class="popUp">
+
+   <div class="row">
     <div class="row">
         <div class=" row" style="width: 580px;">
-            <h3>Example page header <small>Subtext for header</small>
+            <h3><span class="name">Example page header</span> <small class="user">Subtext for header</small>
 
                 <button type="button" class="close" ng-click="closePopUp()" data-dismiss="alert" aria-label="Close"><span
                         aria-hidden="true">×</span>
@@ -13,35 +15,83 @@
 
     </div>
 
+
+
+
+
+
     <div class="row">
-        <div style="width: 550px;  font-size: 25px;" class="row content">
+        <div style="width: 550px;height: 220px;  font-size: 25px;" class="row content">
             アップルのモバイル決済サービス「アップル・ペイ」に採用される近距離通信（ＮＦＣ）技術は、北米や欧州、オーストラリアでは普及している。
         </div>
 
-        <div style="width: 500px;  font-size: 20px; position: fixed;bottom: 10px" class="row">
 
-            <div class="comment">
+    </div>
 
+    <div style="width: 500px;  font-size: 20px; " class="row">
+
+        <div class="comment">
+                <span ng-show="makeLikeNum % 2 == 0">
+                    <button type="button" class="btn btn-default" ng-click="makeLike()"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>いいね</button>
+                </span>
+                <span ng-click="makeLike()" class="btn btn-default" ng-show="makeLikeNum % 2 == 1">いいね済み</span>
                 <span>
-                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>いいね</button>
+                    <button type="button" class="btn btn-default" ng-click="makeSense()"><span ng-class="['glyphicon',{'glyphicon-star-empty':glyphiconStarEmpty,'glyphicon-star':glyphiconStar}]"  aria-hidden="true"></span>気になる</button>
                 </span>
 
                 <span>
-                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>気になる</button>
-                </span>
-
-                <span>
-                    <button type="button" class="btn btn-default">コメント欄 <span class="badge">42</span></button>
+                    <button type="button" class="btn btn-default" ng-click="doComment()">コメント欄 <span class="badge">42</span></button>
                 </span>
 
                 <span>
                 <button type="button" class="btn btn-default">参照例
                 </button>
                 </span>
-            </div>
         </div>
     </div>
 
+   </div>
+
+
+
+
+
+
+    <div class="row">
+    <div class="row" ng-show="showComment%2 == 1">
+        <hr/>
+        <form role="form" name="myForm" ng-submit="submitComment(myForm.$valid)" class="form-horizontal" novalidate>
+
+            <div class="form-group">
+                <textarea class="form-control" name="commentContent" style="width: 550px;height: 80px;" ng-minlength="5" ng-maxlength="15" required ng-model="commentContent"></textarea>
+                <button class=" col-lg-offset-8" type="submit">
+                    送信
+                </button>
+            </div>
+
+        </form>
+
+        <div class="alert alert-warning alert-dismissible" ng-show="myForm.commentContent.$invalid" role="alert" style="width: 550px;">
+            <strong>Warning!</strong>
+            <div ng-if="myForm.commentContent.$error.required">
+                必要項目
+            </div>
+            <div ng-if="myForm.commentContent.$error.minlength">
+               短すぎ
+            </div>
+            <div ng-if="myForm.commentContent.$error.maxlength">
+                長すぎ
+            </div>
+        </div>
+
+        <hr/>
+            <ul class="list-group" style="width: 550px;height: 200px;overflow: auto">
+                <li ng-repeat="comment in commentContentList" class="list-group-item">{{comment}}</li>
+            </ul>
+    </div>
+
+
+    </div>
 
 
 </div>
