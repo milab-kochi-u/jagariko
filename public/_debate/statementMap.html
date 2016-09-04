@@ -17,9 +17,7 @@
     <div ng-if="val.type == 'first' || val.type == 'twice'" class="panel-body" ng-repeat="(_key,_val) in val.inputMessage">
         <p>時間:{{val.time | date:'yyyy-MM-dd HH:mm:ss '}}</p>
 
-
         <div ng-if="_val.index > 10000" class="alert alert-danger" role="alert"> <small>意義内容:{{_val.dissentTxt}}</small></div>
-
 
         内容:{{_val.content}}<br/>
             <button class="btn btn-primary" type="button" ng-click="showInMap(_val.index)">
