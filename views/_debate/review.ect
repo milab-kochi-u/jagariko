@@ -31,6 +31,7 @@
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 </head>
 
 <body ng-app="myApp">
@@ -40,7 +41,7 @@
 
 
         <div class="row">
-        <my-navy></my-navy>
+        <my-navy debate-info="debateInfo"></my-navy>
         </div>
 
         <div class="row">
@@ -140,6 +141,7 @@
                             $scope.debateInfo.con = _res.data.con
                             $scope.debateInfo.group = _res.data.group
                             $scope.debateInfo.config = _res.data.config
+                            $scope.debateInfo.username = _res.data.username
                             deferred.resolve({err:0,msg:"data acquired"});
                     }else{
                             deferred.reject({err:1,msg:"data not acquired"});
@@ -178,7 +180,7 @@
 
     myApp.directive("myNavy",function(){
         return {
-            scope:false,
+            scope:{debateInfo:"="},
             templateUrl:"/_debate/navy.html"
         }
     })

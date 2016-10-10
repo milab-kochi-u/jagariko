@@ -16,7 +16,7 @@ module.exports = {
         console.log("session is ...")
         console.log(req.session)
 
-        res.render("review/index",{})
+        res.render("review/index",{debateInfo:req.session})
     },
     reviewDataController:function(req,res){
         mongo.find("themes",{},{},function(list){

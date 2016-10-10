@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/tmp/jquery-2.2.4.min.js" ></script>
+    <script src="/_debate/d3/d3.js"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+
+<svg width="1500" height="900">
+
+  <!--
+    <foreignObject x="10" width="450">
+        <div class="alert alert-info" role="alert">
+            主張:石原慎太郎元東京都知事（84）は6日、豊洲市場（江東区）問題で「（石原氏が）都の聞き取りを拒否した」との報道について、「調査に協力する意思に変わりはなく、戸惑っている」とのコメントを発表した。
+        </div>
+    </foreignObject>
+    <foreignObject x="30" width="450" y="125">
+        <div class="alert alert-info" role="alert">
+            論拠:石原氏はコメントで「年を重ねていて記憶が正確でないことに加え、このところ体調がすぐれない。（聞き取り調査の）時間や方法に配慮していただきたい」と指摘。
+        </div>
+    </foreignObject>
+
+    <foreignObject x="50" width="450" y="230">
+        <div class="alert alert-info" role="alert">
+            根拠:「実務担当者に事情を聞いていただいた結果を踏まえ、書面で質問いただければ記憶を整理して誠意をもってお答えしたい」とし、都にも申し入れる方針を示している。　
+        </div>
+    </foreignObject>
+
+
+
+    <foreignObject x="710" width="450" y="20">
+        <div class="alert alert-warning" role="alert">
+            主張:石原慎太郎元東京都知事（84）は6日、豊洲市場（江東区）問題で「（石原氏が）都の聞き取りを拒否した」との報道について、「調査に協力する意思に変わりはなく、戸惑っている」とのコメントを発表した。
+        </div>
+    </foreignObject>
+
+    <foreignObject x="730" width="450" y="145">
+        <div class="alert alert-warning" role="alert">
+            論拠:石原氏はコメントで「年を重ねていて記憶が正確でないことに加え、このところ体調がすぐれない。（聞き取り調査の）時間や方法に配慮していただきたい」と指摘。
+        </div>
+    </foreignObject>
+
+    <foreignObject x="750" width="450" y="250">
+        <div class="alert alert-warning" role="alert">
+            根拠:「実務担当者に事情を聞いていただいた結果を踏まえ、書面で質問いただければ記憶を整理して誠意をもってお答えしたい」とし、都にも申し入れる方針を示している。　
+        </div>
+    </foreignObject>
+
+
+
+
+
+
+
+
+    <foreignObject x="10" width="450" y="400">
+        <div class="alert alert-info" role="alert">
+            主張:石原慎太郎元東京都知事（84）は6日、豊洲市場（江東区）問題で「（石原氏が）都の聞き取りを拒否した」との報道について、「調査に協力する意思に変わりはなく、戸惑っている」とのコメントを発表した。
+        </div>
+    </foreignObject>
+
+    <foreignObject x="30" width="450" y="525">
+        <div class="alert alert-info" role="alert">
+            論拠:石原氏はコメントで「年を重ねていて記憶が正確でないことに加え、このところ体調がすぐれない。（聞き取り調査の）時間や方法に配慮していただきたい」と指摘。
+        </div>
+    </foreignObject>
+
+    <foreignObject x="50" width="450" y="630">
+        <div class="alert alert-info" role="alert">
+            根拠:「実務担当者に事情を聞いていただいた結果を踏まえ、書面で質問いただければ記憶を整理して誠意をもってお答えしたい」とし、都にも申し入れる方針を示している。　
+        </div>
+    </foreignObject>
+
+
+
+
+
+
+
+
+
+
+    <foreignObject x="710" width="450" y="400">
+        <div class="alert alert-warning" role="alert">
+            主張:石原慎太郎元東京都知事（84）は6日、豊洲市場（江東区）問題で「（石原氏が）都の聞き取りを拒否した」との報道について、「調査に協力する意思に変わりはなく、戸惑っている」とのコメントを発表した。
+        </div>
+    </foreignObject>
+
+    <foreignObject x="730" width="450" y="525">
+        <div class="alert alert-warning" role="alert">
+            論拠:石原氏はコメントで「年を重ねていて記憶が正確でないことに加え、このところ体調がすぐれない。（聞き取り調査の）時間や方法に配慮していただきたい」と指摘。
+        </div>
+    </foreignObject>
+
+    <foreignObject x="750" width="450" y="630">
+        <div class="alert alert-warning" role="alert">
+            根拠:「実務担当者に事情を聞いていただいた結果を踏まえ、書面で質問いただければ記憶を整理して誠意をもってお答えしたい」とし、都にも申し入れる方針を示している。　
+        </div>
+    </foreignObject>
+
+
+    <defs>
+        <marker id="arrow"
+                markerUnits="strokeWidth"
+                markerWidth="12"
+                markerHeight="12"
+                viewBox="0 0 12 12"
+                refX="6"
+                refY="6"
+                orient="auto">
+            <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000000;" />
+        </marker>
+    </defs>
+
+    -->
+
+
+    <defs>
+        <marker id="arrow"
+                markerUnits="strokeWidth"
+                markerWidth="12"
+                markerHeight="12"
+                viewBox="0 0 12 12"
+                refX="6"
+                refY="6"
+                orient="auto">
+            <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000000;" />
+        </marker>
+    </defs>
+</svg>
+
+
+</body>
+<script>
+
+    var WIDTH = document.body.clientWidth //整个区域的宽度
+    var HEIGHT = 2000 //整个区域的高度
+    var RECTWIDTH = 450  //模块的长度
+    var RECTHEIGHT = 100  //模块的宽度
+    var LEFT = WIDTH/3 - RECTWIDTH  //整体模块距离浏览器左边的边距
+    var SPACEX = 350 //右边模块距离左边模块的宽度
+    var SPACEY = 15 //距头上模块的上边距
+    var SLIPWIDTH = 15  //各级的错位距离
+
+    var LEFTSPACE = 10 //做边距
+    var TOPSPACE = 10 //顶头的模块距离顶端的距离
+    var FRONTSPACE = 35
+
+    var svg = d3.select("svg")
+    svg.attr("width",WIDTH)
+    svg.attr("height",HEIGHT)
+    svg.style("margin-left",LEFT)
+
+
+
+
+    var data = [
+        {
+
+        order:1,
+        objs:[{
+            claimTxt: "年金積立金管理運用独立行政法人（ＧＰＩＦ）が２０１６年４～６月期に約５兆２０００億円もの運用損を出したのは、価格変動リスクの大きい株式の運用割合を高めたためだ。",
+            position:1,
+            warrant:[
+                {warrantTxt:"年金給付の財源は保険料収入と国庫負担で９割程度が賄われ、短期的な運用損は年金給付に影響しないが、一方で国民の将来への不安を解消するための体制整備を早期に進めることが不可欠だ。",
+                 evidence:[{
+                     evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                 },
+                 {
+                     evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                 },
+                 {
+                     evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                 },
+                 {
+                     evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。",
+                     random:1014,
+                     dissent:1
+                 }
+                 ],
+                 dissent:1,
+                 random:1012
+                }
+            ]
+
+        }
+        ]
+        },
+        {
+
+            order:1,
+            objs:[{
+                claimTxt: "2050年には農業人口が半減し、100万人程度に。そのうち3割は85歳以上――。自民党の農林水産業骨太方針策定プロジェクトチーム（PT、小泉進次郎委員長）がこんな試算をまとめた。国内の農業生産を維持できないとみて、11月に決める環太平洋連携協定（TPP）の中長期的対策に、人材育成や労働力の確保策を盛り込む。",
+                position:1,
+                warrant:[
+                    {warrantTxt:"基幹的農業従事者と常時雇用者を合わせた「農業就業者数」は、10年に219万人。PTの試算では、これが25年に163万人、50年には108万人に減るとの結果になった。現在の就農者数や定着率、日本の総人口の減少見通しなどから「厳しく見積もった」（鈴木憲和PT副委員長）。",
+                        evidence:[{
+                            evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
+                        }
+                        ]
+                    }
+                ],
+                index:2011
+            }
+            ]
+        },
+        {
+
+            order:1,
+            objs:[{
+                claimTxt: "一方で、昨年策定した食料・農業・農村基本計画は、国内の農業生産の継続には90万人程度の農業就業者が必要だと推計する。",
+                position:1,
+                warrant:[
+                    {warrantTxt:"PTは試算を踏まえ、このままでは国内農業の持続可能性が危機的な状況になると判断。農業教育・研修の充実で国内外の市場を視野に入れる経営層の育成だけでなく、生産作業には外国人やロボットなどの活用も必要とみて、人材育成や労働力確保の具体策の検討を11月の取りまとめに向けて加速する。",
+                        evidence:[{
+                            evidenceTxt: "農水省は、議論の材料として（1）農業大学校の専門職業大学化（2）就農の入り口となる農業法人での雇用拡大（3）青年就農給付金制度の改善（4）地域で農業をしながら経営学を学べる農業経営塾（5）外国人労働力の確保――などを示した。ただ外国人の受け入れ拡大には、トラブルの増加や日本人の労賃引き下げなどにつながるとして、慎重論が出る可能性もある。",
+                            dissent:1,
+                            random:1013
+                        }
+                        ]
+                    }
+                ]
+            }
+            ]
+        }
+    ]
+
+
+    var _data = [
+        {
+            order:1,
+            objs:[{
+                claimTxt: "年金積立金管理運用独立行政法人（ＧＰＩＦ）が２０１６年４～６月期に約５兆２０００億円もの運用損を出したのは、価格変動リスクの大きい株式の運用割合を高めたためだ。",
+                position:2,
+                warrant:[
+                    {warrantTxt:"年金給付の財源は保険料収入と国庫負担で９割程度が賄われ、短期的な運用損は年金給付に影響しないが、一方で国民の将来への不安を解消するための体制整備を早期に進めることが不可欠だ。",
+                        evidence:[{
+                            evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                        },
+                        {
+                            evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                        },
+                        {
+                            evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                        },
+                        {
+                            evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                        }
+                        ]
+                    }
+                ],
+                index:1012
+            }
+            ]
+        },
+        {
+            order:1,
+            objs:[{
+                claimTxt: "2050年には農業人口が半減し、100万人程度に。そのうち3割は85歳以上――。自民党の農林水産業骨太方針策定プロジェクトチーム（PT、小泉進次郎委員長）がこんな試算をまとめた。国内の農業生産を維持できないとみて、11月に決める環太平洋連携協定（TPP）の中長期的対策に、人材育成や労働力の確保策を盛り込む。",
+                position:2,
+                warrant:[
+                    {warrantTxt:"基幹的農業従事者と常時雇用者を合わせた「農業就業者数」は、10年に219万人。PTの試算では、これが25年に163万人、50年には108万人に減るとの結果になった。現在の就農者数や定着率、日本の総人口の減少見通しなどから「厳しく見積もった」（鈴木憲和PT副委員長）。",
+                        evidence:[
+                            {
+                                evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
+                            },
+                            {
+                                evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
+                            }
+                        ]
+                    }
+                ],
+                dissent:1,
+                random:2011
+            }
+            ]
+        },
+        {
+
+            order:1,
+            objs:[{
+                claimTxt: "一方で、昨年策定した食料・農業・農村基本計画は、国内の農業生産の継続には90万人程度の農業就業者が必要だと推計する。",
+                position:2,
+                warrant:[
+                    {warrantTxt:"PTは試算を踏まえ、このままでは国内農業の持続可能性が危機的な状況になると判断。農業教育・研修の充実で国内外の市場を視野に入れる経営層の育成だけでなく、生産作業には外国人やロボットなどの活用も必要とみて、人材育成や労働力確保の具体策の検討を11月の取りまとめに向けて加速する。",
+                        evidence:[{
+                            evidenceTxt: "農水省は、議論の材料として（1）農業大学校の専門職業大学化（2）就農の入り口となる農業法人での雇用拡大（3）青年就農給付金制度の改善（4）地域で農業をしながら経営学を学べる農業経営塾（5）外国人労働力の確保――などを示した。ただ外国人の受け入れ拡大には、トラブルの増加や日本人の労賃引き下げなどにつながるとして、慎重論が出る可能性もある。"
+                        }
+                        ]
+                    }
+                ],
+                index:1013
+            },
+            {
+                claimTxt: "一方で、昨年策定した食料・農業・農村基本計画は、国内の農業生産の継続には90万人程度の農業就業者が必要だと推計する。",
+                position:2,
+                warrant:[
+                    {warrantTxt:"PTは試算を踏まえ、このままでは国内農業の持続可能性が危機的な状況になると判断。農業教育・研修の充実で国内外の市場を視野に入れる経営層の育成だけでなく、生産作業には外国人やロボットなどの活用も必要とみて、人材育成や労働力確保の具体策の検討を11月の取りまとめに向けて加速する。",
+                        evidence:[{
+                            evidenceTxt: "農水省は、議論の材料として（1）農業大学校の専門職業大学化（2）就農の入り口となる農業法人での雇用拡大（3）青年就農給付金制度の改善（4）地域で農業をしながら経営学を学べる農業経営塾（5）外国人労働力の確保――などを示した。ただ外国人の受け入れ拡大には、トラブルの増加や日本人の労賃引き下げなどにつながるとして、慎重論が出る可能性もある。"
+                        }
+                        ]
+                    }
+                ],
+                index:1014
+            }
+            ]
+        }
+    ]
+
+    var arrow = {}
+    draw(1,data)
+    draw(2,_data)
+
+    drawArrow(arrow)
+
+
+
+
+   /*
+    var c1 = [100, 110];
+    var c2 = [100, 125];
+    var carray1 = [c1,c2];
+
+    var c3 = [100, 215];
+    var c4 = [100, 230];
+    var carray2 = [c3,c4];
+
+
+    var line = d3.line()
+            .x(function(d) {return d[0];})
+            .y(function(d) {return d[1];})
+
+    var path = svg.append('path')
+            .attr("d", line(carray1))
+            .attr("stroke", "blue")
+            .attr("stroke-width", 5)
+            .attr("fill", "none");
+
+
+    var path = svg.append('path')
+            .attr("d", line(carray2))
+            .attr("stroke", "blue")
+            .attr("stroke-width", 5)
+            .attr("fill", "none");
+
+    var c1 = [775, 130];
+    var c2 = [775, 145];
+    var carray1 = [c1,c2];
+
+    var path = svg.append('path')
+            .attr("d", line(carray1))
+            .attr("stroke", "yellow")
+            .attr("stroke-width", 5)
+            .attr("fill", "none");
+
+    var c1 = [775, 235];
+    var c2 = [775, 250];
+    var carray1 = [c1,c2];
+
+    var path = svg.append('path')
+            .attr("d", line(carray1))
+            .attr("stroke", "yellow")
+            .attr("stroke-width", 5)
+            .attr("fill", "none");
+
+
+    var c1 = [100, 510];
+    var c2 = [100, 525];
+    var carray1 = [c1,c2];
+
+    var c3 = [100, 615];
+    var c4 = [100, 630];
+    var carray2 = [c3,c4];
+
+
+    var path = svg.append('path')
+            .attr("d", line(carray1))
+            .attr("stroke", "blue")
+            .attr("stroke-width", 5)
+            .attr("fill", "none");
+
+    var path = svg.append('path')
+            .attr("d", line(carray2))
+            .attr("stroke", "blue")
+            .attr("stroke-width", 5)
+            .attr("fill", "none");
+
+
+    var c1 = [775, 510];
+    var c2 = [775, 525];
+    var carray1 = [c1,c2];
+
+    var path = svg.append('path')
+            .attr("d", line(carray1))
+            .attr("stroke", "yellow")
+            .attr("stroke-width", 5)
+            .attr("fill", "none");
+
+    var c1 = [775, 615];
+    var c2 = [775, 630];
+    var carray1 = [c1,c2];
+
+    var path = svg.append('path')
+            .attr("d", line(carray1))
+            .attr("stroke", "yellow")
+            .attr("stroke-width", 5)
+            .attr("fill", "none");
+
+
+    svg.append("svg:defs").append("svg:marker")
+            .attr("id", "triangle")
+            .attr("refX", 6)
+            .attr("refY", 6)
+            .attr("markerWidth", 30)
+            .attr("markerHeight", 30)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M 0 0 12 6 0 12 3 6")
+            .style("fill", "black");
+
+
+    //绘制直线
+    var line = svg.append("line")
+            .attr("x1",650)
+            .attr("y1",200)
+            .attr("x2",720)
+            .attr("y2",200)
+            .attr("stroke","blue")
+            .attr("stroke-width",3)
+            .attr("marker-end","url(#arrow)");
+
+
+
+    //绘制直线
+    var line = svg.append("line")
+            .attr("x1",650)
+            .attr("y1",200)
+            .attr("x2",650)
+            .attr("y2",460)
+            .attr("stroke","blue")
+            .attr("stroke-width",3)
+
+    //绘制直线
+    var line = svg.append("line")
+            .attr("x1",460)
+            .attr("y1",460)
+            .attr("x2",650)
+            .attr("y2",460)
+            .attr("stroke","blue")
+            .attr("stroke-width",3)
+
+
+    //绘制直线
+    var line = svg.append("line")
+            .attr("x1",620)
+            .attr("y1",70)
+            .attr("x2",710)
+            .attr("y2",70)
+            .attr("stroke","yellow")
+            .attr("stroke-width",3)
+
+
+    //绘制直线
+    var line = svg.append("line")
+            .attr("x1",620)
+            .attr("y1",70)
+            .attr("x2",620)
+            .attr("y2",170)
+            .attr("stroke","yellow")
+            .attr("stroke-width",3)
+
+    //绘制直线
+    var line = svg.append("line")
+            .attr("x1",620)
+            .attr("y1",170)
+            .attr("x2",490)
+            .attr("y2",170)
+            .attr("stroke","yellow")
+            .attr("stroke-width",3)
+            .attr("marker-end","url(#arrow)");
+
+
+
+    //绘制直线
+    var line = svg.append("line")
+            .attr("x1",620)
+            .attr("y1",470)
+            .attr("x2",710)
+            .attr("y2",470)
+            .attr("stroke","yellow")
+            .attr("stroke-width",3)
+
+
+    //绘制直线
+    var line = svg.append("line")
+            .attr("x1",620)
+            .attr("y1",470)
+            .attr("x2",620)
+            .attr("y2",560)
+            .attr("stroke","yellow")
+            .attr("stroke-width",3)
+
+    //绘制直线
+    var line = svg.append("line")
+            .attr("x1",620)
+            .attr("y1",560)
+            .attr("x2",490)
+            .attr("y2",560)
+            .attr("stroke","yellow")
+            .attr("stroke-width",3)
+            .attr("marker-end","url(#arrow)");
+
+
+*/
+
+
+    function draw(n,data){
+
+
+        var lastHeight = TOPSPACE
+
+        if(n == 1){
+            var lastLeft = LEFTSPACE
+        }else{
+            var lastLeft = LEFTSPACE + RECTWIDTH + SPACEX
+        }
+
+
+
+        for(var i=0;i<data.length;i++){
+            for(var j=0;j<data[i].objs.length;j++){
+                    appendRect(n,data[i].objs[j].dissent,lastLeft,lastHeight,"主張:"+data[i].objs[j].claimTxt)
+                    lastHeight += (RECTHEIGHT+SPACEY)
+                    lastLeft += SLIPWIDTH
+                    var position = data[i].objs[j].position
+                        if(data[i].objs[j].dissent){
+                            var random = data[i].objs[j].random
+                            if(arrow[random]){
+                                arrow[random]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                            }else{
+                                arrow[random] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                            }
+                        }
+
+                        if(data[i].objs[j].index){
+                            var index = data[i].objs[j].index
+                            if(arrow[index]){
+                                arrow[index]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                            }else{
+                                arrow[index] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                            }
+                        }
+
+                    for(var k=0;k<data[i].objs[j].warrant.length;k++){
+                        appendRect(n,data[i].objs[j].warrant[k].dissent,lastLeft,lastHeight,"論拠:"+data[i].objs[j].warrant[k].warrantTxt)
+                        lastHeight += (RECTHEIGHT+SPACEY)
+                        lastLeft += SLIPWIDTH
+
+                            if(data[i].objs[j].warrant[k].dissent){
+                                var random = data[i].objs[j].warrant[k].random
+                                if(arrow[random]){
+                                    arrow[random]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                }else{
+                                    arrow[random] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                }
+                            }
+
+
+                        for(var s=0;s<data[i].objs[j].warrant[k].evidence.length;s++){
+                            appendRect(n,data[i].objs[j].warrant[k].evidence[s].dissent,lastLeft,lastHeight,"根拠:"+data[i].objs[j].warrant[k].evidence[s].evidenceTxt)
+                            lastHeight += (RECTHEIGHT+SPACEY)
+
+
+                            if(data[i].objs[j].warrant[k].evidence[s].dissent){
+                                var random = data[i].objs[j].warrant[k].evidence[s].random
+                                    if(arrow[random]){
+                                        arrow[random]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                    }else{
+                                        arrow[random] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                    }
+                            }
+                        }
+                        lastLeft -= SLIPWIDTH
+                    }
+
+                    lastLeft -= SLIPWIDTH
+            }
+
+            lastHeight += FRONTSPACE
+        }
+
+
+
+
+
+    }
+
+    function appendRect(n,d,x,y,txt){
+        var foreignObject = svg.append("foreignObject")
+        foreignObject.attr("width",RECTWIDTH)
+        foreignObject.attr("height",RECTHEIGHT)
+
+        foreignObject.attr("x",x)
+        foreignObject.attr("y",y)
+
+        var div = foreignObject.append('xhtml:div')
+
+        var div = div.append('div')
+
+        if(!d){
+            if(n == 1){
+                div.attr(
+                        'class','alert alert-info'
+                );
+            }else{
+                div.attr(
+                        'class','alert alert-success'
+                );
+            }
+        }else{
+            div.attr(
+                    'class','alert alert-warning'
+            );
+        }
+
+
+
+        div.attr(
+            'role',"alert"
+        )
+        div.style("height",RECTHEIGHT+"px")
+        div.style('overflow',"auto")
+
+
+        var p = div.append('p')
+                .html(txt);
+    }
+
+
+    function drawArrow(_arrow){
+        console.log(_arrow)
+        for(var i in _arrow){
+            var _start = _arrow[i].start
+            var _end = _arrow[i].end
+            console.log(_start)
+
+            var startLeftX,startLeftY,endRightX,endRightY
+            var endLeftX,endLeftY,endRightX,endRightY
+
+
+            if(_start.position == 1){
+                startLeftX = _start.left + RECTWIDTH
+                startLeftY = _start.height - RECTHEIGHT/2
+            }else{
+                startLeftX = _start.left
+                startLeftY = _start.height - RECTHEIGHT/2
+            }
+
+            if(_end.position == 1){
+                endLeftX = _end.left + RECTWIDTH
+                endLeftY = _end.height - RECTHEIGHT/2
+            }else{
+                endLeftX = _end.left
+                endLeftY = _end.height - RECTHEIGHT/2
+            }
+
+            someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY)
+
+        }
+    }
+
+    function someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY){
+        var divArr = [2,2.5,3,3.5,4,4.5]
+        svg.append("svg:defs").append("svg:marker")
+                .attr("id", "triangle")
+                .attr("refX", 6)
+                .attr("refY", 6)
+                .attr("markerWidth", 30)
+                .attr("markerHeight", 30)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M 0 0 12 6 0 12 3 6")
+                .style("fill", "black");
+
+
+
+        //已确定起点和终点,现在要做的事就是增加2个点M1,M2
+
+        //M1
+
+        var m1X = (endLeftX - startLeftX)/divArr[i%(divArr.length-1)] + startLeftX
+        var m1Y =  startLeftY
+        var m2X = m1X
+        var m2Y = endLeftY
+
+        var line = svg.append("line")
+                .attr("x1",startLeftX)
+                .attr("y1",startLeftY)
+                .attr("x2",m1X)
+                .attr("y2",m1Y)
+                .attr("stroke","#000")
+                .attr("stroke-width",3)
+
+        var line = svg.append("line")
+                .attr("x1",m1X)
+                .attr("y1",m1Y)
+                .attr("x2",m2X)
+                .attr("y2",m2Y)
+                .attr("stroke","#000")
+                .attr("stroke-width",3)
+
+        var line = svg.append("line")
+                .attr("x1",m2X)
+                .attr("y1",m2Y)
+                .attr("x2",endLeftX)
+                .attr("y2",endLeftY)
+                .attr("stroke","#000")
+                .attr("stroke-width",3)
+                .attr("marker-end","url(#arrow)");
+
+    }
+</script>
+</html>

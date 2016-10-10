@@ -183,7 +183,6 @@ module.exports = {
         })()
     },
     reviewRoomController:function(req,res){
-
         var num = req.body.num
         var rNum = req.body.rNum
         req.session.debateLogin.num = num
