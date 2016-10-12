@@ -14,12 +14,18 @@
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <style>
 
+        .border{
+            border: inset 2px #000;
+        }
+
+    </style>
 </head>
 <body>
 
-
-<svg width="1500" height="900">
+<div class="row" id="home" style="overflow: auto">
+<svg>
 
     <defs>
         <marker id="arrow"
@@ -33,18 +39,42 @@
             <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000000;" />
         </marker>
     </defs>
-</svg>
 
+
+</svg>
+</div>
+
+
+<div class="row" style="width: 46%;margin:0 auto">
+
+    <div class="page-header">
+        <h1 style="text-align: center">自己勝敗判定<h1>
+    </div>
+    <div class="btn-group btn-group-justified" role="group" aria-label="...">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default">勝ち</button>
+        </div>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default">引き分け</button>
+        </div>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default">負け</button>
+        </div>
+    </div>
+
+</div>
 
 </body>
 <script>
 
-    var WIDTH = document.body.clientWidth //整个区域的宽度
-    var HEIGHT = 2000 //整个区域的高度
+    var WIDTH = window.screen.width  //整个区域的宽度
+
+    var HEIGHT = window.screen.height //整个区域的高度
+    var SVGHEIGHT = 1200
     var RECTWIDTH = 450  //模块的长度
     var RECTHEIGHT = 100  //模块的宽度
     var LEFT = 10 //整体模块距离浏览器左边的边距
-    var SPACEX = 350 //右边模块距离左边模块的宽度
+    var SPACEX = 380 //右边模块距离左边模块的宽度
     var SPACEY = 15 //距头上模块的上边距
     var SLIPWIDTH = 15  //各级的错位距离
 
@@ -60,9 +90,11 @@
     var PROFILEPRORIGHT = LEFTSPACE + RECTWIDTH + SPACEX + RECTWIDTH
 
 
+    d3.select("#home").style("height",HEIGHT*0.70+"px")
+
     var svg = d3.select("svg")
     svg.attr("width",WIDTH)
-    svg.attr("height",HEIGHT)
+    svg.attr("height",SVGHEIGHT)
     svg.style("margin-left",LEFT)
 
 
@@ -74,9 +106,11 @@
         order:1,
         objs:[{
             claimTxt: "年金積立金管理運用独立行政法人（ＧＰＩＦ）が２０１６年４～６月期に約５兆２０００億円もの運用損を出したのは、価格変動リスクの大きい株式の運用割合を高めたためだ。",
+            expand:0,
             position:1,
             warrant:[
                 {warrantTxt:"年金給付の財源は保険料収入と国庫負担で９割程度が賄われ、短期的な運用損は年金給付に影響しないが、一方で国民の将来への不安を解消するための体制整備を早期に進めることが不可欠だ。",
+                 expand:0,
                  evidence:[{
                      evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
                  },
@@ -105,9 +139,11 @@
             order:1,
             objs:[{
                 claimTxt: "2050年には農業人口が半減し、100万人程度に。そのうち3割は85歳以上――。自民党の農林水産業骨太方針策定プロジェクトチーム（PT、小泉進次郎委員長）がこんな試算をまとめた。国内の農業生産を維持できないとみて、11月に決める環太平洋連携協定（TPP）の中長期的対策に、人材育成や労働力の確保策を盛り込む。",
+                expand:0,
                 position:1,
                 warrant:[
                     {warrantTxt:"基幹的農業従事者と常時雇用者を合わせた「農業就業者数」は、10年に219万人。PTの試算では、これが25年に163万人、50年には108万人に減るとの結果になった。現在の就農者数や定着率、日本の総人口の減少見通しなどから「厳しく見積もった」（鈴木憲和PT副委員長）。",
+                        expand:0,
                         evidence:[{
                             evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
                         }
@@ -123,9 +159,11 @@
             order:1,
             objs:[{
                 claimTxt: "一方で、昨年策定した食料・農業・農村基本計画は、国内の農業生産の継続には90万人程度の農業就業者が必要だと推計する。",
+                expand:0,
                 position:1,
                 warrant:[
                     {warrantTxt:"PTは試算を踏まえ、このままでは国内農業の持続可能性が危機的な状況になると判断。農業教育・研修の充実で国内外の市場を視野に入れる経営層の育成だけでなく、生産作業には外国人やロボットなどの活用も必要とみて、人材育成や労働力確保の具体策の検討を11月の取りまとめに向けて加速する。",
+                        expand:0,
                         evidence:[{
                             evidenceTxt: "農水省は、議論の材料として（1）農業大学校の専門職業大学化（2）就農の入り口となる農業法人での雇用拡大（3）青年就農給付金制度の改善（4）地域で農業をしながら経営学を学べる農業経営塾（5）外国人労働力の確保――などを示した。ただ外国人の受け入れ拡大には、トラブルの増加や日本人の労賃引き下げなどにつながるとして、慎重論が出る可能性もある。",
                             dissent:1,
@@ -145,9 +183,11 @@
             order:1,
             objs:[{
                 claimTxt: "年金積立金管理運用独立行政法人（ＧＰＩＦ）が２０１６年４～６月期に約５兆２０００億円もの運用損を出したのは、価格変動リスクの大きい株式の運用割合を高めたためだ。",
+                expand:0,
                 position:2,
                 warrant:[
                     {warrantTxt:"年金給付の財源は保険料収入と国庫負担で９割程度が賄われ、短期的な運用損は年金給付に影響しないが、一方で国民の将来への不安を解消するための体制整備を早期に進めることが不可欠だ。",
+                        expand:0,
                         evidence:[{
                             evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
                         },
@@ -171,9 +211,11 @@
             order:1,
             objs:[{
                 claimTxt: "2050年には農業人口が半減し、100万人程度に。そのうち3割は85歳以上――。自民党の農林水産業骨太方針策定プロジェクトチーム（PT、小泉進次郎委員長）がこんな試算をまとめた。国内の農業生産を維持できないとみて、11月に決める環太平洋連携協定（TPP）の中長期的対策に、人材育成や労働力の確保策を盛り込む。",
+                expand:0,
                 position:2,
                 warrant:[
                     {warrantTxt:"基幹的農業従事者と常時雇用者を合わせた「農業就業者数」は、10年に219万人。PTの試算では、これが25年に163万人、50年には108万人に減るとの結果になった。現在の就農者数や定着率、日本の総人口の減少見通しなどから「厳しく見積もった」（鈴木憲和PT副委員長）。",
+                        expand:0,
                         evidence:[
                             {
                                 evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
@@ -194,9 +236,11 @@
             order:1,
             objs:[{
                 claimTxt: "一方で、昨年策定した食料・農業・農村基本計画は、国内の農業生産の継続には90万人程度の農業就業者が必要だと推計する。",
+                expand:0,
                 position:2,
                 warrant:[
                     {warrantTxt:"PTは試算を踏まえ、このままでは国内農業の持続可能性が危機的な状況になると判断。農業教育・研修の充実で国内外の市場を視野に入れる経営層の育成だけでなく、生産作業には外国人やロボットなどの活用も必要とみて、人材育成や労働力確保の具体策の検討を11月の取りまとめに向けて加速する。",
+                        expand:0,
                         evidence:[{
                             evidenceTxt: "農水省は、議論の材料として（1）農業大学校の専門職業大学化（2）就農の入り口となる農業法人での雇用拡大（3）青年就農給付金制度の改善（4）地域で農業をしながら経営学を学べる農業経営塾（5）外国人労働力の確保――などを示した。ただ外国人の受け入れ拡大には、トラブルの増加や日本人の労賃引き下げなどにつながるとして、慎重論が出る可能性もある。"
                         }
@@ -208,8 +252,10 @@
             {
                 claimTxt: "一方で、昨年策定した食料・農業・農村基本計画は、国内の農業生産の継続には90万人程度の農業就業者が必要だと推計する。",
                 position:2,
+                expand:0,
                 warrant:[
                     {warrantTxt:"PTは試算を踏まえ、このままでは国内農業の持続可能性が危機的な状況になると判断。農業教育・研修の充実で国内外の市場を視野に入れる経営層の育成だけでなく、生産作業には外国人やロボットなどの活用も必要とみて、人材育成や労働力確保の具体策の検討を11月の取りまとめに向けて加速する。",
+                        expand:0,
                         evidence:[{
                             evidenceTxt: "農水省は、議論の材料として（1）農業大学校の専門職業大学化（2）就農の入り口となる農業法人での雇用拡大（3）青年就農給付金制度の改善（4）地域で農業をしながら経営学を学べる農業経営塾（5）外国人労働力の確保――などを示した。ただ外国人の受け入れ拡大には、トラブルの増加や日本人の労賃引き下げなどにつながるとして、慎重論が出る可能性もある。"
                         }
@@ -230,19 +276,25 @@
 
     drawPositionPic()
 
+    var lastHeightL,lastHeightR
+
 
 
 
     function drawPositionPic(){
         var foreignObject = svg.append("foreignObject")
+
         foreignObject.attr("width",PROFILEWIDTH)
         foreignObject.attr("height",PROFILEHEIGHT)
 
         foreignObject.attr("x",PROFILEPROLEFT)
         foreignObject.attr("y",PROFILEPROTOP)
 
+        var id = "f"+Math.round(Math.random()*100000)
+
 
         var div = foreignObject.append('xhtml:div')
+        div.attr("id",id)
 
         var _div = div.append('p')
         _div.style("width",PROFILEWIDTH*0.8+"px")
@@ -324,10 +376,15 @@
 
         for(var i=0;i<data.length;i++){
             for(var j=0;j<data[i].objs.length;j++){
-                    appendRect(n,data[i].objs[j].dissent,lastLeft,lastHeight,"主張:"+data[i].objs[j].claimTxt)
+                    var competitionInformation = getCompetitionInformation(2,data[i].objs[j])
+                    appendRect(n,data[i].objs[j].dissent,lastLeft,lastHeight,"主張:"+data[i].objs[j].claimTxt,[i,j,-1,-1],competitionInformation)
+
+                    var position = data[i].objs[j].position
+                    var expand = data[i].objs[j].expand
+
                     lastHeight += (RECTHEIGHT+SPACEY)
                     lastLeft += SLIPWIDTH
-                    var position = data[i].objs[j].position
+
                         if(data[i].objs[j].dissent){
                             var random = data[i].objs[j].random
                             if(arrow[random]){
@@ -346,8 +403,15 @@
                             }
                         }
 
+
+                        if(parseInt(expand) == 0){
+                            lastLeft -= SLIPWIDTH
+                            continue;
+                        }
+
                     for(var k=0;k<data[i].objs[j].warrant.length;k++){
-                        appendRect(n,data[i].objs[j].warrant[k].dissent,lastLeft,lastHeight,"論拠:"+data[i].objs[j].warrant[k].warrantTxt)
+                        var competitionInformation = getCompetitionInformation(3,data[i].objs[j].warrant[k])
+                        appendRect(n,data[i].objs[j].warrant[k].dissent,lastLeft,lastHeight,"論拠:"+data[i].objs[j].warrant[k].warrantTxt,[i,j,k,-1],competitionInformation)
                         drawConnectLine(position,lastLeft+2*SLIPWIDTH,lastHeight-SPACEY,lastLeft+2*SLIPWIDTH,lastHeight)
 
 
@@ -355,6 +419,7 @@
                         lastHeight += (RECTHEIGHT+SPACEY)
                         lastLeft += SLIPWIDTH
 
+                        var expand = data[i].objs[j].warrant[k].expand
                             if(data[i].objs[j].warrant[k].dissent){
                                 var random = data[i].objs[j].warrant[k].random
                                 if(arrow[random]){
@@ -364,9 +429,13 @@
                                 }
                             }
 
+                        if(parseInt(expand) == 0){
+                            lastLeft -= SLIPWIDTH
+                            continue;
+                        }
 
                         for(var s=0;s<data[i].objs[j].warrant[k].evidence.length;s++){
-                            appendRect(n,data[i].objs[j].warrant[k].evidence[s].dissent,lastLeft,lastHeight,"根拠:"+data[i].objs[j].warrant[k].evidence[s].evidenceTxt)
+                            appendRect(n,data[i].objs[j].warrant[k].evidence[s].dissent,lastLeft,lastHeight,"根拠:"+data[i].objs[j].warrant[k].evidence[s].evidenceTxt,[i,j,k,s],0)
 
                             if(s == 0){
                                 drawConnectLine(position,lastLeft+3*SLIPWIDTH,lastHeight-SPACEY,lastLeft+3*SLIPWIDTH,lastHeight)
@@ -377,14 +446,20 @@
 
                             lastHeight += (RECTHEIGHT+SPACEY)
 
+                            var expand =  data[i].objs[j].warrant[k].evidence[s].expand
+
 
                             if(data[i].objs[j].warrant[k].evidence[s].dissent){
                                 var random = data[i].objs[j].warrant[k].evidence[s].random
                                     if(arrow[random]){
-                                        arrow[random]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                        arrow[random]["end"] = {left:lastLeft,height:lastHeight,position:position}
                                     }else{
-                                        arrow[random] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                        arrow[random] = {"end":{left:lastLeft,height:lastHeight,position:position}}
                                     }
+                            }
+
+                            if(parseInt(expand) == 0){
+                                continue;
                             }
                         }
                         lastLeft -= SLIPWIDTH
@@ -398,23 +473,95 @@
 
 
 
+        if(n == 1){
+            lastHeightL = lastHeight
+        }else{
+            lastHeightR = lastHeight
+            svg.style("height",lastHeightL>lastHeightR?lastHeightL:lastHeightR)
+        }
+
 
 
     }
 
-    function appendRect(n,d,x,y,txt){
+    function getCompetitionInformation(n,arr){
+        var dissentNum = 0;
+        var evidenceNum = 0
+        if(n==2){
+            for(var i=0;i<arr.warrant.length;i++){
+                if(arr.warrant[i].dissent == 1){
+                    dissentNum++
+                }
+                evidenceNum += arr.warrant[i].evidence.length
+
+                dissentNum += getCompetitionInformation(3,arr.warrant[i]).dissentNum
+            }
+            return {dissentNum:dissentNum,warrantNum:arr.warrant.length,evidenceNum:evidenceNum};
+        }
+
+        if(n==3){
+            for(var i=0;i<arr.evidence.length;i++){
+                if(arr.evidence[i].dissent == 1){
+                    dissentNum++
+                }
+            }
+            return {dissentNum:dissentNum,evidenceNum:arr.evidence.length};
+        }
+    }
+
+    function appendRect(n,d,x,y,txt,arr,competitionInformation){
         var foreignObject = svg.append("foreignObject")
         foreignObject.attr("width",RECTWIDTH)
         foreignObject.attr("height",RECTHEIGHT)
 
         foreignObject.attr("x",x)
         foreignObject.attr("y",y)
+        foreignObject.attr("class","rectangle")
+
+        foreignObject.attr("arr",arr)
 
         var div = foreignObject.append('xhtml:div')
 
+
+
+        var i = arr[0]
+        var j = arr[1]
+        var k = arr[2]!=-1?arr[2]:-1
+        var s = arr[3]!=-1?arr[3]:-1
+
+        //这种情况正方反方区别对待
+
+        if(n == 1){
+            if(k>=0 && s<0){
+                //data[i].objs[j].warrant[k].expand = (data[i].objs[j].warrant[k].expand + 1) % 2
+                var expand = data[i].objs[j].warrant[k].expand
+                console.log(data[i].objs[j])
+            }
+            if(j>=0 && k<0){
+                //data[i].objs[j].expand = (data[i].objs[j].expand + 1) % 2
+                var expand = data[i].objs[j].expand
+            }
+        }else{
+            if(k>=0 && s<0){
+                //_data[i].objs[j].warrant[k].expand = (_data[i].objs[j].warrant[k].expand + 1) % 2
+                var expand = _data[i].objs[j].warrant[k].expand
+            }
+            if(j>=0 && k<0){
+                // _data[i].objs[j].expand = (_data[i].objs[j].expand + 1) % 2
+                var expand = _data[i].objs[j].expand
+            }
+        }
+
+
+
         var div = div.append('div')
 
+
+
+
         if(!d){
+
+            //还是一个道理正方反方区别对待
             if(n == 1){
                 div.attr(
                         'class','alert alert-info'
@@ -430,6 +577,9 @@
             );
         }
 
+        if(parseInt(competitionInformation.dissentNum)>=2 || parseInt(competitionInformation.warrantNum)>=3 ||parseInt(competitionInformation.evidenceNum)>=3){
+            div.classed("border",true)
+        }
 
 
         div.attr(
@@ -438,17 +588,104 @@
         div.style("height",RECTHEIGHT+"px")
         div.style('overflow',"auto")
 
+        console.log(1111111111)
+        console.log(competitionInformation)
 
-        var p = div.append('p')
-                .html(txt);
+        if(expand == 1){
+            var p = div.append('p')
+                    .html(txt)
+
+            var p = div.append('p')
+            p.attr("class","row")
+
+
+            if(k>=0 && s<0){
+                p.html("<div class='col-sm-3'>異議数:" + competitionInformation.dissentNum + "</div>"+
+                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                        "<div class='col-sm-2'>隠す</div>");
+            }
+
+            if(j>=0 && k<0){
+                    p.html("<div class='col-sm-3'>異議数:" + competitionInformation.dissentNum + "</div>"+
+                        "<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                        "<div class='col-sm-2'>隠す</div>");
+            }
+
+
+        }else{
+            var p = div.append('p')
+                    .html(txt)
+
+            var p = div.append('p')
+            p.attr("class","row")
+
+
+            if(k>=0 && s<0){
+                p.html("<div class='col-sm-3'>異議数:" + competitionInformation.dissentNum + "</div>"+
+                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                        "<div class='col-sm-2'>詳細</div>");
+            }
+
+            if(j>=0 && k<0){
+                p.html("<div class='col-sm-3'>異議数:" + competitionInformation.dissentNum + "</div>"+
+                        "<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                        "<div class='col-sm-2'>詳細</div>");
+            }
+
+        }
+
+
+        var id = "f"+Math.round(Math.random()*100000)
+        p.attr("id",id)
+
+        d3.select("#"+id).on("click",function(){
+
+
+            if(n == 1){
+                if(k>=0 && s<0){
+                    data[i].objs[j].warrant[k].expand = (data[i].objs[j].warrant[k].expand + 1) % 2
+                }
+                if(j>=0 && k<0){
+                    data[i].objs[j].expand = (data[i].objs[j].expand + 1) % 2
+                }
+            }else{
+                if(k>=0 && s<0){
+                    _data[i].objs[j].warrant[k].expand = (_data[i].objs[j].warrant[k].expand + 1) % 2
+                }
+                if(j>=0 && k<0){
+                     _data[i].objs[j].expand = (_data[i].objs[j].expand + 1) % 2
+                }
+            }
+
+            reDraw()
+
+        })
     }
 
+    function reDraw(){
+        arrow = {}
+        svg.selectAll(".rectangle,.connectLine,.arrow").remove();
+        draw(1,data)
+        draw(2,_data)
+        drawArrow(arrow)
+
+        if(lastHeightL >= lastHeightR){
+            svg.style("height",lastHeightL)
+        }else{
+            svg.style("height",lastHeightR)
+        }
+    }
 
     function drawArrow(_arrow){
         console.log(_arrow)
         for(var i in _arrow){
             var _start = _arrow[i].start
             var _end = _arrow[i].end
+
+            if(!_start || !_end) continue　//如果起始点或者终点有一个是被收起来得状态得话,那么这条线直接不显示,跳过
+
             console.log(_start)
 
             var startLeftX,startLeftY,endRightX,endRightY
@@ -464,10 +701,10 @@
             }
 
             if(_end.position == 1){
-                endLeftX = _end.left + RECTWIDTH
+                endLeftX = _end.left + RECTWIDTH +10
                 endLeftY = _end.height - RECTHEIGHT/2
             }else{
-                endLeftX = _end.left
+                endLeftX = _end.left - 10
                 endLeftY = _end.height - RECTHEIGHT/2
             }
 
@@ -486,20 +723,13 @@
                 .attr("y2",endY)
                 .attr("stroke",color)
                 .attr("stroke-width",6)
+                .attr("class","connectLine")
+
     }
 
     function someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY){
         var divArr = [2,2.5,3,3.5,4,4.5]
-        svg.append("svg:defs").append("svg:marker")
-                .attr("id", "triangle")
-                .attr("refX", 6)
-                .attr("refY", 6)
-                .attr("markerWidth", 30)
-                .attr("markerHeight", 30)
-                .attr("orient", "auto")
-                .append("path")
-                .attr("d", "M 0 0 12 6 0 12 3 6")
-                .style("fill", "black");
+
 
 
 
@@ -519,6 +749,7 @@
                 .attr("y2",m1Y)
                 .attr("stroke","#000")
                 .attr("stroke-width",3)
+                .attr("class","arrow")
 
         var line = svg.append("line")
                 .attr("x1",m1X)
@@ -527,6 +758,7 @@
                 .attr("y2",m2Y)
                 .attr("stroke","#000")
                 .attr("stroke-width",3)
+                .attr("class","arrow")
 
         var line = svg.append("line")
                 .attr("x1",m2X)
@@ -535,7 +767,8 @@
                 .attr("y2",endLeftY)
                 .attr("stroke","#000")
                 .attr("stroke-width",3)
-                .attr("marker-end","url(#arrow)");
+                .attr("marker-end","url(#arrow)")
+                .attr("class","arrow")
 
     }
 </script>
