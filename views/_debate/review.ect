@@ -3,24 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>review</title>
-    <link rel="stylesheet" href="/tmp/bootstrap.min.css">
+
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="/tmp/bootstrap-theme.min.css">
+
     <![endif]-->
     <script src="/tmp/angular.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/tmp/jquery-2.2.4.min.js" ></script>
-    <script src="/tmp/bootstrap.min.js"></script>
+
+
+
     <script type="text/javascript" src="/tmp/angular-route.min.js"></script>
     <script src="/_debate/d3/d3.js"></script>
+
+    <!--
+    <link rel="stylesheet" href="/tmp/bootstrap.min.css">
+    <link rel="stylesheet" href="/tmp/bootstrap-theme.min.css">
+    <script src="/tmp/bootstrap.min.js"></script>
+    -->
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 </head>
 
 <body ng-app="myApp">
     <div ng-controller="myCtr" class="container">
 
         <div class="row">
-        <my-navy></my-navy>
+        <my-navy debate-info="debateInfo"></my-navy>
         </div>
 
         <div class="row">
@@ -42,10 +60,12 @@
               </div>
 
               <div class="col-md-7" id="debateMap" style="height:950px">
-                    <debate-map focus-zoom-index="focusZoomIndex" time-numbers="debateInfo.config.timeNumbers"></debate-map>
+                    <debate-map gg="gg" focus-zoom-index="focusZoomIndex" time-numbers="debateInfo.config.timeNumbers"></debate-map>
               </div>
             </div>
             <home-map>
+
+
 
         </div>
     </div>
@@ -106,7 +126,6 @@
 
             $scope.debateInfo = {}
 
-
             function _getDebateInformation(){
 
                     var deferred = $q.defer();
@@ -119,6 +138,7 @@
                             $scope.debateInfo.con = _res.data.con
                             $scope.debateInfo.group = _res.data.group
                             $scope.debateInfo.config = _res.data.config
+                            $scope.debateInfo.username = _res.data.username
                             deferred.resolve({err:0,msg:"data acquired"});
                     }else{
                             deferred.reject({err:1,msg:"data not acquired"});
@@ -129,23 +149,35 @@
                     return deferred.promise;
             }
 
-
             function init(){
                  var promise = _getDebateInformation()
             }
 
             init()
 
-
             $scope.showInMap = function(index){
                 $scope.focusZoomIndex = index
+
+                d3.selectAll("table").style("border-color",null)
+
+                var obj = d3.selectAll("g").filter(function(d){
+                    if(!d) return;
+                    return d._index == index && d.name == "claim"
+                })
+
+                if(obj.select("table").style("border-color").length == 16){
+                   obj.select("table").style("border-color","")
+                }else{
+                   obj.select("table").style("border-color","yellow")
+                }
+
             }
 
     })
 
     myApp.directive("myNavy",function(){
         return {
-            scope:false,
+            scope:{debateInfo:"="},
             templateUrl:"/_debate/navy.html"
         }
     })
@@ -202,8 +234,6 @@
                                 return {source:null}
                             }
 
-
-
             }
         }
     })
@@ -219,38 +249,39 @@
 
             $scope.showSequence = function(n){
                 $scope.showSequenceNum = n
-                d3.selectAll("circle,line,text,image").style("visibility","hidden")
-                d3.selectAll("circle,line,text,image").filter(function(d){
-                            return parseInt(d.order) == n;
+                d3.selectAll("line").style("visibility","hidden")
+
+                $scope.gg.style("visibility","hidden")
+
+                d3.selectAll("line").filter(function(d){
+                    return parseInt(d.order) == n;
                 }).style("visibility","visible")
+
+                $scope.gg.filter(function(d){
+                      return parseInt(d.order) == n;
+                }).style("visibility","visible")
+
 
                 d3.selectAll("line").filter(function(d){
                    return d.connect
                 }).style("visibility","hidden")
 
             }
-            this.aa = 11
 
-            $scope.changeLayoutDataArray = ["概要","詳細"]
-            $scope.changeLayoutData = 0
-            $scope.changeLayout = function(){
-               $scope.changeLayoutData = ($scope.changeLayoutData + 1) % 2
-               $scope.showSequenceNum = -1
-               init()
-            }
             $scope.rebuild = function(){
                 $scope.showSequenceNum = -1
                 init()
+                d3.selectAll(".rect,.links,.nodes").data([]).exit().remove()
             }
 
             init()
 
 
             $scope.$watch("focusZoomIndex",function(preVal,val){
-                focusOnParticularNode()
+                //focusOnParticularNode()
             })
 
-
+/*
             function focusOnParticularNode(){
                 var nodes = $scope.node._groups[0]
                 console.log(nodes)
@@ -264,7 +295,7 @@
                        }
                 }
             }
-
+*/
 
             function init(){
 
@@ -295,33 +326,35 @@
 
                     var nodes = []
                     var links = []
+
+                    console.log("data is ...")
+                    console.log(data)
                     for(var i=0;i<data.length;i++){
                         for(var j=0;j<data[i].objs.length;j++){
+                            var user = {pro:data[i].pro,con:data[i].con}
                             for(var k=0;k<data[i].objs[j].length;k++){
-
                                 if(parseInt(data[i].objs[j][k].index) > 10000){
-                                    var _target = $scope.ijkByIndex(data[i].objs[j][k].index,data).target
-                                    links.push({connect:true,order:data[i].order,position:data[i].position,class:_target,"source":"i"+i+"j"+j+"k"+k,target:_target,"value":2})
-                                    nodes.push({extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:_target,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
+                                    var target = $scope.ijkByIndex(data[i].objs[j][k].index,data)
+                                    var _target = target.target
+                                    var _target1 = target.target
+                                    var _target2 = "i"+target.i+"j"+target.j+"k"+target.k
+                                    var __target = _target1 + " " + _target2
+                                    console.log(__target)
+                                    links.push({user:user,connect:true,order:data[i].order,position:data[i].position,class:_target,"source":"i"+i+"j"+j+"k"+k,target:_target,"value":2})
+                                    nodes.push({user:user,dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:_target,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
                                 }else{
-                                    nodes.push({extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:"i"+i+"j"+j+"k"+k,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
+                                    nodes.push({user:user,dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:"i"+i+"j"+j+"k"+k,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
                                 }
 
 
                                 for(var s=0;s<data[i].objs[j][k].warrant.length;s++){
-                                    nodes.push({extension:0,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s,class:"i"+i+"j"+j+"k"+k,name:"warrant",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].warrantTxt})
-                                    links.push({order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s,target:"i"+i+"j"+j+"k"+k,"value":2})
+                                    var extension = $scope.ijkByRandom(data[i].objs[j][k].warrant[s].random,data).source?1:0
+                                    nodes.push({user:user,dissent:data[i].objs[j][k].warrant[s].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s,class:"i"+i+"j"+j+"k"+k,name:"warrant",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].warrantTxt})
+                                    links.push({user:user,order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s,target:"i"+i+"j"+j+"k"+k,"value":2})
                                     for(var t=0;t<data[i].objs[j][k].warrant[s].evidence.length;t++){
-                                        links.push({order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,"target":"i"+i+"j"+j+"k"+k+"s"+s,value:3})
-
-
-                                        console.log($scope.ijkByRandom(data[i].objs[j][k].warrant[s].evidence[t].random,data))
-                                        if($scope.ijkByRandom(data[i].objs[j][k].warrant[s].evidence[t].random,data).source){
-                                            nodes.push({extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,class:"i"+i+"j"+j+"k"+k,name:"evidence",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].evidence[t].evidenceTxt})
-                                        }else{
-                                            nodes.push({extension:0,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,class:"i"+i+"j"+j+"k"+k,name:"evidence",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].evidence[t].evidenceTxt})
-                                        }
-
+                                        links.push({user:user,order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,"target":"i"+i+"j"+j+"k"+k+"s"+s,value:3})
+                                        var extension = $scope.ijkByRandom(data[i].objs[j][k].warrant[s].evidence[t].random,data).source?1:0
+                                        nodes.push({user:user,dissent:data[i].objs[j][k].warrant[s].evidence[t].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,class:"i"+i+"j"+j+"k"+k,name:"evidence",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].evidence[t].evidenceTxt})
                                     }
                                 }
                             }
@@ -335,7 +368,7 @@
 
             function drawMap(graph){
 
-                var zoom = d3.zoom()
+               var zoom = d3.zoom()
                             .scaleExtent([1, 100])
                             .on("zoom", zoomed);
                 $scope.zoom = zoom
@@ -345,21 +378,22 @@
                         d3.event.transform);
                 }
 
-                d3.selectAll("g").data([]).exit().remove()
+                var svg = d3.selectAll("g").filter("#main"),
 
-                var svg = d3.select("svg"),
-                    width = +svg.attr("width"),
-                    height = +svg.attr("height");
-                var svg = svg.append("g").call(zoom)
+                    width = +d3.select("svg").attr("width"),
+                    height = +d3.select("svg").attr("height");
+
+                svg.call(zoom)
 
                 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
                 var simulation = d3.forceSimulation()
-                    .force("link", d3.forceLink().distance(90).strength(2).id(function(d) { return d.id; }))
+                    .force("link", d3.forceLink().distance(250).strength(2).id(function(d) { return d.id; }))
                     .force("charge", d3.forceManyBody().distanceMin([0,5]))
-                    .force("center", d3.forceCenter(width / 3, height / 3));
+                    .force("center", d3.forceCenter(width/2 , height/2 ));
 
                 var rect = svg.append("rect")
+                            .attr("class","rect")
                             .attr("x",0)
                             .attr("y",0)
                             .attr("width",10000)
@@ -374,6 +408,7 @@
                     .selectAll("line")
                     .data(graph.links)
                     .enter().append("line")
+                    .attr("stroke-width",2)
                     .attr("class",function(d){
                         return d.class
                     })
@@ -387,137 +422,184 @@
                         return d.order
                     })
                     .style("visibility","hidden")
+                    .style("cursor","pointer")
 
 
 
-                  var node = svg.append("g")
-                      .attr("class", "nodes")
-                    .selectAll("circle")
-                    .data(graph.nodes)
-                    .enter().append("circle")
-                      .attr("r", 12)
-                      .attr("fill",function(d){
-                            return color(d.position)
-                      })
-                      .attr("visibility", function(d) {
-                        return d.name=="claim"&&d._index<=10000?"visible":"hidden"
-                      })
-                      .attr("index",function(d){
-                            return d._index
-                      })
-                      .attr("extend",1)
-                      .attr("id",function(d){
-                            return d.id
-                      })
-                      .attr("order",function(d){
-                            return d.order
-                      })
-                      .attr("position",function(d){
-                            return d.position
-                      })
-                      .attr("class",function(d){
-                        return d.class
-                      })
-                      .attr("random",function(d){
-                        return d.random
-                      })
-                      .call(d3.drag()
-                          .on("start", dragstarted)
-                          .on("drag", dragged)
-                          .on("end", dragended))
-                          .on("click",function(d){
-                                //zoom.translateBy(d3.select(this),0,0)
-                                //zoom.scaleBy(d3.select(this),1.2)
-
-                                    var val = parseInt(d3.select(this).attr("extend"))
-                                    d3.select(this).attr("extend",val+1)
-                                    if(val%2 == 1){
-                                         d3.selectAll("line").filter(function(_d){
-                                               if($scope.showSequenceNum > 0){
-                                                   return _d.class == d.id && _d.order == $scope.showSequenceNum
-                                               }else{
-                                                   return _d.class == d.id
-                                               }
-                                         }).style("visibility","visible")
-
-                                         d3.selectAll("circle").filter("."+d.id).filter(function(_d){
-                                            if($scope.showSequenceNum > 0){
-                                                return _d.class == d.id && _d.order == $scope.showSequenceNum
-                                            }else{
-                                                return _d.class == d.id
-                                            }
-                                         }).style("visibility","visible")
-
-                                         d3.selectAll("text").filter("."+d.id).filter(function(_d){
-                                            if($scope.showSequenceNum > 0){
-                                                return _d.class == d.id && _d.order == $scope.showSequenceNum
-                                            }else{
-                                                return _d.class == d.id
-                                            }
-                                         }).style("visibility","visible")
+                   var gg = svg.append("g")
+                   .attr("class", "nodes")
+                   .selectAll("g")
+                   .data(graph.nodes)
+                   .enter()
+                   .append("g")
+                   .call(d3.drag()
+                   .on("start", dragstarted)
+                   .on("drag", dragged)
+                   .on("end", dragended))
+                   .attr("visibility", function(d) {
+                      return d.name=="claim"&&d._index<=10000?"visible":"hidden"
+                   })
+                   .attr("index",function(d){
+                       return d._index
+                   })
+                   .attr("extend",1)
+                   .attr("id",function(d){
+                       return d.id
+                   })
+                   .attr("order",function(d){
+                       return d.order
+                   })
+                   .attr("position",function(d){
+                       return d.position
+                   })
+                   .attr("class",function(d){
+                   return d.class
+                   })
+                   .attr("random",function(d){
+                     return d.random
+                   }).on("click",function(d){
+                     var val = parseInt(d3.select(this).attr("extend"))
+                     d3.select(this).attr("extend",val+1)
 
 
-                                         d3.selectAll("image").filter("."+d.id).filter(function(_d){
-                                            if($scope.showSequenceNum > 0){
-                                                return _d.class == d.id && _d.order == $scope.showSequenceNum
-                                            }else{
-                                                return _d.class == d.id
-                                            }
-                                         }).style("visibility","visible")
+                     if(val%2 == 1){
+                          d3.selectAll("g").filter(function(_d){
+                                if(!_d) return false;
+                                if($scope.showSequenceNum > 0){
+                                    return _d.class == d.id && _d.order == $scope.showSequenceNum
+                                }else{
+                                    return _d.class == d.id
+                                }
+                          }).style("visibility","visible")
 
+                         d3.selectAll("line").filter(function(_d){
+                                if(!_d) return false;
+                                if($scope.showSequenceNum > 0){
+                                    return _d.class == d.id && _d.order == $scope.showSequenceNum
+                                }else{
+                                    return _d.class == d.id
+                                }
+                         }).style("visibility","visible")
+
+                     }else{
+                          d3.selectAll("g").filter(function(_d){
+                             if(!_d) return false
+                             if($scope.showSequenceNum > 0){
+                                 return _d.class == d.id && _d.order == $scope.showSequenceNum
+                             }else{
+                                 return _d.class == d.id
+                             }
+                           }).style("visibility","hidden")
+
+                         d3.selectAll("line").filter(function(_d){
+                                if(!_d) return false;
+                                if($scope.showSequenceNum > 0){
+                                    return _d.class == d.id && _d.order == $scope.showSequenceNum
+                                }else{
+                                    return _d.class == d.id
+                                }
+                         }).style("visibility","hidden")
+
+
+                          d3.select(this).style("visibility","visible")
+                     }
+
+                    })
+
+                    $scope.gg = gg
+
+
+                  var rects = gg.append('foreignObject')
+
+                    .attr("x",-120)
+                    .attr("y",-100)
+
+                    var tables = rects.append('xhtml:div')
+                    .append('table')
+                    .style("width","250px")
+                    .style("height","100px")
+                    .attr("class","table table-bordered")
+
+                    var tr1 = tables.append('tr')
+
+                    var td1_1 = tr1.append("td")
+                    .html(function(d){
+                        switch(d.name){
+                            case 'claim':return '主張';
+                            case 'warrant':return '論拠';
+                            case 'evidence':return '根拠';
+                        }
+                    })
+
+
+                    var td1_2 = tr1.append("td")
+                    .html(function(d){
+                            if(d.dissent){
+                             return "意義"
+                            }
+                    })
+
+
+
+                    .attr("width","20%")
+
+                    var tr2 = tables.append("tr")
+
+                    var td2_1 = tr2.append("td")
+                    .attr("colspan",2)
+                    .html(function(d){
+                        return d.txt.substring(1, 40) + "...<span _index='" + d._index + "' position='"+ d.position +"' pro='"+d.user.pro+"' con='"+d.user.con+"' name='"+d.name+"' txt='"+ d.txt +"' class='detail' >詳細</span>";
+                    })
+                    .attr("width","100%")
+                    .attr("cx",350)
+
+
+                    td2_1.selectAll(".detail").on("click",function(e){
+
+                        d3.selectAll("g").filter(".popUp").style("visibility","visible")
+                        d3.selectAll("g").filter(".popUp").selectAll("div").filter(".content").html(d3.select(this).attr("txt"))
+                        var name = d3.select(this).attr("name")
+                        var position = d3.select(this).attr("position")
+                        var pro = d3.select(this).attr("pro")
+                        var con = d3.select(this).attr("con")
+                        var _index = d3.select(this).attr("_index")
+
+
+                        d3.selectAll("g").filter(".popUp").selectAll("small").filter(".user").html(function(){
+
+                            if(position == 1){
+                                return "賛成側"+ pro + "->" + "反対側" + con
+                            }else{
+                                return "反対側"+ con + "->" + "賛成側" + pro
+                            }
+
+                        })
+
+                        d3.selectAll("g").filter(".popUp").selectAll("span").filter(".name").html(function(){
+
+                            switch(name){
+                                case 'claim':
+                                    if(_index>10000){
+                                        return '主張(意義説明)'
                                     }else{
-                                         d3.selectAll("line").filter(function(_d){
-                                            if($scope.showSequenceNum > 0){
-                                                return _d.class == d.id && _d.order == $scope.showSequenceNum
-                                            }else{
-                                                return _d.class == d.id
-                                            }
-                                          }).style("visibility","hidden")
-
-                                         d3.selectAll("circle").filter(function(_d){
-                                           if($scope.showSequenceNum > 0){
-                                               return _d.class == d.id && _d.order == $scope.showSequenceNum
-                                           }else{
-                                               return _d.class == d.id
-                                           }
-                                         }).style("visibility","hidden")
-
-                                         d3.selectAll("text").filter(function(_d){
-                                           if($scope.showSequenceNum > 0){
-                                               return _d.class == d.id && _d.order == $scope.showSequenceNum
-                                           }else{
-                                               return _d.class == d.id
-                                           }
-                                           }).style("visibility","hidden")
-
-                                         d3.selectAll("image").filter(function(_d){
-                                           if($scope.showSequenceNum > 0){
-                                               return _d.class == d.id && _d.order == $scope.showSequenceNum
-                                           }else{
-                                               return _d.class == d.id
-                                           }
-                                           }).style("visibility","hidden")
-
-
-                                         d3.select(this).style("visibility","visible")
+                                        return '主張(オリジナル)'
                                     }
+                                break;
+                                case 'warrant':
+                                    return '論拠'
+                                break;
+                                case 'evidence':
+                                    return '根拠'
+                                break;
+                            }
+                        })
+
+                    })
+                    .style("cursor","pointer")
 
 
-                                        d3.selectAll("text").filter(function(_d){
-                                            return _d.id == d.id
-                                        }).style("visibility","visible")
 
-                          })
-
-                    $scope.node = node
-
-
-                  node.append("title")
-                      .text(function(d) {
-                        return $scope.changeLayoutData==0?d.txt:d.name;
-                      });
-
-                  var text = svg.append("g").attr("class","nodes").selectAll("text").data(graph.nodes).enter().append("text").text(function(d){
+                  var text = gg.append("text").text(function(d){
                       return $scope.changeLayoutData==0?d.name:d.txt;
                   }).style("text-anchor", "middle")
                     .style("fill", "#555")
@@ -530,7 +612,8 @@
                         return d.order
                     })
                     .style("visibility",function(d){
-                        return d.name=="claim"&&d._index<=10000?"visible":"hidden"
+                        //return d.name=="claim"&&d._index<=10000?"visible":"hidden"
+                        return "hidden"
                     })
                     .attr("class",function(d){
                         return d.class
@@ -538,53 +621,15 @@
                     .attr("id",function(d){
                         return d.id
                     })
+                    .attr("y",20)
 
-                    var marks = svg.append("g").attr("class","images").selectAll("image").data(graph.nodes).enter().append("image")
-                      .attr("xlink:href",function(d){
-                          if(d.extension==1){
-                            return "/_debate/+.png"
-                          }else{
 
-                          }
 
-                      })
-                      .attr("id",function(d){
-                          return d.id
-                      })
-                     .attr("order",function(d){
-                          return d.order
-                     })
-                      .attr("visibility", function(d) {
-                          return d.name=="claim"&&d._index<=10000?"visible":"hidden"
-                      })
-                      .attr("extend",0)
-                      .attr('width', 20)
-                      .attr('height', 20)
-                      .attr("class",function(d){
-                            return d.class
-                      })
-                      .on("click",function(d){
-                            if(d.extension!=1) return;
-                            var val = parseInt(d3.select(this).attr("extend"))
-                            val ++
-                            val%2 == 0? d3.select(this).attr("xlink:href","/_debate/+.png"):d3.select(this).attr("xlink:href","/_debate/-.ico")
-                            d3.select(this).attr("extend",val)
 
-                            var res = d3.selectAll("circle").filter(function(_d){
-                                return _d.id == d.id
-                            })
-
-                            var _res = res.on('click')
-                            _res.call(res.node(), res.datum())
-
-                            d3.select(this).style("visibility","visible")
-                     }).call(d3.drag()
-                      .on("start", dragstarted)
-                      .on("drag", dragged)
-                      .on("end", dragended))
 
                   simulation
                       .nodes(graph.nodes)
+                      .force("collide", d3.forceCollide().radius(function(d) { return 45 }))
                       .on("tick", ticked);
 
                   simulation.force("link")
@@ -592,21 +637,14 @@
 
                   function ticked() {
                     link
-                        .attr("x1", function(d) { return d.source.x; })
-                        .attr("y1", function(d) { return d.source.y; })
+                        .attr("x1", function(d) { return d.source.x-120; })
+                        .attr("y1", function(d) { return d.source.y-100; })
                         .attr("x2", function(d) { return d.target.x; })
                         .attr("y2", function(d) { return d.target.y; });
 
-                    node
-                        .attr("cx", function(d) { return d.x; })
-                        .attr("cy", function(d) { return d.y; });
-
-                    text.attr("x", function(d){ return d.x; })
-                        .attr("y", function (d) {return d.y - 10; })
-
-                    marks.attr("x", function(d){ return d.x - 10; })
-                    .attr("y", function (d) {return d.y - 10; })
-
+                    gg
+                        .attr("transform", function(d) { return "translate("+d.x+","+d.y+")" })
+                        
                   }
 
                 function dragstarted(d) {
@@ -689,6 +727,57 @@
             templateUrl:"/_debate/statementMap.html"
         }
     })
+
+    myApp.directive("svgComment",function(){
+        return {
+            scope:true,
+            controller:function($scope){
+                $scope.commentContentList = []
+                $scope.showComment = 0
+                $scope.makeSenseNum = 0
+                $scope.makeLikeNum = 0
+                $scope.glyphiconStarEmpty = true
+                $scope.glyphiconStar = false
+                $scope.closePopUp = function(){
+                    d3.select("svg").selectAll("g").filter(".popUp").style("visibility","hidden")
+                }
+
+                $scope.doComment = function(){
+                    $scope.showComment = $scope.showComment + 1
+
+                    if($scope.showComment % 2 == 1){
+                        d3.select("#popUpBackground").attr("height",750)
+                    }else{
+                        d3.select("#popUpBackground").attr("height",450)
+                    }
+
+                }
+
+                $scope.submitComment = function(isValid){
+                    if(!isValid) return;
+                    $scope.commentContentList.push($scope.commentContent)
+                }
+
+                $scope.makeSense = function(){
+                    $scope.makeSenseNum = $scope.makeSenseNum + 1
+                    if($scope.makeSenseNum %2 == 0){
+                        $scope.glyphiconStarEmpty = true
+                        $scope.glyphiconStar = false
+                    }else{
+                        $scope.glyphiconStarEmpty = false
+                        $scope.glyphiconStar = true
+                    }
+                }
+
+                $scope.makeLike = function(){
+                    $scope.makeLikeNum = $scope.makeLikeNum + 1
+                }
+
+            },
+            templateUrl:"/_debate/svgComment.html"
+        }
+    })
+
 </script>
 
 </html>
