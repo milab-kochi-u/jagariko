@@ -28,7 +28,34 @@
             position:relative;
         }
 
-        .balloon:before {
+        .__balloon:before {
+            border:10px solid transparent;
+            border-left-color:#fff;
+            border-right-width:0;
+            right:-9px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+            z-index:1;
+        }
+
+        .__balloon:after {
+            border:10px solid transparent;
+            border-left-color:#000;
+            border-right-width:0;
+            right:-10px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+        }
+
+
+
+        ._balloon:before {
             border:10px solid transparent;
             border-right-color:#fff;
             border-left-width:0;
@@ -41,7 +68,7 @@
             z-index:1;
         }
 
-        .balloon:after {
+        ._balloon:after {
             border:10px solid transparent;
             border-right-color:#000;
             border-left-width:0;
@@ -125,8 +152,8 @@
     var PROFILEPROTOP = TOPSPACE
     var PROFILEPRORIGHT = LEFTSPACE + RECTWIDTH + SPACEX + RECTWIDTH
 
-    var POPUPRECTWIDTH = 300
-    var POPUPRECTHEIGHT = 200
+    var POPUPRECTWIDTH = 1000
+    var POPUPRECTHEIGHT = 600
 
     var DISSENTIMAGEWIDTH = 105
 
@@ -682,7 +709,6 @@
                         "<div class='col-sm-2'>隠す</div>");
             }
 
-
         }else{
             var p = div.append('p')
                     .html(txt)
@@ -709,6 +735,8 @@
         var did = "d" + id
         p.attr("id",did)
 
+
+        //展开和收拢的控制
         d3.select("#"+did).on("click",function(){
 
 
@@ -735,32 +763,43 @@
         d3.select("#"+balloonId).on("mouseover",function(){
             d3.selectAll(".balloon").remove()
             if(structureInformation != 0){
-                popUp(balloonId,x,y,structureInformation)
+                popUp(n,balloonId,x,y,structureInformation)
             }
-
         })
 
-        //d3.select("#"+id).on("mouseout",function(){
-        //    d3.select("#f"+id).remove()
-        //})
+
     }
 
 
-    function popUp(id,x,y,structureInformation){
+    function popUp(position,id,x,y,structureInformation){
         var rect = svg.append("foreignObject")
-        rect.attr("x",x+RECTWIDTH+50)
+
         rect.attr("y",y)
         rect.attr("width",POPUPRECTWIDTH)
         rect.attr("height",POPUPRECTHEIGHT)
 
 
         var div = rect.append('xhtml:div')
-
+        div.style("width",POPUPRECTWIDTH)
+        div.style("height",POPUPRECTHEIGHT)
         div = div.append("div")
+
         div.attr("class","row col-sm-12 balloon")
+
+        if(position == 1){
+            rect.attr("x",x+RECTWIDTH + 30)
+            div.classed("_balloon", true);
+        }else{
+            rect.attr("x",x-POPUPRECTWIDTH)
+            div.classed("__balloon", true);
+        }
+
+
+
+
         div.style("width",POPUPRECTWIDTH+"px")
         div.style("background-color","#fff")
-        div.style("opacity","0.7")
+        //div.style("opacity","0.7")
 
         var sdiv = div.append("div")
         sdiv.attr("class","row")
