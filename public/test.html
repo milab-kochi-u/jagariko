@@ -20,6 +20,41 @@
             border: inset 2px #000;
         }
 
+
+        .balloon {
+            background-color:#fff;
+            border:1px solid #000;
+            border-radius:5px;
+            position:relative;
+        }
+
+        .balloon:before {
+            border:10px solid transparent;
+            border-right-color:#fff;
+            border-left-width:0;
+            left:-9px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+            z-index:1;
+        }
+
+        .balloon:after {
+            border:10px solid transparent;
+            border-right-color:#000;
+            border-left-width:0;
+            left:-10px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+        }
+
+
+
     </style>
 </head>
 <body>
@@ -73,6 +108,7 @@
     var SVGHEIGHT = 1200
     var RECTWIDTH = 450  //模块的长度
     var RECTHEIGHT = 100  //模块的宽度
+    var LASTRECTHEIGHT //根据字体计算的长度
     var LEFT = 10 //整体模块距离浏览器左边的边距
     var SPACEX = 380 //右边模块距离左边模块的宽度
     var SPACEY = 15 //距头上模块的上边距
@@ -89,6 +125,10 @@
     var PROFILEPROTOP = TOPSPACE
     var PROFILEPRORIGHT = LEFTSPACE + RECTWIDTH + SPACEX + RECTWIDTH
 
+    var POPUPRECTWIDTH = 300
+    var POPUPRECTHEIGHT = 200
+
+    var DISSENTIMAGEWIDTH = 105
 
     d3.select("#home").style("height",HEIGHT*0.70+"px")
 
@@ -154,6 +194,13 @@
                 expand:0,
                 position:1,
                 warrant:[
+                    {warrantTxt:"基幹的農業従事者と常時雇用者を合わせた「農業就業者数」は、10年に219万人。PTの試算では、これが25年に163万人、50年には108万人に減るとの結果になった。現在の就農者数や定着率、日本の総人口の減少見通しなどから「厳しく見積もった」（鈴木憲和PT副委員長）。",
+                        expand:0,
+                        evidence:[{
+                            evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
+                        }
+                        ]
+                    },
                     {warrantTxt:"基幹的農業従事者と常時雇用者を合わせた「農業就業者数」は、10年に219万人。PTの試算では、これが25年に163万人、50年には108万人に減るとの結果になった。現在の就農者数や定着率、日本の総人口の減少見通しなどから「厳しく見積もった」（鈴木憲和PT副委員長）。",
                         expand:0,
                         evidence:[{
@@ -281,6 +328,7 @@
     ]
 
     var arrow = {}
+
     draw(1,data)
     draw(2,_data)
 
@@ -389,29 +437,29 @@
         for(var i=0;i<data.length;i++){
             for(var j=0;j<data[i].objs.length;j++){
                     var competitionInformation = getCompetitionInformation(2,data[i].objs[j])
-                    appendRect(n,data[i].objs[j].dissent,lastLeft,lastHeight,"主張:"+data[i].objs[j].claimTxt,[i,j,-1,-1],competitionInformation)
+                    appendRect(n,data[i].objs[j].dissent,lastLeft,lastHeight,"主張:"+data[i].objs[j].claimTxt,[i,j,-1,-1],competitionInformation,{warrant:data[i].objs[j].warrant})
 
                     var position = data[i].objs[j].position
                     var expand = data[i].objs[j].expand
 
-                    lastHeight += (RECTHEIGHT+SPACEY)
+                    lastHeight += (LASTRECTHEIGHT+SPACEY)
                     lastLeft += SLIPWIDTH
 
                         if(data[i].objs[j].dissent){
                             var random = data[i].objs[j].random
                             if(arrow[random]){
-                                arrow[random]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                arrow[random]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
                             }else{
-                                arrow[random] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                arrow[random] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
                             }
                         }
 
                         if(data[i].objs[j].index){
                             var index = data[i].objs[j].index
                             if(arrow[index]){
-                                arrow[index]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                arrow[index]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
                             }else{
-                                arrow[index] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                arrow[index] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
                             }
                         }
 
@@ -423,21 +471,21 @@
 
                     for(var k=0;k<data[i].objs[j].warrant.length;k++){
                         var competitionInformation = getCompetitionInformation(3,data[i].objs[j].warrant[k])
-                        appendRect(n,data[i].objs[j].warrant[k].dissent,lastLeft,lastHeight,"論拠:"+data[i].objs[j].warrant[k].warrantTxt,[i,j,k,-1],competitionInformation)
+                        appendRect(n,data[i].objs[j].warrant[k].dissent,lastLeft,lastHeight,"論拠:"+data[i].objs[j].warrant[k].warrantTxt,[i,j,k,-1],competitionInformation,{evidence:data[i].objs[j].warrant[k].evidence})
                         drawConnectLine(position,lastLeft+2*SLIPWIDTH,lastHeight-SPACEY,lastLeft+2*SLIPWIDTH,lastHeight)
 
 
 
-                        lastHeight += (RECTHEIGHT+SPACEY)
+                        lastHeight += (LASTRECTHEIGHT+SPACEY)
                         lastLeft += SLIPWIDTH
 
                         var expand = data[i].objs[j].warrant[k].expand
                             if(data[i].objs[j].warrant[k].dissent){
                                 var random = data[i].objs[j].warrant[k].random
                                 if(arrow[random]){
-                                    arrow[random]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                    arrow[random]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
                                 }else{
-                                    arrow[random] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                    arrow[random] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
                                 }
                             }
 
@@ -447,7 +495,7 @@
                         }
 
                         for(var s=0;s<data[i].objs[j].warrant[k].evidence.length;s++){
-                            appendRect(n,data[i].objs[j].warrant[k].evidence[s].dissent,lastLeft,lastHeight,"根拠:"+data[i].objs[j].warrant[k].evidence[s].evidenceTxt,[i,j,k,s],0)
+                            appendRect(n,data[i].objs[j].warrant[k].evidence[s].dissent,lastLeft,lastHeight,"根拠:"+data[i].objs[j].warrant[k].evidence[s].evidenceTxt,[i,j,k,s],0,0)
 
                             if(s == 0){
                                 drawConnectLine(position,lastLeft+3*SLIPWIDTH,lastHeight-SPACEY,lastLeft+3*SLIPWIDTH,lastHeight)
@@ -456,7 +504,7 @@
                             }
 
 
-                            lastHeight += (RECTHEIGHT+SPACEY)
+                            lastHeight += (LASTRECTHEIGHT+SPACEY)
 
                             var expand =  data[i].objs[j].warrant[k].evidence[s].expand
 
@@ -464,9 +512,9 @@
                             if(data[i].objs[j].warrant[k].evidence[s].dissent){
                                 var random = data[i].objs[j].warrant[k].evidence[s].random
                                     if(arrow[random]){
-                                        arrow[random]["end"] = {left:lastLeft,height:lastHeight,position:position}
+                                        arrow[random]["start"] = {left:lastLeft,height:lastHeight,position:position}
                                     }else{
-                                        arrow[random] = {"end":{left:lastLeft,height:lastHeight,position:position}}
+                                        arrow[random] = {"start":{left:lastLeft,height:lastHeight,position:position}}
                                     }
                             }
 
@@ -499,38 +547,54 @@
     function getCompetitionInformation(n,arr){
         var dissentNum = 0;
         var evidenceNum = 0
+        var warrantDissentNum = 0
+        var evidenceDissentNum = 0
         if(n==2){
             for(var i=0;i<arr.warrant.length;i++){
                 if(arr.warrant[i].dissent == 1){
                     dissentNum++
+                    warrantDissentNum++
                 }
                 evidenceNum += arr.warrant[i].evidence.length
 
                 dissentNum += getCompetitionInformation(3,arr.warrant[i]).dissentNum
             }
-            return {dissentNum:dissentNum,warrantNum:arr.warrant.length,evidenceNum:evidenceNum};
+            return {dissentNum:dissentNum,warrantNum:arr.warrant.length,warrantDissentNum:warrantDissentNum,evidenceNum:evidenceNum};
         }
 
         if(n==3){
             for(var i=0;i<arr.evidence.length;i++){
                 if(arr.evidence[i].dissent == 1){
                     dissentNum++
+                    evidenceDissentNum++
                 }
             }
-            return {dissentNum:dissentNum,evidenceNum:arr.evidence.length};
+            return {dissentNum:dissentNum,evidenceNum:arr.evidence.length,evidenceDissentNum:evidenceDissentNum};
         }
     }
 
-    function appendRect(n,d,x,y,txt,arr,competitionInformation){
+    function appendRect(n,d,x,y,txt,arr,competitionInformation,structureInformation){
         var foreignObject = svg.append("foreignObject")
+
+        //450的宽度一行能装14px font的字体30个
+        //100(默认RECTHEIGHT)的高度能装4行
+        var _RECTHEIGHT = (Math.ceil(txt.length/30+1))*(RECTHEIGHT/4)
+        LASTRECTHEIGHT = _RECTHEIGHT
+
         foreignObject.attr("width",RECTWIDTH)
-        foreignObject.attr("height",RECTHEIGHT)
+        foreignObject.attr("height",_RECTHEIGHT)
 
         foreignObject.attr("x",x)
         foreignObject.attr("y",y)
         foreignObject.attr("class","rectangle")
 
         foreignObject.attr("arr",arr)
+
+        var id = Math.round(Math.random()*100000)
+
+
+        var balloonId = "b"+id
+        foreignObject.attr("id",balloonId)
 
         var div = foreignObject.append('xhtml:div')
 
@@ -569,8 +633,6 @@
         var div = div.append('div')
 
 
-
-
         if(!d){
 
             //还是一个道理正方反方区别对待
@@ -597,11 +659,9 @@
         div.attr(
             'role',"alert"
         )
-        div.style("height",RECTHEIGHT+"px")
+        div.style("height",_RECTHEIGHT+"px")
         div.style('overflow',"auto")
 
-        console.log(1111111111)
-        console.log(competitionInformation)
 
         if(expand == 1){
             var p = div.append('p')
@@ -612,14 +672,12 @@
 
 
             if(k>=0 && s<0){
-                p.html("<div class='col-sm-3'>異議数:" + competitionInformation.dissentNum + "</div>"+
-                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                p.html("<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
                         "<div class='col-sm-2'>隠す</div>");
             }
 
             if(j>=0 && k<0){
-                    p.html("<div class='col-sm-3'>異議数:" + competitionInformation.dissentNum + "</div>"+
-                        "<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                    p.html("<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
                         "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
                         "<div class='col-sm-2'>隠す</div>");
             }
@@ -634,14 +692,12 @@
 
 
             if(k>=0 && s<0){
-                p.html("<div class='col-sm-3'>異議数:" + competitionInformation.dissentNum + "</div>"+
-                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                p.html( "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
                         "<div class='col-sm-2'>詳細</div>");
             }
 
             if(j>=0 && k<0){
-                p.html("<div class='col-sm-3'>異議数:" + competitionInformation.dissentNum + "</div>"+
-                        "<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                p.html( "<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
                         "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
                         "<div class='col-sm-2'>詳細</div>");
             }
@@ -649,10 +705,11 @@
         }
 
 
-        var id = "f"+Math.round(Math.random()*100000)
-        p.attr("id",id)
 
-        d3.select("#"+id).on("click",function(){
+        var did = "d" + id
+        p.attr("id",did)
+
+        d3.select("#"+did).on("click",function(){
 
 
             if(n == 1){
@@ -674,11 +731,101 @@
             reDraw()
 
         })
+
+        d3.select("#"+balloonId).on("mouseover",function(){
+            d3.selectAll(".balloon").remove()
+            if(structureInformation != 0){
+                popUp(balloonId,x,y,structureInformation)
+            }
+
+        })
+
+        //d3.select("#"+id).on("mouseout",function(){
+        //    d3.select("#f"+id).remove()
+        //})
+    }
+
+
+    function popUp(id,x,y,structureInformation){
+        var rect = svg.append("foreignObject")
+        rect.attr("x",x+RECTWIDTH+50)
+        rect.attr("y",y)
+        rect.attr("width",POPUPRECTWIDTH)
+        rect.attr("height",POPUPRECTHEIGHT)
+
+
+        var div = rect.append('xhtml:div')
+
+        div = div.append("div")
+        div.attr("class","row col-sm-12 balloon")
+        div.style("width",POPUPRECTWIDTH+"px")
+        div.style("background-color","#fff")
+        div.style("opacity","0.7")
+
+        var sdiv = div.append("div")
+        sdiv.attr("class","row")
+
+        var title = sdiv.append("div")
+        title.attr("class","col-sm-10")
+        title.html("子孫構想")
+
+        var remove = sdiv.append("div")
+        remove.attr("class","col-sm-1")
+        remove = remove.append("span")
+        remove.attr("class","glyphicon glyphicon-remove")
+        remove.attr("aria-hidden","true")
+        remove.style("cursor","pointer")
+
+        remove.on("click",function(){
+            rect.remove()
+        })
+
+
+        if(structureInformation.warrant){
+
+            for(var i=0;i<structureInformation.warrant.length;i++){
+                var _div = div.append("div")
+                _div.attr("class","col-sm-10 col-sm-offset-2")
+                if(structureInformation.warrant[i].dissent){
+                    _div.html("論拠(意義あり)")
+                }else{
+                    _div.html("論拠")
+                }
+                for(var j=0;j<structureInformation.warrant[i].evidence.length;j++){
+                    var _div = div.append("div")
+                    _div.attr("class","col-sm-8 col-sm-offset-4")
+
+                    if(structureInformation.warrant[i].evidence[j].dissent){
+                        _div.html("根拠(意義あり)")
+                    }else{
+                        _div.html("根拠")
+                    }
+
+                }
+            }
+
+        }
+
+        if(structureInformation.evidence){
+            for(var i=0;i<structureInformation.evidence.length;i++){
+                var _div = div.append("div")
+                _div.attr("class","col-sm-10 col-sm-offset-2")
+
+                if(structureInformation.evidence[i].dissent){
+                    _div.html("根拠(意義あり)")
+                }else{
+                    _div.html("根拠")
+                }
+
+            }
+        }
+
+
     }
 
     function reDraw(){
         arrow = {}
-        svg.selectAll(".rectangle,.connectLine,.arrow").remove();
+        svg.selectAll(".rectangle,.connectLine,.arrow,.dissentImage").remove();
         draw(1,data)
         draw(2,_data)
         drawArrow(arrow)
@@ -691,10 +838,11 @@
     }
 
     function drawArrow(_arrow){
-        console.log(_arrow)
         for(var i in _arrow){
             var _start = _arrow[i].start
             var _end = _arrow[i].end
+            var dissentImageX
+            var dissentImageY
 
             if(!_start || !_end) continue　//如果起始点或者终点有一个是被收起来得状态得话,那么这条线直接不显示,跳过
 
@@ -707,9 +855,13 @@
             if(_start.position == 1){
                 startLeftX = _start.left + RECTWIDTH
                 startLeftY = _start.height - RECTHEIGHT/2
+                dissentImageX = startLeftX
+                dissentImageY = startLeftY
             }else{
                 startLeftX = _start.left
                 startLeftY = _start.height - RECTHEIGHT/2
+                dissentImageX = startLeftX - DISSENTIMAGEWIDTH
+                dissentImageY = startLeftY
             }
 
             if(_end.position == 1){
@@ -721,6 +873,68 @@
             }
 
             someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY)
+
+
+
+            var dissent = svg.append("foreignObject")
+                    .attr("x", dissentImageX)
+                    .attr("y", dissentImageY)
+                    .attr("class","dissentImage")
+
+            var dissent = dissent.append('xhtml:div')
+            dissent.attr("class","row")
+            dissent.style("width",DISSENTIMAGEWIDTH+"px")
+
+
+
+            if(_start.position == 1){
+
+
+                var div = dissent.append("div")
+                div.attr("class","col-sm-6")
+                var image = div.append("img")
+
+                image.attr("src", "./leftPointer.png")
+                image.attr("width", "60")
+                        .attr("height", "50");
+
+
+
+                var div = dissent.append("div")
+                div.attr("class","col-sm-6")
+
+
+                var image = div.append("img")
+
+                image.attr("src", "./dissent.png")
+                        .attr("width", "60")
+                        .attr("height", "50");
+
+
+            }else{
+
+                var div = dissent.append("div")
+                div.attr("class","col-sm-6")
+
+
+                var image = div.append("img")
+
+                image.attr("src", "./dissent.png")
+                        .attr("width", "60")
+                        .attr("height", "50");
+
+                var div = dissent.append("div")
+                div.attr("class","col-sm-6")
+                var image = div.append("img")
+
+                image.attr("src", "./rightPointer.png")
+                image.attr("width", "60")
+                        .attr("height", "50");
+            }
+
+
+
+
 
         }
     }
@@ -737,12 +951,12 @@
                 .attr("stroke-width",6)
                 .attr("class","connectLine")
 
+
+
     }
 
     function someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY){
         var divArr = [2,2.5,3,3.5,4,4.5]
-
-
 
 
         //已确定起点和终点,现在要做的事就是增加2个点M1,M2
