@@ -67,8 +67,8 @@
 </body>
 <script>
 
-    var WIDTH = window.screen.width  //整个区域的宽度
-
+    //var WIDTH = window.screen.width  //整个区域的宽度
+    var WIDTH = getWidth()
     var HEIGHT = window.screen.height //整个区域的高度
     var SVGHEIGHT = 1200
     var RECTWIDTH = 450  //模块的长度
@@ -98,6 +98,18 @@
     svg.style("margin-left",LEFT)
 
 
+    function getWidth() {
+        if (self.innerWidth) {
+            return self.innerWidth;
+        }
+        else if (document.documentElement && document.documentElement.clientHeight){
+            return document.documentElement.clientWidth;
+        }
+        else if (document.body) {
+            return document.body.clientWidth;
+        }
+        return 0;
+    }
 
 
     var data = [
