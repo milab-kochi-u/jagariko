@@ -53,6 +53,8 @@
 
         <div class="row">
 
+
+<!--
             <home-map>
             <div class="row">
               <div class="col-md-5" id="statementMap" style="height:950px">
@@ -65,6 +67,11 @@
             </div>
             <home-map>
 
+-->
+
+            <test-map>
+
+            </test-map>
 
 
         </div>
@@ -181,6 +188,1092 @@
             templateUrl:"/_debate/navy.html"
         }
     })
+
+
+    myApp.directive("testMap",function(myPost,$rootScope){
+        return {
+            scope:{},
+            templateUrl:"/_debate/test.html",
+            controller:function($scope){
+                var data = []
+                var _data = []
+
+                init()
+                function init(){
+
+                myPost.postData("/_debate/fetchAnalysisLog").then(function(_res){
+                    for(var i=0;i<_res.data.length;i++){
+                        if(_res.data[i].position == 1){
+                              data.push(_res.data[i])
+                        }else{
+                              _data.push(_res.data[i])
+                        }
+                    }
+
+                    for(var i=0;i<data.length;i++){
+                        for(var j=0;j<data[i].objs.length;j++){
+
+                           for(var o=0;o<data[i].objs[j].length;o++){
+                                data[i].objs[j][o].expand = 0
+                                for(var k=0;k<data[i].objs[j][o].warrant.length;k++){
+                                    data[i].objs[j][o].warrant[k].expand = 0
+
+                                }
+                           }
+                        }
+                    }
+
+
+                    main()
+
+                })
+
+/*
+                data = [
+                                        {
+
+                                            order:1,
+                                            objs:[{
+                                                claimTxt: "年金積立金管理運用独立行政法人（ＧＰＩＦ）が２０１６年４～６月期に約５兆２０００億円もの運用損を出したのは、価格変動リスクの大きい株式の運用割合を高めたためだ。",
+                                                expand:0,
+                                                position:1,
+                                                warrant:[
+                                                    {warrantTxt:"年金給付の財源は保険料収入と国庫負担で９割程度が賄われ、短期的な運用損は年金給付に影響しないが、一方で国民の将来への不安を解消するための体制整備を早期に進めることが不可欠だ。",
+                                                        expand:0,
+                                                        evidence:[{
+                                                            evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                                                        },
+                                                            {
+                                                                evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                                                            },
+                                                            {
+                                                                evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                                                            },
+                                                            {
+                                                                evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。",
+                                                                random:1014,
+                                                                dissent:1
+                                                            }
+                                                        ],
+                                                        dissent:1,
+                                                        random:1012
+                                                    }
+                                                ]
+
+                                            }
+                                            ]
+                                        },
+                                        {
+
+                                            order:1,
+                                            objs:[{
+                                                claimTxt: "2050年には農業人口が半減し、100万人程度に。そのうち3割は85歳以上――。自民党の農林水産業骨太方針策定プロジェクトチーム（PT、小泉進次郎委員長）がこんな試算をまとめた。国内の農業生産を維持できないとみて、11月に決める環太平洋連携協定（TPP）の中長期的対策に、人材育成や労働力の確保策を盛り込む。",
+                                                expand:0,
+                                                position:1,
+                                                warrant:[
+                                                    {warrantTxt:"基幹的農業従事者と常時雇用者を合わせた「農業就業者数」は、10年に219万人。PTの試算では、これが25年に163万人、50年には108万人に減るとの結果になった。現在の就農者数や定着率、日本の総人口の減少見通しなどから「厳しく見積もった」（鈴木憲和PT副委員長）。",
+                                                        expand:0,
+                                                        evidence:[{
+                                                            evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
+                                                        }
+                                                        ]
+                                                    },
+                                                    {warrantTxt:"基幹的農業従事者と常時雇用者を合わせた「農業就業者数」は、10年に219万人。PTの試算では、これが25年に163万人、50年には108万人に減るとの結果になった。現在の就農者数や定着率、日本の総人口の減少見通しなどから「厳しく見積もった」（鈴木憲和PT副委員長）。",
+                                                        expand:0,
+                                                        evidence:[{
+                                                            evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
+                                                        }
+                                                        ]
+                                                    }
+                                                ],
+                                                index:2011
+                                            }
+                                            ]
+                                        },
+                                        {
+
+                                            order:1,
+                                            objs:[{
+                                                claimTxt: "一方で、昨年策定した食料・農業・農村基本計画は、国内の農業生産の継続には90万人程度の農業就業者が必要だと推計する。",
+                                                expand:0,
+                                                position:1,
+                                                warrant:[
+                                                    {warrantTxt:"PTは試算を踏まえ、このままでは国内農業の持続可能性が危機的な状況になると判断。農業教育・研修の充実で国内外の市場を視野に入れる経営層の育成だけでなく、生産作業には外国人やロボットなどの活用も必要とみて、人材育成や労働力確保の具体策の検討を11月の取りまとめに向けて加速する。",
+                                                        expand:0,
+                                                        evidence:[{
+                                                            evidenceTxt: "農水省は、議論の材料として（1）農業大学校の専門職業大学化（2）就農の入り口となる農業法人での雇用拡大（3）青年就農給付金制度の改善（4）地域で農業をしながら経営学を学べる農業経営塾（5）外国人労働力の確保――などを示した。ただ外国人の受け入れ拡大には、トラブルの増加や日本人の労賃引き下げなどにつながるとして、慎重論が出る可能性もある。",
+                                                            dissent:1,
+                                                            random:1013
+                                                        }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                            ]
+                                        }
+                                    ]
+
+
+                                    _data = [
+                                        {
+                                            order:1,
+                                            objs:[{
+                                                claimTxt: "年金積立金管理運用独立行政法人（ＧＰＩＦ）が２０１６年４～６月期に約５兆２０００億円もの運用損を出したのは、価格変動リスクの大きい株式の運用割合を高めたためだ。",
+                                                expand:0,
+                                                position:2,
+                                                warrant:[
+                                                    {warrantTxt:"年金給付の財源は保険料収入と国庫負担で９割程度が賄われ、短期的な運用損は年金給付に影響しないが、一方で国民の将来への不安を解消するための体制整備を早期に進めることが不可欠だ。",
+                                                        expand:0,
+                                                        evidence:[{
+                                                            evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                                                        },
+                                                            {
+                                                                evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                                                            },
+                                                            {
+                                                                evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                                                            },
+                                                            {
+                                                                evidenceTxt: "ＧＰＩＦが株式への運用比率を高めたのは「運用が国債に偏ると運用目標を達成できない」（担当者）ことが背景にある。ＧＰＩＦからは毎年約５兆円を年金会計に上納。"
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                index:1012
+                                            }
+                                            ]
+                                        },
+                                        {
+                                            order:1,
+                                            objs:[{
+                                                claimTxt: "2050年には農業人口が半減し、100万人程度に。そのうち3割は85歳以上――。自民党の農林水産業骨太方針策定プロジェクトチーム（PT、小泉進次郎委員長）がこんな試算をまとめた。国内の農業生産を維持できないとみて、11月に決める環太平洋連携協定（TPP）の中長期的対策に、人材育成や労働力の確保策を盛り込む。",
+                                                expand:0,
+                                                position:2,
+                                                warrant:[
+                                                    {warrantTxt:"基幹的農業従事者と常時雇用者を合わせた「農業就業者数」は、10年に219万人。PTの試算では、これが25年に163万人、50年には108万人に減るとの結果になった。現在の就農者数や定着率、日本の総人口の減少見通しなどから「厳しく見積もった」（鈴木憲和PT副委員長）。",
+                                                        expand:0,
+                                                        evidence:[
+                                                            {
+                                                                evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
+                                                            },
+                                                            {
+                                                                evidenceTxt: "世代別に見ると、主要な労働力である60代以下の層が10年の124万人から25年には81万人、50年には60万人に減る。また10年には全体の3％にとどまる85歳以上の割合が、25年には22％、50年には29％に高まる。"
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                dissent:1,
+                                                random:2011
+                                            }
+                                            ]
+                                        },
+                                        {
+
+                                            order:1,
+                                            objs:[{
+                                                claimTxt: "一方で、昨年策定した食料・農業・農村基本計画は、国内の農業生産の継続には90万人程度の農業就業者が必要だと推計する。",
+                                                expand:0,
+                                                position:2,
+                                                warrant:[
+                                                    {warrantTxt:"PTは試算を踏まえ、このままでは国内農業の持続可能性が危機的な状況になると判断。農業教育・研修の充実で国内外の市場を視野に入れる経営層の育成だけでなく、生産作業には外国人やロボットなどの活用も必要とみて、人材育成や労働力確保の具体策の検討を11月の取りまとめに向けて加速する。",
+                                                        expand:0,
+                                                        evidence:[{
+                                                            evidenceTxt: "農水省は、議論の材料として（1）農業大学校の専門職業大学化（2）就農の入り口となる農業法人での雇用拡大（3）青年就農給付金制度の改善（4）地域で農業をしながら経営学を学べる農業経営塾（5）外国人労働力の確保――などを示した。ただ外国人の受け入れ拡大には、トラブルの増加や日本人の労賃引き下げなどにつながるとして、慎重論が出る可能性もある。"
+                                                        }
+                                                        ]
+                                                    }
+                                                ],
+                                                index:1013
+                                            },
+                                                {
+                                                    claimTxt: "一方で、昨年策定した食料・農業・農村基本計画は、国内の農業生産の継続には90万人程度の農業就業者が必要だと推計する。",
+                                                    position:2,
+                                                    expand:0,
+                                                    warrant:[
+                                                        {warrantTxt:"PTは試算を踏まえ、このままでは国内農業の持続可能性が危機的な状況になると判断。農業教育・研修の充実で国内外の市場を視野に入れる経営層の育成だけでなく、生産作業には外国人やロボットなどの活用も必要とみて、人材育成や労働力確保の具体策の検討を11月の取りまとめに向けて加速する。",
+                                                            expand:0,
+                                                            evidence:[{
+                                                                evidenceTxt: "農水省は、議論の材料として（1）農業大学校の専門職業大学化（2）就農の入り口となる農業法人での雇用拡大（3）青年就農給付金制度の改善（4）地域で農業をしながら経営学を学べる農業経営塾（5）外国人労働力の確保――などを示した。ただ外国人の受け入れ拡大には、トラブルの増加や日本人の労賃引き下げなどにつながるとして、慎重論が出る可能性もある。"
+                                                            }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    index:1014
+                                                }
+                                            ]
+                                        }
+                                    ]
+
+                                    */
+                }
+
+
+
+
+                  //var WIDTH = window.screen.width  //整个区域的宽度
+                    var WIDTH = getWidth()
+                    var HEIGHT = window.screen.height //整个区域的高度
+                    var SVGHEIGHT = 1200
+                    var RECTWIDTH = 450  //模块的长度
+                    var RECTHEIGHT = 100  //模块的宽度
+                    var LASTRECTHEIGHT //根据字体计算的长度
+                    var LEFT = 10 //整体模块距离浏览器左边的边距
+                    var SPACEX = 280 //右边模块距离左边模块的宽度
+                    var SPACEY = 15 //距头上模块的上边距
+                    var SLIPWIDTH = 15  //各级的错位距离
+
+                    var LEFTSPACE = 280 //左边模块距离左边svg边距
+                    var TOPSPACE = 10 //顶头的模块距离顶端的距离
+                    var FRONTSPACE = 35
+
+                    var PROFILEWIDTH = 200
+                    var PROFILEHEIGHT = 250
+
+                    var PROFILEPROLEFT = LEFTSPACE - PROFILEWIDTH
+                    var PROFILEPROTOP = TOPSPACE
+                    var PROFILEPRORIGHT = LEFTSPACE + RECTWIDTH + SPACEX + RECTWIDTH
+
+                    var POPUPRECTWIDTH = 1000
+                    var POPUPRECTHEIGHT = 600
+
+                    var DISSENTIMAGEWIDTH = 105
+
+                    var lastHeightL,lastHeightR
+                    var arrow = {}
+
+                    d3.select("#home").style("height",HEIGHT*0.70+"px")
+
+                    var svg = d3.select("svg")
+                    svg.attr("width",WIDTH)
+                    svg.attr("height",SVGHEIGHT)
+                    svg.style("margin-left",LEFT)
+
+
+                    function getWidth() {
+                        if (self.innerWidth) {
+                            return self.innerWidth;
+                        }
+                        else if (document.documentElement && document.documentElement.clientHeight){
+                            return document.documentElement.clientWidth;
+                        }
+                        else if (document.body) {
+                            return document.body.clientWidth;
+                        }
+                        return 0;
+                    }
+
+
+                    function main(){
+
+                        draw(1,data)
+                        draw(2,_data)
+
+
+                        drawArrow(arrow)
+
+                        drawPositionPic()
+                    }
+
+
+                    function drawPositionPic(){
+                        var foreignObject = svg.append("foreignObject")
+
+                        foreignObject.attr("width",PROFILEWIDTH)
+                        foreignObject.attr("height",PROFILEHEIGHT)
+
+                        foreignObject.attr("x",PROFILEPROLEFT)
+                        foreignObject.attr("y",PROFILEPROTOP)
+
+                        var id = "f"+Math.round(Math.random()*100000)
+
+
+                        var div = foreignObject.append('xhtml:div')
+                        div.attr("id",id)
+
+                        var _div = div.append('p')
+                        _div.style("width",PROFILEWIDTH*0.8+"px")
+                        _div.style("height","20px")
+                        _div.style("text-align","center")
+
+                        _div.html("賛成側")
+
+                        drawProfileDetail(1,div)
+
+                        var foreignObject = svg.append("foreignObject")
+                        foreignObject.attr("width",PROFILEWIDTH)
+                        foreignObject.attr("height",PROFILEHEIGHT)
+
+                        foreignObject.attr("x",PROFILEPRORIGHT)
+                        foreignObject.attr("y",PROFILEPROTOP)
+                        var div = foreignObject.append('xhtml:div')
+
+                        var _div = div.append('p')
+                        _div.style("width",PROFILEWIDTH*0.8+"px")
+                        _div.style("height","20px")
+                        _div.style("text-align","center")
+
+                        _div.html("反対側")
+
+                        drawProfileDetail(2,div)
+
+                    }
+
+
+                    function drawProfileDetail(position,div){
+
+                        position == 1?eval('var color = "#bcdff1"'):eval('var color = "#c8e5bc"')
+
+
+                        var div = div.append("div")
+                        var _svg = div.append("svg")
+                        _svg.attr("width",PROFILEWIDTH*0.8)
+                        _svg.attr("height",PROFILEHEIGHT*0.8)
+
+                        var _circle = _svg.append("circle")
+                        _circle.attr("cx",PROFILEPROLEFT)
+                        _circle.attr("cy",PROFILEPROTOP+25)
+                        _circle.attr("r",20)
+                        _circle.attr("fill",color)
+
+                        var _triangle = _svg.append("polygon")
+                        _triangle.attr("width",PROFILEWIDTH*0.95)
+                        _triangle.attr("height",PROFILEHEIGHT*0.95)
+
+                        var p1X = PROFILEPROLEFT
+                        var p1Y = PROFILEPROTOP+25
+
+                        var p2X = PROFILEPROLEFT - PROFILEWIDTH*0.1
+                        var p2Y = PROFILEHEIGHT*0.4
+
+                        var p3X = PROFILEPROLEFT + PROFILEWIDTH*0.1
+                        var p3Y = PROFILEHEIGHT*0.4
+
+                        console.log(p1X+","+p1Y+" "+p2X+","+p2Y+" "+p3X+","+p3Y)
+                        _triangle.attr("points",p1X+","+p1Y+" "+p2X+","+p2Y+" "+p3X+","+p3Y)
+                        _triangle.attr("fill", color)
+                        _triangle.attr("stroke-width", 2)
+
+                    }
+
+                    function draw(n,data){
+
+                        var lastHeight = TOPSPACE
+
+                        if(n == 1){
+                            var lastLeft = LEFTSPACE
+                        }else{
+                            var lastLeft = LEFTSPACE + RECTWIDTH + SPACEX
+                        }
+
+                        for(var i=0;i<data.length;i++){
+                            for(var j=0;j<data[i].objs.length;j++){
+
+                                for(var o=0;o<data[i].objs[j].length;o++){
+
+
+                                var competitionInformation = getCompetitionInformation(2,data[i].objs[j][o])
+                                appendRect(n,data[i].objs[j][o].dissent,lastLeft,lastHeight,"主張:"+data[i].objs[j][o].claimTxt,[i,j,o,-1,-1],competitionInformation,{warrant:data[i].objs[j][o].warrant})
+
+                                //var position = data[i].objs[j][o].position
+                                position = n
+                                var expand = data[i].objs[j][o].expand
+
+                                lastHeight += (LASTRECTHEIGHT+SPACEY)
+                                lastLeft += SLIPWIDTH
+
+                                if(data[i].objs[j][o].dissent){
+                                    var random = data[i].objs[j][o].random
+                                    if(arrow[random]){
+                                        arrow[random]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                    }else{
+                                        arrow[random] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                    }
+                                }
+
+                                if(data[i].objs[j][o].index){
+                                    var index = data[i].objs[j][o].index
+                                    if(arrow[index]){
+                                        arrow[index]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                    }else{
+                                        arrow[index] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                    }
+                                }
+
+
+                                if(parseInt(expand) == 0){
+                                    lastLeft -= SLIPWIDTH
+                                    continue;
+                                }
+
+                                for(var k=0;k<data[i].objs[j][o].warrant.length;k++){
+                                    var competitionInformation = getCompetitionInformation(3,data[i].objs[j][o].warrant[k])
+                                    appendRect(n,data[i].objs[j][o].warrant[k].dissent,lastLeft,lastHeight,"論拠:"+data[i].objs[j][o].warrant[k].warrantTxt,[i,j,o,k,-1],competitionInformation,{evidence:data[i].objs[j][o].warrant[k].evidence})
+                                    drawConnectLine(position,lastLeft+2*SLIPWIDTH,lastHeight-SPACEY,lastLeft+2*SLIPWIDTH,lastHeight)
+
+
+
+                                    lastHeight += (LASTRECTHEIGHT+SPACEY)
+                                    lastLeft += SLIPWIDTH
+
+                                    var expand = data[i].objs[j][o].warrant[k].expand
+                                    if(data[i].objs[j][o].warrant[k].dissent){
+                                        var random = data[i].objs[j][o].warrant[k].random
+                                        if(arrow[random]){
+                                            arrow[random]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                        }else{
+                                            arrow[random] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                        }
+                                    }
+
+                                    if(parseInt(expand) == 0){
+                                        lastLeft -= SLIPWIDTH
+                                        continue;
+                                    }
+
+                                    for(var s=0;s<data[i].objs[j][o].warrant[k].evidence.length;s++){
+                                        appendRect(n,data[i].objs[j][o].warrant[k].evidence[s].dissent,lastLeft,lastHeight,"根拠:"+data[i].objs[j][o].warrant[k].evidence[s].evidenceTxt,[i,j,o,k,s],0,0)
+
+                                        if(s == 0){
+                                            drawConnectLine(position,lastLeft+3*SLIPWIDTH,lastHeight-SPACEY,lastLeft+3*SLIPWIDTH,lastHeight)
+                                        }else{
+                                            drawConnectLine(position,lastLeft+4*SLIPWIDTH,lastHeight-SPACEY,lastLeft+4*SLIPWIDTH,lastHeight)
+                                        }
+
+
+                                        lastHeight += (LASTRECTHEIGHT+SPACEY)
+
+                                        var expand =  data[i].objs[j][o].warrant[k].evidence[s].expand
+
+
+                                        if(data[i].objs[j][o].warrant[k].evidence[s].dissent){
+                                            var random = data[i].objs[j][o].warrant[k].evidence[s].random
+                                            if(arrow[random]){
+                                                arrow[random]["start"] = {left:lastLeft,height:lastHeight,position:position}
+                                            }else{
+                                                arrow[random] = {"start":{left:lastLeft,height:lastHeight,position:position}}
+                                            }
+                                        }
+
+                                        if(parseInt(expand) == 0){
+                                            continue;
+                                        }
+                                    }
+                                    lastLeft -= SLIPWIDTH
+                                }
+
+                                lastLeft -= SLIPWIDTH
+
+                            }
+
+                        }
+
+
+                            lastHeight += FRONTSPACE
+                        }
+
+
+
+                        if(n == 1){
+                            lastHeightL = lastHeight
+                        }else{
+                            lastHeightR = lastHeight
+                            svg.style("height",lastHeightL>lastHeightR?lastHeightL:lastHeightR)
+                        }
+
+
+                    }
+
+                    function getCompetitionInformation(n,arr){
+
+
+                        var dissentNum = 0;
+                        var evidenceNum = 0
+                        var warrantDissentNum = 0
+                        var evidenceDissentNum = 0
+                        if(n==2){
+                            for(var i=0;i<arr.warrant.length;i++){
+                                if(arr.warrant[i].dissent == 1){
+                                    dissentNum++
+                                    warrantDissentNum++
+                                }
+                                evidenceNum += arr.warrant[i].evidence.length
+
+                                dissentNum += getCompetitionInformation(3,arr.warrant[i]).dissentNum
+                            }
+                            return {dissentNum:dissentNum,warrantNum:arr.warrant.length,warrantDissentNum:warrantDissentNum,evidenceNum:evidenceNum};
+                        }
+
+                        if(n==3){
+                            for(var i=0;i<arr.evidence.length;i++){
+                                if(arr.evidence[i].dissent == 1){
+                                    dissentNum++
+                                    evidenceDissentNum++
+                                }
+                            }
+                            return {dissentNum:dissentNum,evidenceNum:arr.evidence.length,evidenceDissentNum:evidenceDissentNum};
+                        }
+                    }
+
+                    function appendRect(n,d,x,y,txt,arr,competitionInformation,structureInformation){
+                        var foreignObject = svg.append("foreignObject")
+
+                        //450的宽度一行能装14px font的字体30个
+                        //100(默认RECTHEIGHT)的高度能装4行
+                        var _RECTHEIGHT = (Math.ceil(txt.length/30+1))*(RECTHEIGHT/4)
+                        LASTRECTHEIGHT = _RECTHEIGHT
+
+                        foreignObject.attr("width",RECTWIDTH)
+                        foreignObject.attr("height",_RECTHEIGHT)
+
+                        foreignObject.attr("x",x)
+                        foreignObject.attr("y",y)
+                        foreignObject.attr("class","rectangle")
+
+                        foreignObject.attr("arr",arr)
+
+                        var id = Math.round(Math.random()*100000)
+
+
+                        var balloonId = "b"+id
+                        foreignObject.attr("id",balloonId)
+
+                        var div = foreignObject.append('xhtml:div')
+
+
+
+                        var i = arr[0]
+                        var j = arr[1]
+                        var o = arr[2]
+                        var k = arr[3]!=-1?arr[3]:-1
+                        var s = arr[4]!=-1?arr[4]:-1
+
+                        //这种情况正方反方区别对待
+
+                        if(n == 1){
+                            if(k>=0 && s<0){
+                                //data[i].objs[j][o].warrant[k].expand = (data[i].objs[j][o].warrant[k].expand + 1) % 2
+                                var expand = data[i].objs[j][o].warrant[k].expand
+                                console.log(data[i].objs[j][o])
+                            }
+                            if(j>=0 && k<0){
+                                //data[i].objs[j][o].expand = (data[i].objs[j][o].expand + 1) % 2
+                                var expand = data[i].objs[j][o].expand
+                            }
+                        }else{
+                            if(k>=0 && s<0){
+                                //_data[i].objs[j][o].warrant[k].expand = (_data[i].objs[j][o].warrant[k].expand + 1) % 2
+                                var expand = _data[i].objs[j][o].warrant[k].expand
+                            }
+                            if(j>=0 && k<0){
+                                // _data[i].objs[j][o].expand = (_data[i].objs[j][o].expand + 1) % 2
+                                var expand = _data[i].objs[j][o].expand
+                            }
+                        }
+
+
+
+                        var div = div.append('div')
+
+
+                        if(!d){
+
+                            //还是一个道理正方反方区别对待
+                            if(n == 1){
+                                div.attr(
+                                        'class','alert alert-info'
+                                );
+                            }else{
+                                div.attr(
+                                        'class','alert alert-success'
+                                );
+                            }
+                        }else{
+                            div.attr(
+                                    'class','alert alert-warning'
+                            );
+                        }
+
+                        if(parseInt(competitionInformation.dissentNum)>=2 || parseInt(competitionInformation.warrantNum)>=3 ||parseInt(competitionInformation.evidenceNum)>=3){
+                            div.classed("border",true)
+                        }
+
+
+                        div.attr(
+                                'role',"alert"
+                        )
+                        div.style("height",_RECTHEIGHT+"px")
+                        div.style('overflow',"auto")
+
+
+                        if(expand == 1){
+                            var p = div.append('p')
+                                    .html(txt)
+
+                            var p = div.append('p')
+                            p.attr("class","row")
+
+
+                            if(k>=0 && s<0){
+                                p.html("<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                                        "<div class='col-sm-2'>隠す</div>");
+                            }
+
+                            if(j>=0 && k<0){
+                                p.html("<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                                        "<div class='col-sm-2'>隠す</div>");
+                            }
+
+                        }else{
+                            var p = div.append('p')
+                                    .html(txt)
+
+                            var p = div.append('p')
+                            p.attr("class","row")
+
+
+                            if(k>=0 && s<0){
+                                p.html( "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                                        "<div class='col-sm-2'>詳細</div>");
+                            }
+
+                            if(j>=0 && k<0){
+                                p.html( "<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                                        "<div class='col-sm-2'>詳細</div>");
+                            }
+
+                        }
+
+
+
+                        var did = "d" + id
+                        p.attr("id",did)
+
+
+                        //展开和收拢的控制
+                        d3.select("#"+did).on("click",function(){
+
+
+                            if(n == 1){
+                                if(k>=0 && s<0){
+                                    data[i].objs[j][o].warrant[k].expand = (data[i].objs[j][o].warrant[k].expand + 1) % 2
+                                }
+                                if(j>=0 && k<0){
+                                    data[i].objs[j][o].expand = (data[i].objs[j][o].expand + 1) % 2
+                                }
+                            }else{
+                                if(k>=0 && s<0){
+                                    _data[i].objs[j][o].warrant[k].expand = (_data[i].objs[j][o].warrant[k].expand + 1) % 2
+                                }
+                                if(j>=0 && k<0){
+                                    _data[i].objs[j][o].expand = (_data[i].objs[j][o].expand + 1) % 2
+                                }
+                            }
+
+                            reDraw()
+
+                        })
+
+                        d3.select("#"+balloonId).on("mouseover",function(){
+                            d3.selectAll(".balloon").remove()
+                            if(structureInformation != 0){
+                                popUp(n,balloonId,x,y,structureInformation,arr)
+                            }
+                        })
+
+
+                    }
+
+
+
+                    function popUp(position,id,x,y,structureInformation,arr){
+                        var i = arr[0]
+                        var j = arr[1]
+                        var o = arr[2]
+                        var k = arr[3]!=-1?arr[3]:-1
+                        var s = arr[4]!=-1?arr[4]:-1
+
+
+
+                        var rect = svg.append("foreignObject")
+
+                        rect.attr("y",y)
+                        rect.attr("width",POPUPRECTWIDTH)
+                        rect.attr("height",POPUPRECTHEIGHT)
+
+
+                        var div = rect.append('xhtml:div')
+                        div.style("width",POPUPRECTWIDTH)
+                        div.style("height",POPUPRECTHEIGHT)
+                        div = div.append("div")
+
+                        div.attr("class","row col-sm-12 balloon")
+
+                        if(position == 1){
+                            rect.attr("x",x+RECTWIDTH + 30)
+                            div.classed("_balloon", true);
+                        }else{
+                            rect.attr("x",x-POPUPRECTWIDTH)
+                            div.classed("__balloon", true);
+                        }
+
+
+
+
+                        div.style("width",POPUPRECTWIDTH+"px")
+                        div.style("background-color","#fff")
+                        //div.style("opacity","0.7")
+
+                        var sdiv = div.append("div")
+                        sdiv.attr("class","row")
+
+                        var title = sdiv.append("div")
+                        title.attr("class","col-sm-11")
+                        title.html("ビュー")
+
+                        var remove = sdiv.append("div")
+                        remove.attr("class","col-sm-1")
+                        remove = remove.append("span")
+                        remove.attr("class","glyphicon glyphicon-remove")
+                        remove.attr("aria-hidden","true")
+                        remove.style("cursor","pointer")
+
+                        remove.on("click",function(){
+                            rect.remove()
+                        })
+
+
+
+
+
+                        if(j>=0 && k<0){
+                            var pData = position==1?data:_data
+
+                            var _div = div.append("div")
+
+                            if(pData[i].objs[j][o].dissent){
+                                _div.html("主張(異議あり)")
+                            }else{
+                                _div.html("主張")
+                            }
+
+                            var _div = div.append("div")
+                            _div.attr("class","col-sm-12 col-sm-offset-0")
+                            _div.html(pData[i].objs[j][o].claimTxt)
+
+
+
+
+                            pData = pData[i].objs[j][o].warrant
+
+                            for(var m=0;m<pData.length;m++){
+                                console.log("-----"+pData[m].warrantTxt)
+
+
+                                var _div = div.append("div")
+                                _div.attr("class","col-sm-2 col-sm-offset-0")
+
+                                if(pData[m].dissent){
+                                    _div.html("論拠(異議あり)")
+                                }else{
+                                    _div.html("論拠")
+                                }
+
+                                var _div = div.append("div")
+                                _div.attr("class","col-sm-10 col-sm-offset-1")
+                                _div.html(pData[m].warrantTxt)
+
+
+                                for(var n=0;n<pData[m].evidence.length;n++){
+                                    console.log("---------------"+pData[m].evidence[n].evidenceTxt)
+                                    var _div = div.append("div")
+                                    _div.attr("class","col-sm-2 col-sm-offset-0")
+                                    if(pData[m].evidence[n].dissnet){
+                                        _div.html("根拠(異議あり)")
+                                    }else{
+                                        _div.html("根拠")
+                                    }
+
+                                    var _div = div.append("div")
+                                    _div.attr("class","col-sm-10 col-sm-offset-1")
+                                    _div.html(pData[m].evidence[n].evidenceTxt)
+                                }
+                            }
+                        }
+
+                        if(k>=0 && s<0){
+                            var pData = position==1?data:_data
+
+                            pData = pData[i].objs[j][o].warrant[k]
+
+                            var _div = div.append("div")
+
+                            if(pData.dissent){
+                                _div.html("論拠(異議あり)")
+                            }else{
+                                _div.html("論拠")
+                            }
+
+                            var _div = div.append("div")
+                            _div.attr("class","col-sm-12 col-sm-offset-0")
+                            _div.html(pData.warrantTxt)
+
+
+                            pData = pData.evidence
+                            for(var m=0;m<pData.length;m++){
+                                console.log("-------------"+pData[m].evidenceTxt)
+
+                                var _div = div.append("div")
+                                _div.attr("class","col-sm-12 col-sm-offset-0")
+                                if(pData[m].dissent){
+                                    _div.html("根拠(異議あり)")
+                                }else{
+                                    _div.html("根拠")
+                                }
+                                var _div = div.append("div")
+                                _div.attr("class","col-sm-12 col-sm-offset-0")
+                                _div.html(pData[m].evidenceTxt)
+                            }
+                        }
+
+
+
+
+
+
+
+
+
+                        /*
+
+                         if(structureInformation.warrant){
+
+
+                         for(var i=0;i<structureInformation.warrant.length;i++){
+                         var _div = div.append("div")
+                         _div.attr("class","col-sm-10 col-sm-offset-2")
+                         if(structureInformation.warrant[i].dissent){
+                         _div.html("論拠(意義あり)")
+                         }else{
+                         _div.html("論拠")
+                         }
+                         for(var j=0;j<structureInformation.warrant[i].evidence.length;j++){
+                         var _div = div.append("div")
+                         _div.attr("class","col-sm-8 col-sm-offset-4")
+
+                         if(structureInformation.warrant[i].evidence[j].dissent){
+                         _div.html("根拠(意義あり)")
+                         }else{
+                         _div.html("根拠")
+                         }
+
+                         }
+                         }
+
+
+                         }
+
+                         if(structureInformation.evidence){
+
+                         for(var i=0;i<structureInformation.evidence.length;i++){
+                         var _div = div.append("div")
+                         _div.attr("class","col-sm-10 col-sm-offset-2")
+
+                         if(structureInformation.evidence[i].dissent){
+                         _div.html("根拠(意義あり)")
+                         }else{
+                         _div.html("根拠")
+                         }
+
+                         }
+
+                         }
+
+                         */
+
+
+                    }
+
+                    function reDraw(){
+                        arrow = {}
+                        svg.selectAll(".rectangle,.connectLine,.arrow,.dissentImage").remove();
+                        draw(1,data)
+                        draw(2,_data)
+                        drawArrow(arrow)
+
+                        if(lastHeightL >= lastHeightR){
+                            svg.style("height",lastHeightL)
+                        }else{
+                            svg.style("height",lastHeightR)
+                        }
+                    }
+
+                    function drawArrow(_arrow){
+
+                        for(var i in _arrow){
+                            var _start = _arrow[i].start
+                            var _end = _arrow[i].end
+                            var dissentImageX
+                            var dissentImageY
+
+                            if(!_start || !_end) continue　//如果起始点或者终点有一个是被收起来得状态得话,那么这条线直接不显示,跳过
+
+                            console.log(_start)
+
+                            var startLeftX,startLeftY,endRightX,endRightY
+                            var endLeftX,endLeftY,endRightX,endRightY
+
+
+                            if(_start.position == 1){
+                                startLeftX = _start.left + RECTWIDTH
+                                startLeftY = _start.height - RECTHEIGHT/2
+                                dissentImageX = startLeftX
+                                dissentImageY = startLeftY
+                            }else{
+                                startLeftX = _start.left
+                                startLeftY = _start.height - RECTHEIGHT/2
+                                dissentImageX = startLeftX - DISSENTIMAGEWIDTH
+                                dissentImageY = startLeftY
+                            }
+
+                            if(_end.position == 1){
+                                endLeftX = _end.left + RECTWIDTH
+                                endLeftY = _end.height - RECTHEIGHT/2
+                            }else{
+                                endLeftX = _end.left - 10
+                                endLeftY = _end.height - RECTHEIGHT/2
+                            }
+
+                            someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY)
+
+
+
+                            var dissent = svg.append("foreignObject")
+                                    .attr("x", dissentImageX)
+                                    .attr("y", dissentImageY)
+                                    .attr("class","dissentImage")
+
+                            var dissent = dissent.append('xhtml:div')
+                            dissent.attr("class","row")
+                            dissent.style("width",DISSENTIMAGEWIDTH+"px")
+
+
+
+                            if(_start.position == 1){
+
+
+                                var div = dissent.append("div")
+                                div.attr("class","col-sm-6")
+                                var image = div.append("img")
+
+                                image.attr("src", "./leftPointer.png")
+                                image.attr("width", "60")
+                                        .attr("height", "50");
+
+
+
+                                var div = dissent.append("div")
+                                div.attr("class","col-sm-6")
+
+
+                                var image = div.append("img")
+
+                                image.attr("src", "./dissent.png")
+                                        .attr("width", "60")
+                                        .attr("height", "50");
+
+
+                            }else{
+
+                                var div = dissent.append("div")
+                                div.attr("class","col-sm-6")
+
+
+                                var image = div.append("img")
+
+                                image.attr("src", "./dissent.png")
+                                        .attr("width", "60")
+                                        .attr("height", "50");
+
+                                var div = dissent.append("div")
+                                div.attr("class","col-sm-6")
+                                var image = div.append("img")
+
+                                image.attr("src", "./rightPointer.png")
+                                image.attr("width", "60")
+                                        .attr("height", "50");
+                            }
+
+
+
+
+
+                        }
+                    }
+
+                    function drawConnectLine(position,startX,startY,endX,endY){
+                        position == 1?eval('var color = "#bcdff1"'):eval('var color = "#c8e5bc"')
+
+                        var line = svg.append("line")
+                                .attr("x1",startX)
+                                .attr("y1",startY)
+                                .attr("x2",endX)
+                                .attr("y2",endY)
+                                .attr("stroke",color)
+                                .attr("stroke-width",6)
+                                .attr("class","connectLine")
+
+
+
+                    }
+
+                    function someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY){
+                        var divArr = [2,2.5,3,3.5,4,4.5]
+
+
+                        //已确定起点和终点,现在要做的事就是增加2个点M1,M2
+
+                        //M1
+
+                        var m1X = (endLeftX - startLeftX)/divArr[i%(divArr.length-1)] + startLeftX
+                        var m1Y =  startLeftY
+                        var m2X = m1X
+                        var m2Y = endLeftY
+
+                        var line = svg.append("line")
+                                .attr("x1",startLeftX)
+                                .attr("y1",startLeftY)
+                                .attr("x2",m1X)
+                                .attr("y2",m1Y)
+                                .attr("stroke","#000")
+                                .attr("stroke-width",3)
+                                .attr("class","arrow")
+
+                        var line = svg.append("line")
+                                .attr("x1",m1X)
+                                .attr("y1",m1Y)
+                                .attr("x2",m2X)
+                                .attr("y2",m2Y)
+                                .attr("stroke","#000")
+                                .attr("stroke-width",3)
+                                .attr("class","arrow")
+
+                        var line = svg.append("line")
+                                .attr("x1",m2X)
+                                .attr("y1",m2Y)
+                                .attr("x2",endLeftX)
+                                .attr("y2",endLeftY)
+                                .attr("stroke","#000")
+                                .attr("stroke-width",3)
+                                .attr("marker-end","url(#arrow)")
+                                .attr("class","arrow")
+
+                    }
+            }
+        }
+    })
+
 
     myApp.directive("homeMap",function($rootScope){
         return {

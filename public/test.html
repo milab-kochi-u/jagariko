@@ -572,6 +572,9 @@
     }
 
     function getCompetitionInformation(n,arr){
+        console.log(1111)
+        console.log(n)
+        console.log(arr)
         var dissentNum = 0;
         var evidenceNum = 0
         var warrantDissentNum = 0
@@ -763,7 +766,7 @@
         d3.select("#"+balloonId).on("mouseover",function(){
             d3.selectAll(".balloon").remove()
             if(structureInformation != 0){
-                popUp(n,balloonId,x,y,structureInformation)
+                popUp(n,balloonId,x,y,structureInformation,arr)
             }
         })
 
@@ -771,7 +774,14 @@
     }
 
 
-    function popUp(position,id,x,y,structureInformation){
+    function popUp(position,id,x,y,structureInformation,arr){
+        var i = arr[0]
+        var j = arr[1]
+        var k = arr[2]!=-1?arr[2]:-1
+        var s = arr[3]!=-1?arr[3]:-1
+
+
+
         var rect = svg.append("foreignObject")
 
         rect.attr("y",y)
@@ -805,8 +815,8 @@
         sdiv.attr("class","row")
 
         var title = sdiv.append("div")
-        title.attr("class","col-sm-10")
-        title.html("子孫構想")
+        title.attr("class","col-sm-11")
+        title.html("ビュー")
 
         var remove = sdiv.append("div")
         remove.attr("class","col-sm-1")
@@ -820,7 +830,111 @@
         })
 
 
+
+
+
+        if(j>=0 && k<0){
+            var pData = position==1?data:_data
+
+            var _div = div.append("div")
+
+            if(pData[i].objs[j].dissent){
+                _div.html("主張(異議あり)")
+            }else{
+                _div.html("主張")
+            }
+
+            var _div = div.append("div")
+            _div.attr("class","col-sm-12 col-sm-offset-0")
+            _div.html(pData[i].objs[j].claimTxt)
+
+
+
+
+            pData = pData[i].objs[j].warrant
+
+            for(var m=0;m<pData.length;m++){
+                console.log("-----"+pData[m].warrantTxt)
+
+
+                var _div = div.append("div")
+                _div.attr("class","col-sm-2 col-sm-offset-0")
+
+                if(pData[m].dissent){
+                    _div.html("論拠(異議あり)")
+                }else{
+                    _div.html("論拠")
+                }
+
+                var _div = div.append("div")
+                _div.attr("class","col-sm-10 col-sm-offset-1")
+                _div.html(pData[m].warrantTxt)
+
+
+                for(var n=0;n<pData[m].evidence.length;n++){
+                    console.log("---------------"+pData[m].evidence[n].evidenceTxt)
+                    var _div = div.append("div")
+                    _div.attr("class","col-sm-2 col-sm-offset-0")
+                    if(pData[m].evidence[n]){
+                        _div.html("根拠(異議あり)")
+                    }else{
+                        _div.html("根拠")
+                    }
+
+                    var _div = div.append("div")
+                    _div.attr("class","col-sm-10 col-sm-offset-1")
+                    _div.html(pData[m].evidence[n].evidenceTxt)
+                }
+            }
+        }
+
+        if(k>=0 && s<0){
+            var pData = position==1?data:_data
+
+            pData = pData[i].objs[j].warrant[k]
+
+            var _div = div.append("div")
+
+            if(pData.dissent){
+                _div.html("論拠(異議あり)")
+            }else{
+                _div.html("論拠")
+            }
+
+            var _div = div.append("div")
+            _div.attr("class","col-sm-12 col-sm-offset-0")
+            _div.html(pData.warrantTxt)
+
+
+            pData = pData.evidence
+            for(var m=0;m<pData.length;m++){
+                console.log("-------------"+pData[m].evidenceTxt)
+
+                var _div = div.append("div")
+                _div.attr("class","col-sm-12 col-sm-offset-0")
+                if(pData[m].dissent){
+                    _div.html("根拠(異議あり)")
+                }else{
+                    _div.html("根拠")
+                }
+                var _div = div.append("div")
+                _div.attr("class","col-sm-12 col-sm-offset-0")
+                _div.html(pData[m].evidenceTxt)
+            }
+        }
+
+
+
+
+
+
+
+
+
+        /*
+
         if(structureInformation.warrant){
+
 
             for(var i=0;i<structureInformation.warrant.length;i++){
                 var _div = div.append("div")
@@ -843,9 +957,11 @@
                 }
             }
 
+
         }
 
         if(structureInformation.evidence){
+
             for(var i=0;i<structureInformation.evidence.length;i++){
                 var _div = div.append("div")
                 _div.attr("class","col-sm-10 col-sm-offset-2")
@@ -857,7 +973,10 @@
                 }
 
             }
+
         }
+
+        */
 
 
     }
