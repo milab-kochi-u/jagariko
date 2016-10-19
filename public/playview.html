@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/tmp/jquery-2.2.4.min.js" ></script>
+    <script src="/_debate/d3/d3.js"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <style>
+
+        .border{
+            border: inset 2px #000;
+        }
+
+
+        .balloon {
+            background-color:#fff;
+            border:1px solid #000;
+            border-radius:5px;
+            position:relative;
+        }
+
+        .__balloon:before {
+            border:10px solid transparent;
+            border-left-color:#fff;
+            border-right-width:0;
+            right:-9px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+            z-index:1;
+        }
+
+        .__balloon:after {
+            border:10px solid transparent;
+            border-left-color:#000;
+            border-right-width:0;
+            right:-10px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+        }
+
+
+
+        ._balloon:before {
+            border:10px solid transparent;
+            border-right-color:#fff;
+            border-left-width:0;
+            left:-9px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+            z-index:1;
+        }
+
+        ._balloon:after {
+            border:10px solid transparent;
+            border-right-color:#000;
+            border-left-width:0;
+            left:-10px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+        }
+
+
+
+    </style>
+</head>
+<body>
+
+<div class="row" id="home" style="overflow: auto">
+<svg>
+
+    <defs>
+        <marker id="arrow"
+                markerUnits="strokeWidth"
+                markerWidth="12"
+                markerHeight="12"
+                viewBox="0 0 12 12"
+                refX="6"
+                refY="6"
+                orient="auto">
+            <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000000;" />
+        </marker>
+    </defs>
+
+
+</svg>
+</div>
+
+
+<div class="row" style="width: 46%;margin:0 auto">
+
+    <div class="page-header">
+        <h1 style="text-align: center">自己勝敗判定<h1>
+    </div>
+    <div class="btn-group btn-group-justified" role="group" aria-label="...">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default">勝ち</button>
+        </div>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default">引き分け</button>
+        </div>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default">負け</button>
+        </div>
+    </div>
+
+</div>
+
+</body>
+<script>
+
+
+    //var WIDTH = window.screen.width  //整个区域的宽度
+    var WIDTH = getWidth()
+    var HEIGHT = window.screen.height //整个区域的高度
+    var SVGHEIGHT = 1200
+    var RECTWIDTH = 450  //模块的长度
+    var RECTHEIGHT = 100  //模块的宽度
+    var LASTRECTHEIGHT //根据字体计算的长度
+    var LEFT = 10 //整体模块距离浏览器左边的边距
+    var SPACEX = 380 //右边模块距离左边模块的宽度
+    var SPACEY = 15 //距头上模块的上边距
+    var SLIPWIDTH = 15  //各级的错位距离
+
+    var LEFTSPACE = 350 //左边模块距离左边svg边距
+    var TOPSPACE = 10 //顶头的模块距离顶端的距离
+    var FRONTSPACE = 35
+
+    var PROFILEWIDTH = 250
+    var PROFILEHEIGHT = 250
+
+    var PROFILEPROLEFT = LEFTSPACE - PROFILEWIDTH
+    var PROFILEPROTOP = TOPSPACE
+    var PROFILEPRORIGHT = LEFTSPACE + RECTWIDTH + SPACEX + RECTWIDTH
+
+    var POPUPRECTWIDTH = 1000
+    var POPUPRECTHEIGHT = 600
+
+    var DISSENTIMAGEWIDTH = 105
+
+    var lastHeightL,lastHeightR
+    var arrow = {}
+
+    d3.select("#home").style("height",HEIGHT*0.70+"px")
+
+    var svg = d3.select("svg")
+    svg.attr("width",WIDTH)
+    svg.attr("height",SVGHEIGHT)
+    svg.style("margin-left",LEFT)
+
+
+
+
+
+
+
+
+
+    var data = []
+    var _data = []
+
+    init()
+    function init() {
+        //data = JSON.parse(getCookie("data"))
+        //_data = JSON.parse(getCookie("_data"))
+        data = JSON.parse(window.localStorage.data)
+        _data = JSON.parse(window.localStorage._data)
+
+
+        console.log(data)
+        console.log(_data)
+
+        main()
+    }
+
+        function getWidth() {
+            if (self.innerWidth) {
+                return self.innerWidth;
+            }
+            else if (document.documentElement && document.documentElement.clientHeight){
+                return document.documentElement.clientWidth;
+            }
+            else if (document.body) {
+                return document.body.clientWidth;
+            }
+            return 0;
+        }
+
+
+        function main(){
+
+            draw(1,data)
+            draw(2,_data)
+
+
+            drawArrow(arrow)
+
+            drawPositionPic()
+        }
+
+
+        function drawPositionPic(){
+            var foreignObject = svg.append("foreignObject")
+
+            foreignObject.attr("width",PROFILEWIDTH)
+            foreignObject.attr("height",PROFILEHEIGHT)
+
+            foreignObject.attr("x",PROFILEPROLEFT)
+            foreignObject.attr("y",PROFILEPROTOP)
+
+            var id = "f"+Math.round(Math.random()*100000)
+
+
+            var div = foreignObject.append('xhtml:div')
+            div.attr("id",id)
+
+            var _div = div.append('p')
+            _div.style("width",PROFILEWIDTH*0.8+"px")
+            _div.style("height","20px")
+            _div.style("text-align","center")
+
+            _div.html("賛成側")
+
+            drawProfileDetail(1,div)
+
+            var foreignObject = svg.append("foreignObject")
+            foreignObject.attr("width",PROFILEWIDTH)
+            foreignObject.attr("height",PROFILEHEIGHT)
+
+            foreignObject.attr("x",PROFILEPRORIGHT)
+            foreignObject.attr("y",PROFILEPROTOP)
+            var div = foreignObject.append('xhtml:div')
+
+            var _div = div.append('p')
+            _div.style("width",PROFILEWIDTH*0.8+"px")
+            _div.style("height","20px")
+            _div.style("text-align","center")
+
+            _div.html("反対側")
+
+            drawProfileDetail(2,div)
+
+        }
+
+
+        function drawProfileDetail(position,div){
+
+            position == 1?eval('var color = "#bcdff1"'):eval('var color = "#c8e5bc"')
+
+
+            var div = div.append("div")
+            var _svg = div.append("svg")
+            _svg.attr("width",PROFILEWIDTH*0.8)
+            _svg.attr("height",PROFILEHEIGHT*0.8)
+
+            var _circle = _svg.append("circle")
+            _circle.attr("cx",PROFILEPROLEFT)
+            _circle.attr("cy",PROFILEPROTOP+25)
+            _circle.attr("r",20)
+            _circle.attr("fill",color)
+
+            var _triangle = _svg.append("polygon")
+            _triangle.attr("width",PROFILEWIDTH*0.95)
+            _triangle.attr("height",PROFILEHEIGHT*0.95)
+
+            var p1X = PROFILEPROLEFT
+            var p1Y = PROFILEPROTOP+25
+
+            var p2X = PROFILEPROLEFT - PROFILEWIDTH*0.1
+            var p2Y = PROFILEHEIGHT*0.4
+
+            var p3X = PROFILEPROLEFT + PROFILEWIDTH*0.1
+            var p3Y = PROFILEHEIGHT*0.4
+
+            console.log(p1X+","+p1Y+" "+p2X+","+p2Y+" "+p3X+","+p3Y)
+            _triangle.attr("points",p1X+","+p1Y+" "+p2X+","+p2Y+" "+p3X+","+p3Y)
+            _triangle.attr("fill", color)
+            _triangle.attr("stroke-width", 2)
+
+        }
+
+        function draw(n,data){
+
+            var lastHeight = TOPSPACE
+
+            if(n == 1){
+                var lastLeft = LEFTSPACE
+            }else{
+                var lastLeft = LEFTSPACE + RECTWIDTH + SPACEX
+            }
+
+            for(var i=0;i<data.length;i++){
+                for(var j=0;j<data[i].objs.length;j++){
+
+                    for(var o=0;o<data[i].objs[j].length;o++){
+
+
+                        var competitionInformation = getCompetitionInformation(2,data[i].objs[j][o])
+                        appendRect(n,data[i].objs[j][o].dissent,lastLeft,lastHeight,"主張:"+data[i].objs[j][o].claimTxt,[i,j,o,-1,-1],competitionInformation,{warrant:data[i].objs[j][o].warrant})
+
+                        //var position = data[i].objs[j][o].position
+                        position = n
+                        var expand = data[i].objs[j][o].expand
+
+                        lastHeight += (LASTRECTHEIGHT+SPACEY)
+                        lastLeft += SLIPWIDTH
+
+                        if(data[i].objs[j][o].dissent){
+                            var random = data[i].objs[j][o].random
+                            if(arrow[random]){
+                                arrow[random]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                            }else{
+                                arrow[random] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                            }
+                        }
+
+                        if(data[i].objs[j][o].index){
+                            var index = data[i].objs[j][o].index
+                            if(arrow[index]){
+                                arrow[index]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                            }else{
+                                arrow[index] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                            }
+                        }
+
+
+
+                        if(parseInt(expand) == 0){
+                            lastLeft -= SLIPWIDTH
+                            continue;
+                        }
+
+                        for(var k=0;k<data[i].objs[j][o].warrant.length;k++){
+                            var competitionInformation = getCompetitionInformation(3,data[i].objs[j][o].warrant[k])
+                            appendRect(n,data[i].objs[j][o].warrant[k].dissent,lastLeft,lastHeight,"論拠:"+data[i].objs[j][o].warrant[k].warrantTxt,[i,j,o,k,-1],competitionInformation,{evidence:data[i].objs[j][o].warrant[k].evidence})
+                            drawConnectLine(position,lastLeft+2*SLIPWIDTH,lastHeight-SPACEY,lastLeft+2*SLIPWIDTH,lastHeight)
+
+
+
+                            lastHeight += (LASTRECTHEIGHT+SPACEY)
+                            lastLeft += SLIPWIDTH
+
+                            var expand = data[i].objs[j][o].warrant[k].expand
+                            if(data[i].objs[j][o].warrant[k].dissent){
+                                var random = data[i].objs[j][o].warrant[k].random
+                                if(arrow[random]){
+                                    arrow[random]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                }else{
+                                    arrow[random] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                }
+                            }
+
+                            if(parseInt(expand) == 0){
+                                lastLeft -= SLIPWIDTH
+                                continue;
+                            }
+
+                            for(var s=0;s<data[i].objs[j][o].warrant[k].evidence.length;s++){
+                                appendRect(n,data[i].objs[j][o].warrant[k].evidence[s].dissent,lastLeft,lastHeight,"根拠:"+data[i].objs[j][o].warrant[k].evidence[s].evidenceTxt,[i,j,o,k,s],0,0)
+
+                                if(s == 0){
+                                    drawConnectLine(position,lastLeft+3*SLIPWIDTH,lastHeight-SPACEY,lastLeft+3*SLIPWIDTH,lastHeight)
+                                }else{
+                                    drawConnectLine(position,lastLeft+4*SLIPWIDTH,lastHeight-SPACEY,lastLeft+4*SLIPWIDTH,lastHeight)
+                                }
+
+
+                                lastHeight += (LASTRECTHEIGHT+SPACEY)
+
+                                var expand =  data[i].objs[j][o].warrant[k].evidence[s].expand
+
+
+                                if(data[i].objs[j][o].warrant[k].evidence[s].dissent){
+                                    var random = data[i].objs[j][o].warrant[k].evidence[s].random
+                                    if(arrow[random]){
+                                        arrow[random]["start"] = {left:lastLeft,height:lastHeight,position:position}
+                                    }else{
+                                        arrow[random] = {"start":{left:lastLeft,height:lastHeight,position:position}}
+                                    }
+                                }
+
+                                if(parseInt(expand) == 0){
+                                    continue;
+                                }
+                            }
+                            lastLeft -= SLIPWIDTH
+                        }
+
+                        lastLeft -= SLIPWIDTH
+
+                    }
+
+                }
+
+
+                lastHeight += FRONTSPACE
+            }
+
+
+
+            if(n == 1){
+                lastHeightL = lastHeight
+            }else{
+                lastHeightR = lastHeight
+                svg.style("height",lastHeightL>lastHeightR?lastHeightL:lastHeightR)
+            }
+
+
+        }
+
+        function getCompetitionInformation(n,arr){
+
+
+            var dissentNum = 0;
+            var evidenceNum = 0
+            var warrantDissentNum = 0
+            var evidenceDissentNum = 0
+            if(n==2){
+                for(var i=0;i<arr.warrant.length;i++){
+                    if(arr.warrant[i].dissent == 1){
+                        dissentNum++
+                        warrantDissentNum++
+                    }
+                    evidenceNum += arr.warrant[i].evidence.length
+
+                    dissentNum += getCompetitionInformation(3,arr.warrant[i]).dissentNum
+                }
+                return {dissentNum:dissentNum,warrantNum:arr.warrant.length,warrantDissentNum:warrantDissentNum,evidenceNum:evidenceNum};
+            }
+
+            if(n==3){
+                for(var i=0;i<arr.evidence.length;i++){
+                    if(arr.evidence[i].dissent == 1){
+                        dissentNum++
+                        evidenceDissentNum++
+                    }
+                }
+                return {dissentNum:dissentNum,evidenceNum:arr.evidence.length,evidenceDissentNum:evidenceDissentNum};
+            }
+        }
+
+        function appendRect(n,d,x,y,txt,arr,competitionInformation,structureInformation){
+            var foreignObject = svg.append("foreignObject")
+            foreignObject.style("cursor","pointer")
+            //450的宽度一行能装14px font的字体30个
+            //100(默认RECTHEIGHT)的高度能装4行
+            var _RECTHEIGHT = (Math.ceil(txt.length/30+1))*(RECTHEIGHT/4)
+            LASTRECTHEIGHT = _RECTHEIGHT
+
+            foreignObject.attr("width",RECTWIDTH)
+            foreignObject.attr("height",_RECTHEIGHT)
+
+            foreignObject.attr("x",x)
+            foreignObject.attr("y",y)
+            foreignObject.attr("class","rectangle")
+
+            foreignObject.attr("arr",arr)
+
+            var id = Math.round(Math.random()*100000)
+
+
+            var balloonId = "b"+id
+            foreignObject.attr("id",balloonId)
+
+            var div = foreignObject.append('xhtml:div')
+
+
+
+            var i = arr[0]
+            var j = arr[1]
+            var o = arr[2]
+            var k = arr[3]!=-1?arr[3]:-1
+            var s = arr[4]!=-1?arr[4]:-1
+
+            //这种情况正方反方区别对待
+
+            if(n == 1){
+                if(k>=0 && s<0){
+                    //data[i].objs[j][o].warrant[k].expand = (data[i].objs[j][o].warrant[k].expand + 1) % 2
+                    var expand = data[i].objs[j][o].warrant[k].expand
+                    console.log(data[i].objs[j][o])
+                }
+                if(j>=0 && k<0){
+                    //data[i].objs[j][o].expand = (data[i].objs[j][o].expand + 1) % 2
+                    var expand = data[i].objs[j][o].expand
+                }
+            }else{
+                if(k>=0 && s<0){
+                    //_data[i].objs[j][o].warrant[k].expand = (_data[i].objs[j][o].warrant[k].expand + 1) % 2
+                    var expand = _data[i].objs[j][o].warrant[k].expand
+                }
+                if(j>=0 && k<0){
+                    // _data[i].objs[j][o].expand = (_data[i].objs[j][o].expand + 1) % 2
+                    var expand = _data[i].objs[j][o].expand
+                }
+            }
+
+
+
+            var div = div.append('div')
+
+
+            if(!d){
+
+                //还是一个道理正方反方区别对待
+                if(n == 1){
+                    div.attr(
+                            'class','alert alert-info'
+                    );
+                }else{
+                    div.attr(
+                            'class','alert alert-success'
+                    );
+                }
+            }else{
+                div.attr(
+                        'class','alert alert-warning'
+                );
+            }
+
+            if(parseInt(competitionInformation.dissentNum)>=2 || parseInt(competitionInformation.warrantNum)>=3 ||parseInt(competitionInformation.evidenceNum)>=3){
+                div.classed("border",true)
+            }
+
+
+            div.attr(
+                    'role',"alert"
+            )
+            div.style("height",_RECTHEIGHT+"px")
+            div.style('overflow',"auto")
+
+
+            if(expand == 1){
+                var p = div.append('p')
+                        .html(txt)
+
+                var p = div.append('p')
+                p.attr("class","row")
+
+
+                if(k>=0 && s<0){
+                    p.html("<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                            "<div class='col-sm-2'>隠す</div>");
+                }
+
+                if(j>=0 && k<0){
+                    p.html("<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                            "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                            "<div class='col-sm-2'>隠す</div>");
+                }
+
+            }else{
+                var p = div.append('p')
+                        .html(txt)
+
+                var p = div.append('p')
+                p.attr("class","row")
+
+
+                if(k>=0 && s<0){
+                    p.html( "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                            "<div class='col-sm-2'>詳細</div>");
+                }
+
+                if(j>=0 && k<0){
+                    p.html( "<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                            "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                            "<div class='col-sm-2'>詳細</div>");
+                }
+
+            }
+
+
+
+            var did = "d" + id
+            p.attr("id",did)
+
+
+            //展开和收拢的控制
+            d3.select("#"+did).on("click",function(){
+
+
+                if(n == 1){
+                    if(k>=0 && s<0){
+                        data[i].objs[j][o].warrant[k].expand = (data[i].objs[j][o].warrant[k].expand + 1) % 2
+                    }
+                    if(j>=0 && k<0){
+                        data[i].objs[j][o].expand = (data[i].objs[j][o].expand + 1) % 2
+                    }
+                }else{
+                    if(k>=0 && s<0){
+                        _data[i].objs[j][o].warrant[k].expand = (_data[i].objs[j][o].warrant[k].expand + 1) % 2
+                    }
+                    if(j>=0 && k<0){
+                        _data[i].objs[j][o].expand = (_data[i].objs[j][o].expand + 1) % 2
+                    }
+                }
+
+                reDraw()
+
+            })
+
+            d3.select("#"+balloonId).on("mouseover",function(){
+                d3.selectAll(".balloon").remove()
+                if(structureInformation != 0){
+                    popUp(n,balloonId,x,y,structureInformation,arr)
+                }
+            })
+
+
+        }
+
+
+
+        function popUp(position,id,x,y,structureInformation,arr){
+            var i = arr[0]
+            var j = arr[1]
+            var o = arr[2]
+            var k = arr[3]!=-1?arr[3]:-1
+            var s = arr[4]!=-1?arr[4]:-1
+
+
+
+            var rect = svg.append("foreignObject")
+
+            rect.attr("y",y)
+            rect.attr("width",POPUPRECTWIDTH)
+            rect.attr("height",POPUPRECTHEIGHT)
+
+
+            var div = rect.append('xhtml:div')
+            div.style("width",POPUPRECTWIDTH)
+            div.style("height",POPUPRECTHEIGHT)
+            div = div.append("div")
+
+            div.attr("class","row col-sm-12 balloon")
+
+            if(position == 1){
+                rect.attr("x",x+RECTWIDTH + 30)
+                div.classed("_balloon", true);
+            }else{
+                rect.attr("x",x-POPUPRECTWIDTH)
+                div.classed("__balloon", true);
+            }
+
+
+
+
+            div.style("width",POPUPRECTWIDTH+"px")
+            div.style("background-color","#fff")
+            //div.style("opacity","0.7")
+
+            var sdiv = div.append("div")
+            sdiv.attr("class","row")
+
+            var title = sdiv.append("div")
+            title.attr("class","col-sm-11")
+            title.html("ビュー")
+
+            var remove = sdiv.append("div")
+            remove.attr("class","col-sm-1")
+            remove = remove.append("span")
+            remove.attr("class","glyphicon glyphicon-remove")
+            remove.attr("aria-hidden","true")
+            remove.style("cursor","pointer")
+
+            remove.on("click",function(){
+                rect.remove()
+            })
+
+
+
+
+
+            if(j>=0 && k<0){
+                var pData = position==1?data:_data
+
+                var _div = div.append("div")
+
+                if(pData[i].objs[j][o].dissent){
+                    _div.html("主張(異議あり)")
+                }else{
+                    _div.html("主張")
+                }
+
+                var _div = div.append("div")
+                _div.attr("class","col-sm-12 col-sm-offset-0")
+                _div.html(pData[i].objs[j][o].claimTxt)
+
+
+
+
+                pData = pData[i].objs[j][o].warrant
+
+                for(var m=0;m<pData.length;m++){
+
+                    var _div = div.append("div")
+                    _div.attr("class","col-sm-2 col-sm-offset-0")
+
+                    if(pData[m].dissent){
+                        _div.html("論拠(異議あり)")
+                    }else{
+                        _div.html("論拠")
+                    }
+
+                    var _div = div.append("div")
+                    _div.attr("class","col-sm-10 col-sm-offset-1")
+                    _div.html(pData[m].warrantTxt)
+
+
+                    for(var n=0;n<pData[m].evidence.length;n++){
+                        //console.log("---------------"+pData[m].evidence[n].evidenceTxt)
+                        var _div = div.append("div")
+                        _div.attr("class","col-sm-2 col-sm-offset-0")
+                        if(pData[m].evidence[n].dissnet){
+                            _div.html("根拠(異議あり)")
+                        }else{
+                            _div.html("根拠")
+                        }
+
+                        var _div = div.append("div")
+                        _div.attr("class","col-sm-10 col-sm-offset-1")
+                        _div.html(pData[m].evidence[n].evidenceTxt)
+                    }
+                }
+            }
+
+            if(k>=0 && s<0){
+                var pData = position==1?data:_data
+
+                pData = pData[i].objs[j][o].warrant[k]
+
+                var _div = div.append("div")
+
+                if(pData.dissent){
+                    _div.html("論拠(異議あり)")
+                }else{
+                    _div.html("論拠")
+                }
+
+                var _div = div.append("div")
+                _div.attr("class","col-sm-12 col-sm-offset-0")
+                _div.html(pData.warrantTxt)
+
+
+                pData = pData.evidence
+                for(var m=0;m<pData.length;m++){
+
+                    var _div = div.append("div")
+                    _div.attr("class","col-sm-12 col-sm-offset-0")
+                    if(pData[m].dissent){
+                        _div.html("根拠(異議あり)")
+                    }else{
+                        _div.html("根拠")
+                    }
+                    var _div = div.append("div")
+                    _div.attr("class","col-sm-12 col-sm-offset-0")
+                    _div.html(pData[m].evidenceTxt)
+                }
+            }
+
+
+
+
+
+
+
+
+
+            /*
+
+             if(structureInformation.warrant){
+
+
+             for(var i=0;i<structureInformation.warrant.length;i++){
+             var _div = div.append("div")
+             _div.attr("class","col-sm-10 col-sm-offset-2")
+             if(structureInformation.warrant[i].dissent){
+             _div.html("論拠(意義あり)")
+             }else{
+             _div.html("論拠")
+             }
+             for(var j=0;j<structureInformation.warrant[i].evidence.length;j++){
+             var _div = div.append("div")
+             _div.attr("class","col-sm-8 col-sm-offset-4")
+
+             if(structureInformation.warrant[i].evidence[j].dissent){
+             _div.html("根拠(意義あり)")
+             }else{
+             _div.html("根拠")
+             }
+
+             }
+             }
+
+
+             }
+
+             if(structureInformation.evidence){
+
+             for(var i=0;i<structureInformation.evidence.length;i++){
+             var _div = div.append("div")
+             _div.attr("class","col-sm-10 col-sm-offset-2")
+
+             if(structureInformation.evidence[i].dissent){
+             _div.html("根拠(意義あり)")
+             }else{
+             _div.html("根拠")
+             }
+
+             }
+
+             }
+
+             */
+
+
+        }
+
+        function reDraw(){
+            arrow = {}
+            svg.selectAll(".rectangle,.connectLine,.arrow,.dissentImage").remove();
+            draw(1,data)
+            draw(2,_data)
+            drawArrow(arrow)
+
+            if(lastHeightL >= lastHeightR){
+                svg.style("height",lastHeightL)
+            }else{
+                svg.style("height",lastHeightR)
+            }
+        }
+
+        function drawArrow(_arrow){
+
+
+            for(var i in _arrow){
+
+                var _start = _arrow[i].start
+                var _end = _arrow[i].end
+                var dissentImageX
+                var dissentImageY
+
+                if(!_start || !_end) continue　//如果起始点或者终点有一个是被收起来得状态得话,那么这条线直接不显示,跳过
+
+                console.log(_start)
+
+                var startLeftX,startLeftY,endRightX,endRightY
+                var endLeftX,endLeftY,endRightX,endRightY
+
+
+                if(_start.position == 1){
+                    startLeftX = _start.left + RECTWIDTH
+                    startLeftY = _start.height - RECTHEIGHT/2
+                    dissentImageX = startLeftX
+                    dissentImageY = startLeftY
+                }else{
+                    startLeftX = _start.left
+                    startLeftY = _start.height - RECTHEIGHT/2
+                    dissentImageX = startLeftX - DISSENTIMAGEWIDTH
+                    dissentImageY = startLeftY
+                }
+
+                if(_end.position == 1){
+                    endLeftX = _end.left + RECTWIDTH
+                    endLeftY = _end.height - RECTHEIGHT/2
+                }else{
+                    endLeftX = _end.left - 10
+                    endLeftY = _end.height - RECTHEIGHT/2
+                }
+
+                someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY)
+
+
+                var dissent = svg.append("foreignObject")
+                        .attr("x", dissentImageX)
+                        .attr("y", dissentImageY)
+                        .attr("class","dissentImage")
+
+                var dissent = dissent.append('xhtml:div')
+                dissent.attr("class","row")
+                dissent.style("width",DISSENTIMAGEWIDTH+"px")
+
+
+
+                if(_start.position == 1){
+
+
+                    var div = dissent.append("div")
+                    div.attr("class","col-sm-6")
+                    var image = div.append("img")
+
+                    image.attr("src", "./leftPointer.png")
+                    image.attr("width", "60")
+                            .attr("height", "50");
+
+
+
+                    var div = dissent.append("div")
+                    div.attr("class","col-sm-6")
+
+
+                    var image = div.append("img")
+
+                    image.attr("src", "./dissent.png")
+                            .attr("width", "60")
+                            .attr("height", "50");
+
+
+                }else{
+
+                    var div = dissent.append("div")
+                    div.attr("class","col-sm-6")
+
+
+                    var image = div.append("img")
+
+                    image.attr("src", "./dissent.png")
+                            .attr("width", "60")
+                            .attr("height", "50");
+
+                    var div = dissent.append("div")
+                    div.attr("class","col-sm-6")
+                    var image = div.append("img")
+
+                    image.attr("src", "./rightPointer.png")
+                    image.attr("width", "60")
+                            .attr("height", "50");
+                }
+
+
+
+
+
+            }
+        }
+
+        function drawConnectLine(position,startX,startY,endX,endY){
+            position == 1?eval('var color = "#bcdff1"'):eval('var color = "#c8e5bc"')
+
+            var line = svg.append("line")
+                    .attr("x1",startX)
+                    .attr("y1",startY)
+                    .attr("x2",endX)
+                    .attr("y2",endY)
+                    .attr("stroke",color)
+                    .attr("stroke-width",6)
+                    .attr("class","connectLine")
+
+
+
+        }
+
+        function someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY){
+            var divArr = [2,2.5,3,3.5,4,4.5]
+
+
+            //已确定起点和终点,现在要做的事就是增加2个点M1,M2
+
+            //M1
+
+            var m1X = (endLeftX - startLeftX)/divArr[i%(divArr.length-1)] + startLeftX
+            var m1Y =  startLeftY
+            var m2X = m1X
+            var m2Y = endLeftY
+
+            var line = svg.append("line")
+                    .attr("x1",startLeftX)
+                    .attr("y1",startLeftY)
+                    .attr("x2",m1X)
+                    .attr("y2",m1Y)
+                    .attr("stroke","#000")
+                    .attr("stroke-width",3)
+                    .attr("class","arrow")
+
+            var line = svg.append("line")
+                    .attr("x1",m1X)
+                    .attr("y1",m1Y)
+                    .attr("x2",m2X)
+                    .attr("y2",m2Y)
+                    .attr("stroke","#000")
+                    .attr("stroke-width",3)
+                    .attr("class","arrow")
+
+            var line = svg.append("line")
+                    .attr("x1",m2X)
+                    .attr("y1",m2Y)
+                    .attr("x2",endLeftX)
+                    .attr("y2",endLeftY)
+                    .attr("stroke","#000")
+                    .attr("stroke-width",3)
+                    .attr("marker-end","url(#arrow)")
+                    .attr("class","arrow")
+
+        }
+
+</script>
+</html>
