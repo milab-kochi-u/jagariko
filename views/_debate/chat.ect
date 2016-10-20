@@ -305,7 +305,7 @@
                             $scope.debateInfo.config = _res.data.config
                             $scope.debateInfo.username = _res.data.username
 
-                            $scope.everyStatementData = _res.data.everyStatement || {position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]}
+                            $scope.everyStatementData = _res.data.everyStatement || {position:1,obj:[{title:"主張を述べてください",dissent:0,content:"主張を述べてください"}]}
                             $scope.objs = _res.data.objs
 
                             $scope.requestStatementMessage = _res.data.requestStatementMessage
@@ -587,13 +587,13 @@
             $scope.objs = []
 
             $scope.inputMessage = [
-                        {title:"this is the message for statement",dissent:0,content:"",index:Math.round(Math.random()*10000)}
+                        {title:"主張を述べてください",dissent:0,content:"",index:Math.round(Math.random()*10000)}
                     ]
 
             $scope.requestStatementMessage = ""
             $scope.refuseAnalysisResultReason = ""
 
-            //statement = [{position:1,obj:[{title:"this is the message for statement",dissent:0,content:"this is the message for statement"}]}]
+            //statement = [{position:1,obj:[{title:"主張を述べてください",dissent:0,content:"主張を述べてください"}]}]
 
             $scope.statement = []
 
