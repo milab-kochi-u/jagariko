@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>review</title>
+
+
+    <!-- Optional theme -->
+
+    <![endif]-->
+    <script src="/tmp/angular.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/tmp/jquery-2.2.4.min.js" ></script>
+
+
+
+    <script type="text/javascript" src="/tmp/angular-route.min.js"></script>
+    <script src="/_debate/d3/d3.js"></script>
+
+    <!--
+    <link rel="stylesheet" href="/tmp/bootstrap.min.css">
+    <link rel="stylesheet" href="/tmp/bootstrap-theme.min.css">
+    <script src="/tmp/bootstrap.min.js"></script>
+    -->
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+
+<body ng-app="myApp">
+    <div ng-controller="myCtr" class="container">
+
+        <div class="row">
+        <my-navy debate-info="debateInfo"></my-navy>
+        </div>
+
+        <div class="row">
+                <table class="table table-striped">
+                <tr class="info"><th>テーマ</th><td>{{debateInfo.title}}</td><td></td></tr>
+                <tr class="warning"><th>総回数</th><td>{{debateInfo.config.timeNumbers}}</td><td></td></tr>
+                <tr class="info"><th>賛成側</th><td>{{debateInfo.pro}}</td><td></td></tr>
+                <tr class="success"><th>反対側</th><td>{{debateInfo.con}}</td><td></td></tr>
+               </table>
+        </div>
+
+
+        <div class="row">
+
+
+<!--
+            <home-map>
+            <div class="row">
+              <div class="col-md-5" id="statementMap" style="height:950px">
+                    <statement-map></statement-map>
+              </div>
+
+              <div class="col-md-7" id="debateMap" style="height:950px">
+                    <debate-map gg="gg" focus-zoom-index="focusZoomIndex" time-numbers="debateInfo.config.timeNumbers"></debate-map>
+              </div>
+            </div>
+            <home-map>
+
+-->
+
+            <div class="pull-right">
+                    <button class="glyphicon glyphicon-share btn btn-default btn-lg" type="button" aria-hidden="true" onclick="window.open('/playview.html')"></button>
+            </div>
+
+
+            <test-map>
+
+            </test-map>
+
+
+        </div>
+    </div>
+</body>
+
+
+<script>
+
+
+
+
+    var myApp = angular.module("myApp",[])
+
+    myApp.run(function($rootScope) {
+      $rootScope.range = function(n) {
+        var arr = [];
+        for (var i=0; i<n; ++i) arr.push(i);
+        return arr;
+      };
+    });
+
+    myApp.factory('coreSocket', function($rootScope) {
+                //var socket = io.connect();
+                var socket = io(window.location.host + "/_chat").connect()
+                return {
+                    on: function(eventName, callback) {
+                        socket.on(eventName, function() {
+                            var args = arguments;
+                            $rootScope.$apply(function() {
+                                callback.apply(socket, args);
+                            });
+                        });
+                    },
+                    emit: function(eventName, data, callback) {
+                        socket.emit(eventName, data, function() {
+                            var args = arguments;
+                            $rootScope.$apply(function() {
+                                if (callback) {
+                                    callback.apply(socket, args);
+                                }
+                            });
+                        });
+                    }
+                };
+    });
+
+
+
+    myApp.factory("myPost",function($http){
+        return{
+            postData:function(url,data){
+                return $http.post(url,data).success(function(res){
+                   return res;
+                })
+            }
+        }
+    })
+
+
+    myApp.controller("myCtr",function($scope,$q,coreSocket,myPost){
+
+            $scope.debateInfo = {}
+
+            function _getDebateInformation(){
+
+                    var deferred = $q.defer();
+
+                    myPost.postData("/_debate/getDebateInformation").then(function(_res){
+
+                    if(_res.data){
+                            $scope.debateInfo.title = _res.data.title
+                            $scope.debateInfo.pro = _res.data.pro
+                            $scope.debateInfo.con = _res.data.con
+                            $scope.debateInfo.group = _res.data.group
+                            $scope.debateInfo.config = _res.data.config
+                            $scope.debateInfo.username = _res.data.username
+                            deferred.resolve({err:0,msg:"data acquired"});
+                    }else{
+                            deferred.reject({err:1,msg:"data not acquired"});
+                    }
+
+                    })
+
+                    return deferred.promise;
+            }
+
+            function init(){
+                 var promise = _getDebateInformation()
+            }
+
+            init()
+
+            $scope.showInMap = function(index){
+                $scope.focusZoomIndex = index
+
+                d3.selectAll("table").style("border-color",null)
+
+                var obj = d3.selectAll("g").filter(function(d){
+                    if(!d) return;
+                    return d._index == index && d.name == "claim"
+                })
+
+                if(obj.select("table").style("border-color").length == 16){
+                   obj.select("table").style("border-color","")
+                }else{
+                   obj.select("table").style("border-color","yellow")
+                }
+
+            }
+
+    })
+
+    myApp.directive("myNavy",function(){
+        return {
+            scope:{debateInfo:"="},
+            templateUrl:"/_debate/navy.html"
+        }
+    })
+
+
+    myApp.directive("testMap",function(myPost,$rootScope){
+        return {
+            scope:{},
+            templateUrl:"/_debate/test.html",
+            controller:function($scope){
+
+
+                var data = []
+                var _data = []
+
+                init()
+                function init(){
+
+                myPost.postData("/_debate/fetchAnalysisLog").then(function(_res){
+                    for(var i=0;i<_res.data.length;i++){
+                        if(_res.data[i].position == 1){
+                              data.push(_res.data[i])
+                        }else{
+                              _data.push(_res.data[i])
+                        }
+                    }
+
+                    for(var i=0;i<data.length;i++){
+                        for(var j=0;j<data[i].objs.length;j++){
+
+                           for(var o=0;o<data[i].objs[j].length;o++){
+                                data[i].objs[j][o].expand = 0
+                                for(var k=0;k<data[i].objs[j][o].warrant.length;k++){
+                                    data[i].objs[j][o].warrant[k].expand = 0
+
+                                }
+                           }
+                        }
+                    }
+
+
+                    for(var i=0;i<_data.length;i++){
+                        for(var j=0;j<_data[i].objs.length;j++){
+
+                           for(var o=0;o<_data[i].objs[j].length;o++){
+                                _data[i].objs[j][o].expand = 0
+                                for(var k=0;k<_data[i].objs[j][o].warrant.length;k++){
+                                    _data[i].objs[j][o].warrant[k].expand = 0
+
+                                }
+                           }
+                        }
+                    }
+
+                    window.localStorage.setItem("data",JSON.stringify(data))
+                    window.localStorage.setItem("_data",JSON.stringify(_data))
+
+                    main()
+
+                })
+
+                }
+
+
+                  //var WIDTH = window.screen.width  //整个区域的宽度
+                    var WIDTH = getWidth()
+                    var HEIGHT = window.screen.height //整个区域的高度
+                    var SVGHEIGHT = 1200
+                    var RECTWIDTH = 450  //模块的长度
+                    var RECTHEIGHT = 100  //模块的宽度
+                    var LASTRECTHEIGHT //根据字体计算的长度
+                    var LEFT = 10 //整体模块距离浏览器左边的边距
+                    var SPACEX = 280 //右边模块距离左边模块的宽度
+                    var SPACEY = 15 //距头上模块的上边距
+                    var SLIPWIDTH = 15  //各级的错位距离
+
+                    var LEFTSPACE = 280 //左边模块距离左边svg边距
+                    var TOPSPACE = 10 //顶头的模块距离顶端的距离
+                    var FRONTSPACE = 35
+
+                    var PROFILEWIDTH = 200
+                    var PROFILEHEIGHT = 250
+
+                    var PROFILEPROLEFT = LEFTSPACE - PROFILEWIDTH
+                    var PROFILEPROTOP = TOPSPACE
+                    var PROFILEPRORIGHT = LEFTSPACE + RECTWIDTH + SPACEX + RECTWIDTH
+
+                    var POPUPRECTWIDTH = 1000
+                    var POPUPRECTHEIGHT = 600
+
+                    var DISSENTIMAGEWIDTH = 105
+
+                    var lastHeightL,lastHeightR
+                    var arrow = {}
+
+                    d3.select("#home").style("height",HEIGHT*0.70+"px")
+
+                    var svg = d3.select("svg")
+                    svg.attr("width",WIDTH)
+                    svg.attr("height",SVGHEIGHT)
+                    svg.style("margin-left",LEFT)
+
+
+                    function getWidth() {
+                        if (self.innerWidth) {
+                            return self.innerWidth;
+                        }
+                        else if (document.documentElement && document.documentElement.clientHeight){
+                            return document.documentElement.clientWidth;
+                        }
+                        else if (document.body) {
+                            return document.body.clientWidth;
+                        }
+                        return 0;
+                    }
+
+
+                    function main(){
+
+                        draw(1,data)
+                        draw(2,_data)
+
+
+                        drawArrow(arrow)
+
+                        drawPositionPic()
+                    }
+
+
+                    function drawPositionPic(){
+                        var foreignObject = svg.append("foreignObject")
+
+                        foreignObject.attr("width",PROFILEWIDTH)
+                        foreignObject.attr("height",PROFILEHEIGHT)
+
+                        foreignObject.attr("x",PROFILEPROLEFT)
+                        foreignObject.attr("y",PROFILEPROTOP)
+
+                        var id = "f"+Math.round(Math.random()*100000)
+
+
+                        var div = foreignObject.append('xhtml:div')
+                        div.attr("id",id)
+
+                        var _div = div.append('p')
+                        _div.style("width",PROFILEWIDTH*0.8+"px")
+                        _div.style("height","20px")
+                        _div.style("text-align","center")
+
+                        _div.html("賛成側")
+
+                        drawProfileDetail(1,div)
+
+                        var foreignObject = svg.append("foreignObject")
+                        foreignObject.attr("width",PROFILEWIDTH)
+                        foreignObject.attr("height",PROFILEHEIGHT)
+
+                        foreignObject.attr("x",PROFILEPRORIGHT)
+                        foreignObject.attr("y",PROFILEPROTOP)
+                        var div = foreignObject.append('xhtml:div')
+
+                        var _div = div.append('p')
+                        _div.style("width",PROFILEWIDTH*0.8+"px")
+                        _div.style("height","20px")
+                        _div.style("text-align","center")
+
+                        _div.html("反対側")
+
+                        drawProfileDetail(2,div)
+
+                    }
+
+
+                    function drawProfileDetail(position,div){
+
+                        position == 1?eval('var color = "#bcdff1"'):eval('var color = "#c8e5bc"')
+
+
+                        var div = div.append("div")
+                        var _svg = div.append("svg")
+                        _svg.attr("width",PROFILEWIDTH*0.8)
+                        _svg.attr("height",PROFILEHEIGHT*0.8)
+
+                        var _circle = _svg.append("circle")
+                        _circle.attr("cx",PROFILEPROLEFT)
+                        _circle.attr("cy",PROFILEPROTOP+25)
+                        _circle.attr("r",20)
+                        _circle.attr("fill",color)
+
+                        var _triangle = _svg.append("polygon")
+                        _triangle.attr("width",PROFILEWIDTH*0.95)
+                        _triangle.attr("height",PROFILEHEIGHT*0.95)
+
+                        var p1X = PROFILEPROLEFT
+                        var p1Y = PROFILEPROTOP+25
+
+                        var p2X = PROFILEPROLEFT - PROFILEWIDTH*0.1
+                        var p2Y = PROFILEHEIGHT*0.4
+
+                        var p3X = PROFILEPROLEFT + PROFILEWIDTH*0.1
+                        var p3Y = PROFILEHEIGHT*0.4
+
+                        console.log(p1X+","+p1Y+" "+p2X+","+p2Y+" "+p3X+","+p3Y)
+                        _triangle.attr("points",p1X+","+p1Y+" "+p2X+","+p2Y+" "+p3X+","+p3Y)
+                        _triangle.attr("fill", color)
+                        _triangle.attr("stroke-width", 2)
+
+                    }
+
+                    function draw(n,data){
+
+                        var lastHeight = TOPSPACE
+
+                        if(n == 1){
+                            var lastLeft = LEFTSPACE
+                        }else{
+                            var lastLeft = LEFTSPACE + RECTWIDTH + SPACEX
+                        }
+
+                        for(var i=0;i<data.length;i++){
+                            for(var j=0;j<data[i].objs.length;j++){
+
+                                for(var o=0;o<data[i].objs[j].length;o++){
+
+
+                                var competitionInformation = getCompetitionInformation(2,data[i].objs[j][o])
+                                appendRect(n,data[i].objs[j][o].dissent,lastLeft,lastHeight,"主張:"+data[i].objs[j][o].claimTxt,[i,j,o,-1,-1],competitionInformation,{warrant:data[i].objs[j][o].warrant})
+
+                                //var position = data[i].objs[j][o].position
+                                position = n
+                                var expand = data[i].objs[j][o].expand
+
+                                lastHeight += (LASTRECTHEIGHT+SPACEY)
+                                lastLeft += SLIPWIDTH
+
+                                if(data[i].objs[j][o].dissent){
+                                    var random = data[i].objs[j][o].random
+                                    if(arrow[random]){
+                                        arrow[random]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                    }else{
+                                        arrow[random] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                    }
+                                }
+
+                                if(data[i].objs[j][o].index){
+                                    var index = data[i].objs[j][o].index
+                                    if(arrow[index]){
+                                        arrow[index]["end"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                    }else{
+                                        arrow[index] = {"end":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                    }
+                                }
+
+
+                                if(parseInt(expand) == 0){
+                                    lastLeft -= SLIPWIDTH
+                                    continue;
+                                }
+
+                                for(var k=0;k<data[i].objs[j][o].warrant.length;k++){
+                                    var competitionInformation = getCompetitionInformation(3,data[i].objs[j][o].warrant[k])
+                                    appendRect(n,data[i].objs[j][o].warrant[k].dissent,lastLeft,lastHeight,"論拠:"+data[i].objs[j][o].warrant[k].warrantTxt,[i,j,o,k,-1],competitionInformation,{evidence:data[i].objs[j][o].warrant[k].evidence})
+                                    drawConnectLine(position,lastLeft+2*SLIPWIDTH,lastHeight-SPACEY,lastLeft+2*SLIPWIDTH,lastHeight)
+
+
+
+                                    lastHeight += (LASTRECTHEIGHT+SPACEY)
+                                    lastLeft += SLIPWIDTH
+
+                                    var expand = data[i].objs[j][o].warrant[k].expand
+                                    if(data[i].objs[j][o].warrant[k].dissent){
+                                        var random = data[i].objs[j][o].warrant[k].random
+                                        if(arrow[random]){
+                                            arrow[random]["start"] = {left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}
+                                        }else{
+                                            arrow[random] = {"start":{left:lastLeft-SLIPWIDTH,height:lastHeight,position:position}}
+                                        }
+                                    }
+
+                                    if(parseInt(expand) == 0){
+                                        lastLeft -= SLIPWIDTH
+                                        continue;
+                                    }
+
+                                    for(var s=0;s<data[i].objs[j][o].warrant[k].evidence.length;s++){
+                                        appendRect(n,data[i].objs[j][o].warrant[k].evidence[s].dissent,lastLeft,lastHeight,"根拠:"+data[i].objs[j][o].warrant[k].evidence[s].evidenceTxt,[i,j,o,k,s],0,0)
+
+                                        if(s == 0){
+                                            drawConnectLine(position,lastLeft+3*SLIPWIDTH,lastHeight-SPACEY,lastLeft+3*SLIPWIDTH,lastHeight)
+                                        }else{
+                                            drawConnectLine(position,lastLeft+4*SLIPWIDTH,lastHeight-SPACEY,lastLeft+4*SLIPWIDTH,lastHeight)
+                                        }
+
+
+                                        lastHeight += (LASTRECTHEIGHT+SPACEY)
+
+                                        var expand =  data[i].objs[j][o].warrant[k].evidence[s].expand
+
+
+                                        if(data[i].objs[j][o].warrant[k].evidence[s].dissent){
+                                            var random = data[i].objs[j][o].warrant[k].evidence[s].random
+                                            if(arrow[random]){
+                                                arrow[random]["start"] = {left:lastLeft,height:lastHeight,position:position}
+                                            }else{
+                                                arrow[random] = {"start":{left:lastLeft,height:lastHeight,position:position}}
+                                            }
+                                        }
+
+                                        if(parseInt(expand) == 0){
+                                            continue;
+                                        }
+                                    }
+                                    lastLeft -= SLIPWIDTH
+                                }
+
+                                lastLeft -= SLIPWIDTH
+
+                            }
+
+                        }
+
+
+                            lastHeight += FRONTSPACE
+                        }
+
+
+
+                        if(n == 1){
+                            lastHeightL = lastHeight
+                        }else{
+                            lastHeightR = lastHeight
+                            svg.style("height",lastHeightL>lastHeightR?lastHeightL:lastHeightR)
+                        }
+
+
+                    }
+
+                    function getCompetitionInformation(n,arr){
+
+
+                        var dissentNum = 0;
+                        var evidenceNum = 0
+                        var warrantDissentNum = 0
+                        var evidenceDissentNum = 0
+                        if(n==2){
+                            for(var i=0;i<arr.warrant.length;i++){
+                                if(arr.warrant[i].dissent == 1){
+                                    dissentNum++
+                                    warrantDissentNum++
+                                }
+                                evidenceNum += arr.warrant[i].evidence.length
+
+                                dissentNum += getCompetitionInformation(3,arr.warrant[i]).dissentNum
+                            }
+                            return {dissentNum:dissentNum,warrantNum:arr.warrant.length,warrantDissentNum:warrantDissentNum,evidenceNum:evidenceNum};
+                        }
+
+                        if(n==3){
+                            for(var i=0;i<arr.evidence.length;i++){
+                                if(arr.evidence[i].dissent == 1){
+                                    dissentNum++
+                                    evidenceDissentNum++
+                                }
+                            }
+                            return {dissentNum:dissentNum,evidenceNum:arr.evidence.length,evidenceDissentNum:evidenceDissentNum};
+                        }
+                    }
+
+                    function appendRect(n,d,x,y,txt,arr,competitionInformation,structureInformation){
+                        var foreignObject = svg.append("foreignObject")
+                        foreignObject.style("cursor","pointer")
+                        //450的宽度一行能装14px font的字体30个
+                        //100(默认RECTHEIGHT)的高度能装4行
+                        var _RECTHEIGHT = (Math.ceil(txt.length/25+1))*(RECTHEIGHT/4)
+                        LASTRECTHEIGHT = _RECTHEIGHT
+
+                        foreignObject.attr("width",RECTWIDTH)
+                        foreignObject.attr("height",_RECTHEIGHT)
+
+                        foreignObject.attr("x",x)
+                        foreignObject.attr("y",y)
+                        foreignObject.attr("class","rectangle")
+
+                        foreignObject.attr("arr",arr)
+
+                        var id = Math.round(Math.random()*100000)
+
+
+                        var balloonId = "b"+id
+                        foreignObject.attr("id",balloonId)
+
+                        var div = foreignObject.append('xhtml:div')
+
+
+
+                        var i = arr[0]
+                        var j = arr[1]
+                        var o = arr[2]
+                        var k = arr[3]!=-1?arr[3]:-1
+                        var s = arr[4]!=-1?arr[4]:-1
+
+                        //这种情况正方反方区别对待
+
+                        if(n == 1){
+                            if(k>=0 && s<0){
+                                //data[i].objs[j][o].warrant[k].expand = (data[i].objs[j][o].warrant[k].expand + 1) % 2
+                                var expand = data[i].objs[j][o].warrant[k].expand
+                                console.log(data[i].objs[j][o])
+                            }
+                            if(j>=0 && k<0){
+                                //data[i].objs[j][o].expand = (data[i].objs[j][o].expand + 1) % 2
+                                var expand = data[i].objs[j][o].expand
+                            }
+                        }else{
+                            if(k>=0 && s<0){
+                                //_data[i].objs[j][o].warrant[k].expand = (_data[i].objs[j][o].warrant[k].expand + 1) % 2
+                                var expand = _data[i].objs[j][o].warrant[k].expand
+                            }
+                            if(j>=0 && k<0){
+                                // _data[i].objs[j][o].expand = (_data[i].objs[j][o].expand + 1) % 2
+                                var expand = _data[i].objs[j][o].expand
+                            }
+                        }
+
+
+
+                        var div = div.append('div')
+
+
+                        if(!d){
+
+                            //还是一个道理正方反方区别对待
+                            if(n == 1){
+                                div.attr(
+                                        'class','alert alert-info'
+                                );
+                            }else{
+                                div.attr(
+                                        'class','alert alert-success'
+                                );
+                            }
+                        }else{
+                            div.attr(
+                                    'class','alert alert-warning'
+                            );
+                        }
+
+                        if(parseInt(competitionInformation.dissentNum)>=2 || parseInt(competitionInformation.warrantNum)>=3 ||parseInt(competitionInformation.evidenceNum)>=3){
+                            div.classed("border",true)
+                        }
+
+
+                        div.attr(
+                                'role',"alert"
+                        )
+                        div.style("height",_RECTHEIGHT+"px")
+                        div.style('overflow',"auto")
+
+
+                        if(expand == 1){
+                            var p = div.append('p')
+                                    .html(txt)
+
+                            var p = div.append('p')
+                            p.attr("class","row")
+
+
+                            if(k>=0 && s<0){
+                                p.html("<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                                        "<div class='col-sm-2'>隠す</div>");
+                            }
+
+                            if(j>=0 && k<0){
+                                p.html("<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                                        "<div class='col-sm-2'>隠す</div>");
+                            }
+
+                        }else{
+                            var p = div.append('p')
+                                    .html(txt)
+
+                            var p = div.append('p')
+                            p.attr("class","row")
+
+
+                            if(k>=0 && s<0){
+                                p.html( "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                                        "<div class='col-sm-2'>詳細</div>");
+                            }
+
+                            if(j>=0 && k<0){
+                                p.html( "<div class='col-sm-3'>論拠数:" + competitionInformation.warrantNum + "</div>"+
+                                        "<div class='col-sm-3'>根拠数:" + competitionInformation.evidenceNum + "</div>"+
+                                        "<div class='col-sm-2'>詳細</div>");
+                            }
+
+                        }
+
+
+
+                        var did = "d" + id
+                        p.attr("id",did)
+
+
+                        //展开和收拢的控制
+                        d3.select("#"+did).on("click",function(){
+
+
+                            if(n == 1){
+                                if(k>=0 && s<0){
+                                    data[i].objs[j][o].warrant[k].expand = (data[i].objs[j][o].warrant[k].expand + 1) % 2
+                                }
+                                if(j>=0 && k<0){
+                                    data[i].objs[j][o].expand = (data[i].objs[j][o].expand + 1) % 2
+                                }
+                            }else{
+                                if(k>=0 && s<0){
+                                    _data[i].objs[j][o].warrant[k].expand = (_data[i].objs[j][o].warrant[k].expand + 1) % 2
+                                }
+                                if(j>=0 && k<0){
+                                    _data[i].objs[j][o].expand = (_data[i].objs[j][o].expand + 1) % 2
+                                }
+                            }
+
+                            reDraw()
+
+                        })
+
+                        d3.select("#"+balloonId).on("mouseover",function(){
+                            d3.selectAll(".balloon").remove()
+                            timer = setTimeout(function() {
+                                    if(structureInformation != 0){
+                                            popUp(n,balloonId,x,y,structureInformation,arr)
+                                    }
+                            }, 1000);
+                        })
+
+
+                        d3.select("#"+balloonId).on("mouseout",function(){
+                                    clearTimeout(timer)
+                        })
+
+
+
+                    }
+
+
+
+                    function popUp(position,id,x,y,structureInformation,arr){
+                        var i = arr[0]
+                        var j = arr[1]
+                        var o = arr[2]
+                        var k = arr[3]!=-1?arr[3]:-1
+                        var s = arr[4]!=-1?arr[4]:-1
+
+
+
+                        var rect = svg.append("foreignObject")
+
+                        rect.attr("y",y)
+                        rect.attr("width",POPUPRECTWIDTH)
+                        rect.attr("height",POPUPRECTHEIGHT)
+
+
+                        var div = rect.append('xhtml:div')
+                        div.style("width",POPUPRECTWIDTH)
+                        div.style("height",POPUPRECTHEIGHT)
+                        div = div.append("div")
+
+                        div.attr("class","row col-sm-12 balloon")
+
+                        if(position == 1){
+                            rect.attr("x",x+RECTWIDTH + 30)
+                            div.classed("_balloon", true);
+                        }else{
+                            rect.attr("x",x-POPUPRECTWIDTH)
+                            div.classed("__balloon", true);
+                        }
+
+
+
+
+                        div.style("width",POPUPRECTWIDTH+"px")
+                        div.style("background-color","#fff")
+                        //div.style("opacity","0.7")
+
+                        var sdiv = div.append("div")
+                        sdiv.attr("class","row")
+
+                        var title = sdiv.append("div")
+                        title.attr("class","col-sm-11")
+                        title.html("ビュー")
+
+                        var remove = sdiv.append("div")
+                        remove.attr("class","col-sm-1")
+                        remove = remove.append("span")
+                        remove.attr("class","glyphicon glyphicon-remove")
+                        remove.attr("aria-hidden","true")
+                        remove.style("cursor","pointer")
+
+                        remove.on("click",function(){
+                            rect.remove()
+                        })
+
+
+
+                        if(j>=0 && k<0){
+                            var pData = position==1?data:_data
+
+                            var _div = div.append("div")
+
+                            if(pData[i].objs[j][o].dissent){
+                                _div.html("主張(異議あり)")
+                            }else{
+                                _div.html("主張")
+                            }
+
+                            var _div = div.append("div")
+                            _div.attr("class","col-sm-12 col-sm-offset-0")
+                            _div.html(pData[i].objs[j][o].claimTxt)
+
+
+
+
+                            pData = pData[i].objs[j][o].warrant
+
+                            for(var m=0;m<pData.length;m++){
+                                //console.log("-----"+pData[m].warrantTxt)
+
+
+                                var _div = div.append("div")
+                                _div.attr("class","col-sm-2 col-sm-offset-0")
+
+                                if(pData[m].dissent){
+                                    _div.html("論拠(異議あり)")
+                                }else{
+                                    _div.html("論拠")
+                                }
+
+                                var _div = div.append("div")
+                                _div.attr("class","col-sm-10 col-sm-offset-1")
+                                _div.html(pData[m].warrantTxt)
+
+
+                                for(var n=0;n<pData[m].evidence.length;n++){
+                                    //console.log("---------------"+pData[m].evidence[n].evidenceTxt)
+                                    var _div = div.append("div")
+                                    _div.attr("class","col-sm-2 col-sm-offset-0")
+                                    if(pData[m].evidence[n].dissnet){
+                                        _div.html("根拠(異議あり)")
+                                    }else{
+                                        _div.html("根拠")
+                                    }
+
+                                    var _div = div.append("div")
+                                    _div.attr("class","col-sm-10 col-sm-offset-1")
+                                    _div.html(pData[m].evidence[n].evidenceTxt)
+                                }
+                            }
+                        }
+
+                        if(k>=0 && s<0){
+                            var pData = position==1?data:_data
+
+                            pData = pData[i].objs[j][o].warrant[k]
+
+                            var _div = div.append("div")
+
+                            if(pData.dissent){
+                                _div.html("論拠(異議あり)")
+                            }else{
+                                _div.html("論拠")
+                            }
+
+                            var _div = div.append("div")
+                            _div.attr("class","col-sm-12 col-sm-offset-0")
+                            _div.html(pData.warrantTxt)
+
+
+                            pData = pData.evidence
+                            for(var m=0;m<pData.length;m++){
+                                //console.log("-------------"+pData[m].evidenceTxt)
+
+                                var _div = div.append("div")
+                                _div.attr("class","col-sm-12 col-sm-offset-0")
+                                if(pData[m].dissent){
+                                    _div.html("根拠(異議あり)")
+                                }else{
+                                    _div.html("根拠")
+                                }
+                                var _div = div.append("div")
+                                _div.attr("class","col-sm-12 col-sm-offset-0")
+                                _div.html(pData[m].evidenceTxt)
+                            }
+                        }
+
+
+
+                    }
+
+                    function reDraw(){
+                        arrow = {}
+                        svg.selectAll(".rectangle,.connectLine,.arrow,.dissentImage").remove();
+                        draw(1,data)
+                        draw(2,_data)
+                        drawArrow(arrow)
+
+                        if(lastHeightL >= lastHeightR){
+                            svg.style("height",lastHeightL)
+                        }else{
+                            svg.style("height",lastHeightR)
+                        }
+                    }
+
+                    function drawArrow(_arrow){
+
+                        for(var i in _arrow){
+                            var _start = _arrow[i].start
+                            var _end = _arrow[i].end
+                            var dissentImageX
+                            var dissentImageY
+
+                            if(!_start || !_end) continue　//如果起始点或者终点有一个是被收起来得状态得话,那么这条线直接不显示,跳过
+
+                            console.log(_start)
+
+                            var startLeftX,startLeftY,endRightX,endRightY
+                            var endLeftX,endLeftY,endRightX,endRightY
+
+
+                            if(_start.position == 1){
+                                startLeftX = _start.left + RECTWIDTH
+                                startLeftY = _start.height - RECTHEIGHT/2
+                                dissentImageX = startLeftX
+                                dissentImageY = startLeftY
+                            }else{
+                                startLeftX = _start.left
+                                startLeftY = _start.height - RECTHEIGHT/2
+                                dissentImageX = startLeftX - DISSENTIMAGEWIDTH
+                                dissentImageY = startLeftY
+                            }
+
+                            if(_end.position == 1){
+                                endLeftX = _end.left + RECTWIDTH
+                                endLeftY = _end.height - RECTHEIGHT/2
+                            }else{
+                                endLeftX = _end.left - 10
+                                endLeftY = _end.height - RECTHEIGHT/2
+                            }
+
+                            someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY)
+
+
+
+                            var dissent = svg.append("foreignObject")
+                                    .attr("x", dissentImageX)
+                                    .attr("y", dissentImageY)
+                                    .attr("class","dissentImage")
+
+                            var dissent = dissent.append('xhtml:div')
+                            dissent.attr("class","row")
+                            dissent.style("width",DISSENTIMAGEWIDTH+"px")
+
+
+
+                            if(_start.position == 1){
+
+
+                                var div = dissent.append("div")
+                                div.attr("class","col-sm-6")
+                                var image = div.append("img")
+
+                                image.attr("src", "./leftPointer.png")
+                                image.attr("width", "60")
+                                        .attr("height", "50");
+
+
+
+                                var div = dissent.append("div")
+                                div.attr("class","col-sm-6")
+
+
+                                var image = div.append("img")
+
+                                image.attr("src", "./dissent.png")
+                                        .attr("width", "60")
+                                        .attr("height", "50");
+
+
+                            }else{
+
+                                var div = dissent.append("div")
+                                div.attr("class","col-sm-6")
+
+
+                                var image = div.append("img")
+
+                                image.attr("src", "./dissent.png")
+                                        .attr("width", "60")
+                                        .attr("height", "50");
+
+                                var div = dissent.append("div")
+                                div.attr("class","col-sm-6")
+                                var image = div.append("img")
+
+                                image.attr("src", "./rightPointer.png")
+                                image.attr("width", "60")
+                                        .attr("height", "50");
+                            }
+
+
+
+
+
+                        }
+                    }
+
+                    function drawConnectLine(position,startX,startY,endX,endY){
+                        position == 1?eval('var color = "#bcdff1"'):eval('var color = "#c8e5bc"')
+
+                        var line = svg.append("line")
+                                .attr("x1",startX)
+                                .attr("y1",startY)
+                                .attr("x2",endX)
+                                .attr("y2",endY)
+                                .attr("stroke",color)
+                                .attr("stroke-width",6)
+                                .attr("class","connectLine")
+
+
+
+                    }
+
+                    function someArrow(i,startLeftX,startLeftY,endLeftX,endLeftY){
+                        var divArr = [2,2.5,3,3.5,4,4.5]
+
+
+                        //已确定起点和终点,现在要做的事就是增加2个点M1,M2
+
+                        //M1
+
+                        var m1X = (endLeftX - startLeftX)/divArr[i%(divArr.length-1)] + startLeftX
+                        var m1Y =  startLeftY
+                        var m2X = m1X
+                        var m2Y = endLeftY
+
+                        var line = svg.append("line")
+                                .attr("x1",startLeftX)
+                                .attr("y1",startLeftY)
+                                .attr("x2",m1X)
+                                .attr("y2",m1Y)
+                                .attr("stroke","#000")
+                                .attr("stroke-width",3)
+                                .attr("class","arrow")
+
+                        var line = svg.append("line")
+                                .attr("x1",m1X)
+                                .attr("y1",m1Y)
+                                .attr("x2",m2X)
+                                .attr("y2",m2Y)
+                                .attr("stroke","#000")
+                                .attr("stroke-width",3)
+                                .attr("class","arrow")
+
+                        var line = svg.append("line")
+                                .attr("x1",m2X)
+                                .attr("y1",m2Y)
+                                .attr("x2",endLeftX)
+                                .attr("y2",endLeftY)
+                                .attr("stroke","#000")
+                                .attr("stroke-width",3)
+                                .attr("marker-end","url(#arrow)")
+                                .attr("class","arrow")
+
+                    }
+            }
+        }
+    })
+
+
+    myApp.directive("homeMap",function($rootScope){
+        return {
+            scope:false,
+            controller:function($scope){
+
+                this.ijkByIndex = function(index,data){
+
+                                for(var i=0;i<data.length;i++){
+                                    for(var j=0;j<data[i].objs.length;j++){
+                                        for(var k=0;k<data[i].objs[j].length;k++){
+                                                if( index == parseInt(data[i].objs[j][k].random)){
+                                                    return {target:"i"+i+"j"+j+"k"+k,i:i,j:j,k:k}
+                                                }
+
+
+                                            for(var s=0;s<data[i].objs[j][k].warrant.length;s++){
+                                                    if( index == parseInt(data[i].objs[j][k].warrant[s].random)){
+                                                        return {target:"i"+i+"j"+j+"k"+k+"s"+s,i:i,j:j,k:k,s:s}
+                                                    }
+
+
+                                                for(var t=0;t<data[i].objs[j][k].warrant[s].evidence.length;t++){
+                                                            if( index == parseInt(data[i].objs[j][k].warrant[s].evidence[t].random)){
+                                                                return {target:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,i:i,j:j,k:k,s:s,t:t}
+                                                            }
+
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+
+                                return {target:null}
+                            }
+
+
+                         this.ijkByRandom = function(random,data){
+
+                                for(var i=0;i<data.length;i++){
+                                    for(var j=0;j<data[i].objs.length;j++){
+                                        for(var k=0;k<data[i].objs[j].length;k++){
+                                                if( random == parseInt(data[i].objs[j][k].index)){
+                                                    return {source:"i"+i+"j"+j+"k"+k,i:i,j:j,k:k}
+                                                }
+                                        }
+                                    }
+                                }
+
+                                return {source:null}
+                            }
+
+            }
+        }
+    })
+
+
+    myApp.directive("debateMap",function(myPost,$rootScope){
+        return {
+            require:"^?homeMap",
+            scope:{focusZoomIndex:"=",timeNumbers:"="},
+            controller:function($scope){
+
+            $scope.range = $rootScope.range
+
+            $scope.showSequence = function(n){
+                $scope.showSequenceNum = n
+                d3.selectAll("line").style("visibility","hidden")
+
+                $scope.gg.style("visibility","hidden")
+
+                d3.selectAll("line").filter(function(d){
+                    return parseInt(d.order) == n;
+                }).style("visibility","visible")
+
+                $scope.gg.filter(function(d){
+                      return parseInt(d.order) == n;
+                }).style("visibility","visible")
+
+
+                d3.selectAll("line").filter(function(d){
+                   return d.connect
+                }).style("visibility","hidden")
+
+            }
+
+            $scope.rebuild = function(){
+                $scope.showSequenceNum = -1
+                init()
+                d3.selectAll(".rect,.links,.nodes").data([]).exit().remove()
+            }
+
+            init()
+
+
+            $scope.$watch("focusZoomIndex",function(preVal,val){
+                //focusOnParticularNode()
+            })
+
+/*
+            function focusOnParticularNode(){
+                var nodes = $scope.node._groups[0]
+                console.log(nodes)
+                //$scope.zoom.scaleTo($scope.rect,0)
+                var color = d3.scaleOrdinal(d3.schemeCategory20);
+                for(var i=0;i<nodes.length;i++){
+                       d3.select(nodes[i]).attr("fill",color(d3.select(nodes[i]).attr("position")))
+                       if(d3.select(nodes[i]).attr("index") == $scope.focusZoomIndex){
+                            d3.select(nodes[i]).attr("fill","green")
+                            //$scope.zoom.scaleBy(d3.select(nodes[i]),2.6)
+                       }
+                }
+            }
+*/
+
+            function init(){
+
+                myPost.postData("/_debate/fetchAnalysisLog").then(function(_res){
+
+                                    graph = {
+                                      "nodes": [
+                                        //{"id": "Myriel", "group": 1},
+                                        //{"id": "Napoleon", "group": 1},
+                                        //{"id": "Mlle.Baptistine", "group": 1},
+                                        //{"id": "Mme.Magloire", "group": 1},
+                                      ],
+                                      "links": [
+                                        //{"source": "Myriel", "target": "Napoleon", "value": 1},
+                                        //{"source": "Mlle.Baptistine", "target": "Napoleon", "value": 8},
+                                        //{"source": "Mme.Magloire", "target": "Myriel", "value": 10},
+                                      ]
+                                    }
+
+                                    graph = dealWithAnalysisLogData(_res.data)
+                                    drawMap(graph)
+                            })
+            }
+
+
+
+            function dealWithAnalysisLogData(data){
+
+                    var nodes = []
+                    var links = []
+
+                    console.log("data is ...")
+                    console.log(data)
+                    for(var i=0;i<data.length;i++){
+                        for(var j=0;j<data[i].objs.length;j++){
+                            var user = {pro:data[i].pro,con:data[i].con}
+                            for(var k=0;k<data[i].objs[j].length;k++){
+                                if(parseInt(data[i].objs[j][k].index) > 10000){
+                                    var target = $scope.ijkByIndex(data[i].objs[j][k].index,data)
+                                    var _target = target.target
+                                    var _target1 = target.target
+                                    var _target2 = "i"+target.i+"j"+target.j+"k"+target.k
+                                    var __target = _target1 + " " + _target2
+                                    console.log(__target)
+                                    links.push({user:user,connect:true,order:data[i].order,position:data[i].position,class:_target,"source":"i"+i+"j"+j+"k"+k,target:_target,"value":2})
+                                    nodes.push({user:user,dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:_target,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
+                                }else{
+                                    nodes.push({user:user,dissent:data[i].objs[j][k].dissent,extension:1,order:data[i].order,id:"i"+i+"j"+j+"k"+k,name:"claim",class:"i"+i+"j"+j+"k"+k,group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].claimTxt,_index:data[i].objs[j][k].index})
+                                }
+
+
+                                for(var s=0;s<data[i].objs[j][k].warrant.length;s++){
+                                    var extension = $scope.ijkByRandom(data[i].objs[j][k].warrant[s].random,data).source?1:0
+                                    nodes.push({user:user,dissent:data[i].objs[j][k].warrant[s].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s,class:"i"+i+"j"+j+"k"+k,name:"warrant",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].warrantTxt})
+                                    links.push({user:user,order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s,target:"i"+i+"j"+j+"k"+k,"value":2})
+                                    for(var t=0;t<data[i].objs[j][k].warrant[s].evidence.length;t++){
+                                        links.push({user:user,order:data[i].order,position:data[i].position,class:"i"+i+"j"+j+"k"+k,"source":"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,"target":"i"+i+"j"+j+"k"+k+"s"+s,value:3})
+                                        var extension = $scope.ijkByRandom(data[i].objs[j][k].warrant[s].evidence[t].random,data).source?1:0
+                                        nodes.push({user:user,dissent:data[i].objs[j][k].warrant[s].evidence[t].dissent,extension:extension,order:data[i].order,id:"i"+i+"j"+j+"k"+k+"s"+s+"t"+t,class:"i"+i+"j"+j+"k"+k,name:"evidence",group:data[i]._id,position:data[i].position,txt:data[i].objs[j][k].warrant[s].evidence[t].evidenceTxt})
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+                    graph = {nodes:nodes,links:links}
+                    return graph
+            }
+
+            function drawMap(graph){
+
+               var zoom = d3.zoom()
+                            .scaleExtent([1, 100])
+                            .on("zoom", zoomed);
+                $scope.zoom = zoom
+
+                function zoomed() {
+                    svg.attr("transform",
+                        d3.event.transform);
+                }
+
+                var svg = d3.selectAll("g").filter("#main"),
+
+                    width = +d3.select("svg").attr("width"),
+                    height = +d3.select("svg").attr("height");
+
+                svg.call(zoom)
+
+                var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+                var simulation = d3.forceSimulation()
+                    .force("link", d3.forceLink().distance(250).strength(2).id(function(d) { return d.id; }))
+                    .force("charge", d3.forceManyBody().distanceMin([0,5]))
+                    .force("center", d3.forceCenter(width/2 , height/2 ));
+
+                var rect = svg.append("rect")
+                            .attr("class","rect")
+                            .attr("x",0)
+                            .attr("y",0)
+                            .attr("width",10000)
+                            .attr("height",10000)
+                            .attr("fill","#fff");
+                $scope.rect = rect
+
+
+
+                  var link = svg.append("g")
+                      .attr("class", "links")
+                    .selectAll("line")
+                    .data(graph.links)
+                    .enter().append("line")
+                    .attr("stroke-width",2)
+                    .attr("class",function(d){
+                        return d.class
+                    })
+                    .attr("connect",function(d){
+                        return d.connect
+                    })
+                    .attr("position",function(d){
+                        return d.position
+                    })
+                    .attr("order",function(d){
+                        return d.order
+                    })
+                    .style("visibility","hidden")
+                    .style("cursor","pointer")
+
+
+
+                   var gg = svg.append("g")
+                   .attr("class", "nodes")
+                   .selectAll("g")
+                   .data(graph.nodes)
+                   .enter()
+                   .append("g")
+                   .call(d3.drag()
+                   .on("start", dragstarted)
+                   .on("drag", dragged)
+                   .on("end", dragended))
+                   .attr("visibility", function(d) {
+                      return d.name=="claim"&&d._index<=10000?"visible":"hidden"
+                   })
+                   .attr("index",function(d){
+                       return d._index
+                   })
+                   .attr("extend",1)
+                   .attr("id",function(d){
+                       return d.id
+                   })
+                   .attr("order",function(d){
+                       return d.order
+                   })
+                   .attr("position",function(d){
+                       return d.position
+                   })
+                   .attr("class",function(d){
+                   return d.class
+                   })
+                   .attr("random",function(d){
+                     return d.random
+                   }).on("click",function(d){
+                     var val = parseInt(d3.select(this).attr("extend"))
+                     d3.select(this).attr("extend",val+1)
+
+
+                     if(val%2 == 1){
+                          d3.selectAll("g").filter(function(_d){
+                                if(!_d) return false;
+                                if($scope.showSequenceNum > 0){
+                                    return _d.class == d.id && _d.order == $scope.showSequenceNum
+                                }else{
+                                    return _d.class == d.id
+                                }
+                          }).style("visibility","visible")
+
+                         d3.selectAll("line").filter(function(_d){
+                                if(!_d) return false;
+                                if($scope.showSequenceNum > 0){
+                                    return _d.class == d.id && _d.order == $scope.showSequenceNum
+                                }else{
+                                    return _d.class == d.id
+                                }
+                         }).style("visibility","visible")
+
+                     }else{
+                          d3.selectAll("g").filter(function(_d){
+                             if(!_d) return false
+                             if($scope.showSequenceNum > 0){
+                                 return _d.class == d.id && _d.order == $scope.showSequenceNum
+                             }else{
+                                 return _d.class == d.id
+                             }
+                           }).style("visibility","hidden")
+
+                         d3.selectAll("line").filter(function(_d){
+                                if(!_d) return false;
+                                if($scope.showSequenceNum > 0){
+                                    return _d.class == d.id && _d.order == $scope.showSequenceNum
+                                }else{
+                                    return _d.class == d.id
+                                }
+                         }).style("visibility","hidden")
+
+
+                          d3.select(this).style("visibility","visible")
+                     }
+
+                    })
+
+                    $scope.gg = gg
+
+
+                  var rects = gg.append('foreignObject')
+
+                    .attr("x",-120)
+                    .attr("y",-100)
+
+                    var tables = rects.append('xhtml:div')
+                    .append('table')
+                    .style("width","250px")
+                    .style("height","100px")
+                    .attr("class","table table-bordered")
+
+                    var tr1 = tables.append('tr')
+
+                    var td1_1 = tr1.append("td")
+                    .html(function(d){
+                        switch(d.name){
+                            case 'claim':return '主張';
+                            case 'warrant':return '論拠';
+                            case 'evidence':return '根拠';
+                        }
+                    })
+
+
+                    var td1_2 = tr1.append("td")
+                    .html(function(d){
+                            if(d.dissent){
+                             return "意義"
+                            }
+                    })
+
+
+
+                    .attr("width","20%")
+
+                    var tr2 = tables.append("tr")
+
+                    var td2_1 = tr2.append("td")
+                    .attr("colspan",2)
+                    .html(function(d){
+                        return d.txt.substring(1, 40) + "...<span _index='" + d._index + "' position='"+ d.position +"' pro='"+d.user.pro+"' con='"+d.user.con+"' name='"+d.name+"' txt='"+ d.txt +"' class='detail' >詳細</span>";
+                    })
+                    .attr("width","100%")
+                    .attr("cx",350)
+
+
+                    td2_1.selectAll(".detail").on("click",function(e){
+
+                        d3.selectAll("g").filter(".popUp").style("visibility","visible")
+                        d3.selectAll("g").filter(".popUp").selectAll("div").filter(".content").html(d3.select(this).attr("txt"))
+                        var name = d3.select(this).attr("name")
+                        var position = d3.select(this).attr("position")
+                        var pro = d3.select(this).attr("pro")
+                        var con = d3.select(this).attr("con")
+                        var _index = d3.select(this).attr("_index")
+
+
+                        d3.selectAll("g").filter(".popUp").selectAll("small").filter(".user").html(function(){
+
+                            if(position == 1){
+                                return "賛成側"+ pro + "->" + "反対側" + con
+                            }else{
+                                return "反対側"+ con + "->" + "賛成側" + pro
+                            }
+
+                        })
+
+                        d3.selectAll("g").filter(".popUp").selectAll("span").filter(".name").html(function(){
+
+                            switch(name){
+                                case 'claim':
+                                    if(_index>10000){
+                                        return '主張(意義説明)'
+                                    }else{
+                                        return '主張(オリジナル)'
+                                    }
+                                break;
+                                case 'warrant':
+                                    return '論拠'
+                                break;
+                                case 'evidence':
+                                    return '根拠'
+                                break;
+                            }
+                        })
+
+                    })
+                    .style("cursor","pointer")
+
+
+
+                  var text = gg.append("text").text(function(d){
+                      return $scope.changeLayoutData==0?d.name:d.txt;
+                  }).style("text-anchor", "middle")
+                    .style("fill", "#555")
+                    .style("font-family", "Arial")
+                    .style("font-size", 12)
+                    .style("fill", function(d) {
+                        return "rgb(85, 85, 85)"
+                    })
+                    .attr("order",function(d){
+                        return d.order
+                    })
+                    .style("visibility",function(d){
+                        //return d.name=="claim"&&d._index<=10000?"visible":"hidden"
+                        return "hidden"
+                    })
+                    .attr("class",function(d){
+                        return d.class
+                    })
+                    .attr("id",function(d){
+                        return d.id
+                    })
+                    .attr("y",20)
+
+
+
+
+
+                  simulation
+                      .nodes(graph.nodes)
+                      .force("collide", d3.forceCollide().radius(function(d) { return 45 }))
+                      .on("tick", ticked);
+
+                  simulation.force("link")
+                      .links(graph.links);
+
+                  function ticked() {
+                    link
+                        .attr("x1", function(d) { return d.source.x-120; })
+                        .attr("y1", function(d) { return d.source.y-100; })
+                        .attr("x2", function(d) { return d.target.x; })
+                        .attr("y2", function(d) { return d.target.y; });
+
+                    gg
+                        .attr("transform", function(d) { return "translate("+d.x+","+d.y+")" })
+                        
+                  }
+
+                function dragstarted(d) {
+                  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+                  d.fx = d.x;
+                  d.fy = d.y;
+                }
+
+                function dragged(d) {
+                  d.fx = d3.event.x;
+                  d.fy = d3.event.y;
+                }
+
+                function dragended(d) {
+                  if (!d3.event.active) simulation.alphaTarget(0);
+                  d.fx = null;
+                  d.fy = null;
+                }
+
+                simulation.restart()
+
+            }
+
+            },
+            link:function(scope,element,attrs,homeMap){
+                    scope.width = document.getElementById("debateMap").offsetWidth
+                    scope.height = document.getElementById("debateMap").offsetHeight
+                    scope.ijkByIndex = homeMap.ijkByIndex
+                    scope.ijkByRandom = homeMap.ijkByRandom
+            },
+            templateUrl:"/_debate/debateMap.html"
+        }
+    })
+
+    myApp.directive("statementMap",function(myPost){
+        return {
+            require:"^?homeMap",
+            scope:false,
+            link:function(scope,element,attrs,homeMap){
+                scope.ijkByIndex = homeMap.ijkByIndex
+            },
+            controller:function($scope){
+                myPost.postData("/_debate/fetchStatementLog").then(function(_res){
+                        $scope.statementList = _res.data
+                        myPost.postData("/_debate/fetchAnalysisLog").then(function(_res){
+                               for(var i=0;i<$scope.statementList.length;i++){
+                                    if(!$scope.statementList[i].inputMessage) continue;
+                                    for(var j=0;j<$scope.statementList[i].inputMessage.length;j++){
+                                        if($scope.statementList[i].inputMessage[j].index > 10000){
+                                            var s = $scope.ijkByIndex($scope.statementList[i].inputMessage[j].index,_res.data)
+
+                                             if(!isNaN(s.i)){
+                                                if(!isNaN(s.j)){
+                                                    if(!isNaN(s.k)){
+                                                        if(!isNaN(s.s)){
+                                                            if(!isNaN(s.t)){
+                                                                    //evidence
+                                                                    $scope.statementList[i].inputMessage[j].dissentTxt = _res.data[s.i].objs[s.j][s.k].warrant[s.s].evidence[s.t].evidenceTxt
+                                                            }else{
+                                                                    //warrant
+                                                                    $scope.statementList[i].inputMessage[j].dissentTxt = _res.data[s.i].objs[s.j][s.k].warrant[s.s].warrantTxt
+                                                            }
+                                                        }else{
+                                                                    //claim
+                                                                    $scope.statementList[i].inputMessage[j].dissentTxt = _res.data[s.i].objs[s.j][s.k].claimTxt
+                                                        }
+                                                    }
+                                                }
+                                             }
+                                        }
+                                    }
+                               }
+
+
+                        })
+
+
+                })
+            },
+            templateUrl:"/_debate/statementMap.html"
+        }
+    })
+
+    myApp.directive("svgComment",function(){
+        return {
+            scope:true,
+            controller:function($scope){
+                $scope.commentContentList = []
+                $scope.showComment = 0
+                $scope.makeSenseNum = 0
+                $scope.makeLikeNum = 0
+                $scope.glyphiconStarEmpty = true
+                $scope.glyphiconStar = false
+                $scope.closePopUp = function(){
+                    d3.select("svg").selectAll("g").filter(".popUp").style("visibility","hidden")
+                }
+
+                $scope.doComment = function(){
+                    $scope.showComment = $scope.showComment + 1
+
+                    if($scope.showComment % 2 == 1){
+                        d3.select("#popUpBackground").attr("height",750)
+                    }else{
+                        d3.select("#popUpBackground").attr("height",450)
+                    }
+
+                }
+
+                $scope.submitComment = function(isValid){
+                    if(!isValid) return;
+                    $scope.commentContentList.push($scope.commentContent)
+                }
+
+                $scope.makeSense = function(){
+                    $scope.makeSenseNum = $scope.makeSenseNum + 1
+                    if($scope.makeSenseNum %2 == 0){
+                        $scope.glyphiconStarEmpty = true
+                        $scope.glyphiconStar = false
+                    }else{
+                        $scope.glyphiconStarEmpty = false
+                        $scope.glyphiconStar = true
+                    }
+                }
+
+                $scope.makeLike = function(){
+                    $scope.makeLikeNum = $scope.makeLikeNum + 1
+                }
+
+            },
+            templateUrl:"/_debate/svgComment.html"
+        }
+    })
+
+</script>
+
+</html>

@@ -1,0 +1,23 @@
+<div style="height:800px;overflow:scroll">
+    <div class="panel panel-default" ng-repeat="val in debatingList">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{val.title}}</h3>
+        </div>
+        <div class="panel-body">
+            {{val.desc}}
+            <table class="table table-condensed">
+                <tr class="active"><td class="info">正方</td><td class="info">{{val.pro}}</td> <td class="success">反方</td><td class="success">{{val.con}}</td> <td>总次数</td><td>{{val.config.timeNumbers}}回</td><td>操作限时</td><td ng-show="val.config.timeLimit == 0">不设置</td><td ng-show="val.config.timeLimit!=0">{{val.config.timeLimitValDefault}}</td></tr>
+            </table>
+            <div class="pull-right">
+                <a  ng-click="participateRoom(val.num,val.rNum,1)" class="btn btn-info ">
+                    <span class="glyphicon glyphicon-floppy-save"></span><br>进入房间
+                </a>
+
+                <a  ng-click="participateRoom(val.num,val.rNum,2)" class="btn btn-success ">
+                    <span class="glyphicon glyphicon-floppy-save"></span><br>进入房间
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>

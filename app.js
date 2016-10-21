@@ -8,6 +8,7 @@ var session = require('express-session');
 
 var debate = require('./routes/debate');
 var _debate = require('./routes/_debate');
+var debateCN = require("./routes/debate_cn.js")
 
 var ECT = require('ect'); // ECT 読み込み
 
@@ -49,7 +50,7 @@ app.sessionStore = sessionStore;
 
 app.use('/debate',debate);
 app.use('/_debate',_debate);
-
+app.use("/debateCN",debateCN)
 
 
 // catch 404 and forward to error handler

@@ -1,9 +1,3 @@
-/**
- * Created by xuzhongwei on 2016/07/12.
- */
-
-
-
 var mongo = require("../model/mongo.js");
 var tool = require("./tool.js");
 var steps = require('ocsteps');

@@ -33,7 +33,7 @@
         node ./bin/www
         
     5.access
-        http://127.0.0.1:port/debate
+        http://127.0.0.1:port/_debate
     6.username:miyoshi
       password:miyoshi
       username:syoui
