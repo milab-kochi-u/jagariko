@@ -171,11 +171,6 @@
 
 
 
-
-
-
-
-
     var data = []
     var _data = []
 
@@ -464,7 +459,7 @@
             foreignObject.style("cursor","pointer")
             //450的宽度一行能装14px font的字体30个
             //100(默认RECTHEIGHT)的高度能装4行
-            var _RECTHEIGHT = (Math.ceil(txt.length/30+1))*(RECTHEIGHT/4)
+            var _RECTHEIGHT = (Math.ceil(txt.length/32+1))*(RECTHEIGHT/3.2)
             LASTRECTHEIGHT = _RECTHEIGHT
 
             foreignObject.attr("width",RECTWIDTH)
@@ -639,8 +634,6 @@
             var k = arr[3]!=-1?arr[3]:-1
             var s = arr[4]!=-1?arr[4]:-1
 
-
-
             var rect = svg.append("foreignObject")
 
             rect.attr("y",y)
@@ -664,8 +657,6 @@
             }
 
 
-
-
             div.style("width",POPUPRECTWIDTH+"px")
             div.style("background-color","#fff")
             //div.style("opacity","0.7")
@@ -687,8 +678,6 @@
             remove.on("click",function(){
                 rect.remove()
             })
-
-
 
 
 

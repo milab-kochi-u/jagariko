@@ -32,11 +32,11 @@
 
 </head>
 
-<body ng-app="myApp">
+<body ng-app="myApp" ng-init="LAN='CN'">
     <div ng-controller="myCtr" class="container">
 
         <div class="row">
-        <my-navy debate-info="debateInfo"></my-navy>
+            <my-navy debate-info="debateInfo"></my-navy>
         </div>
 
         <div class="row">
@@ -191,7 +191,10 @@
     myApp.directive("myNavy",function(){
         return {
             scope:{debateInfo:"="},
-            templateUrl:"/debateCN/navy.html"
+            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
+            },
+            templateUrl:"/angularTemplate/navy.html"
         }
     })
 
@@ -564,7 +567,7 @@
                         foreignObject.style("cursor","pointer")
                         //450的宽度一行能装14px font的字体30个
                         //100(默认RECTHEIGHT)的高度能装4行
-                        var _RECTHEIGHT = (Math.ceil(txt.length/25+1))*(RECTHEIGHT/4)
+                        var _RECTHEIGHT = (Math.ceil(txt.length/25+1))*(RECTHEIGHT/3)
                         LASTRECTHEIGHT = _RECTHEIGHT
 
                         foreignObject.attr("width",RECTWIDTH)

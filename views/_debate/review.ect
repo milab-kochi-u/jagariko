@@ -34,12 +34,13 @@
 
 </head>
 
-<body ng-app="myApp">
+<body ng-app="myApp" ng-init="LAN='JP'">
     <div ng-controller="myCtr" class="container">
 
         <div class="row">
         <my-navy debate-info="debateInfo"></my-navy>
         </div>
+
 
         <div class="row">
                 <table class="table table-striped">
@@ -193,7 +194,10 @@
     myApp.directive("myNavy",function(){
         return {
             scope:{debateInfo:"="},
-            templateUrl:"/_debate/navy.html"
+            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
+            },
+            templateUrl:"/angularTemplate/navy.html"
         }
     })
 

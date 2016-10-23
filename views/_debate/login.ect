@@ -12,7 +12,7 @@
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-<div class="container" ng-app="myApp">
+<div class="container" ng-app="myApp" ng-init="LAN='CN'">
 
 
 
@@ -42,6 +42,7 @@ var angular = angular.module("myApp",[])
 
 angular.directive("loginNavy",function(){
     return {
+        scope:false,
         templateUrl:"/_debate/navy.html"
     }
 })
@@ -61,7 +62,7 @@ angular.controller("myForm",function($scope,$window,$timeout,myPost){
         myPost.postData({username:$scope.username,password:$scope.password}).then(function(res){
                 if(parseInt(res.data.error) == 0){
                     $timeout(function(){
-                        $window.location = "/_debate/group"
+                        $window.location = "/_debate/group#/theme"
                     })
                 }else{
                     $window.alert(res.data.msg)
