@@ -328,10 +328,14 @@
 
             var checkStatus = function(val,preVal){
 
-                console.log("val is ..")
-                console.log(val)
+                console.log("------------------")
                 console.log("preVal is ..")
                 console.log(preVal)
+
+                console.log("val is ..")
+                console.log(val)
+                console.log("------------------")
+
                 if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == -2 && parseInt(val) == 0){
                     changeStatusController(["pro11"])
                 }
