@@ -196,7 +196,12 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
             // inputStatement = [{title:"主張を述べてください",dissent:0,content:""}]
 
-            var inputMessage = [{title:"主張を述べてください",dissent:0,content:"",index:Math.round(Math.random()*10000)}]
+            if(msg.LAN == 'JP'){
+                var inputMessage = [{title:"主張を述べてください",dissent:0,content:"",index:Math.round(Math.random()*10000)}]
+            }else{
+
+                var inputMessage = [{title:"请阐述你的结论",dissent:0,content:"",index:Math.round(Math.random()*10000)}]
+            }
 
             for(var t=0;t<msg.objs.length;t++){
                 for(var i=0;i<msg.objs[t].length;i++){

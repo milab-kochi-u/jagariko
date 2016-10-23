@@ -1,3 +1,4 @@
+<div class="row" ng-if="LAN=='JP'">
 
 <div class="row">
     <every-statement every-statement-data="everyStatementData">
@@ -38,7 +39,93 @@
         </div>
     </div>
 
+
+    <div class="row" ng-if="err==1">
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true">!</span>
+            <span class="sr-only">警告:</span>
+            全ての入力項目を完成してください
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-sm-offset-6"><button type="button" class="btn btn-default btn-lg" ng-click="submit()">送信</button></div>
+    </div>
+
+
 </div>
 
 <div class="row">
     <request-for-twice-statement ng-if="changeFormVal[1] == 'active'" ></request-for-twice-statement>
+</div>
+
+</div>
+
+
+
+
+
+<div class="row" ng-if="LAN=='CN'">
+
+<div class="row">
+    <every-statement every-statement-data="everyStatementData">
+
+    </every-statement>
+</div>
+
+<div class="row">
+    <ul class="nav nav-pills nav-justified">
+        <li role="presentation" class="{{changeFormVal[0]}}"><a ng-click="changeForm(0)">分析阐述结果</a></li>
+        <li role="presentation" class="{{changeFormVal[1]}}"><a ng-click="changeForm(1)">请求正方再次阐述</a></li>
+    </ul>
+</div>
+
+<div ng-if="changeFormVal[0] == 'active'" class="row">
+
+
+    <div class="row">
+        <ul class="nav nav-pills nav-justified">
+            <li ng-repeat="(key,val) in everyStatementData.obj track by $index" role="presentation" class="{{changeAnalysisVal[key]}}" >
+                <a ng-click="changeAnalysis(key)">
+                    <span ng-if="key==0">
+                        结论:
+                    </span>
+                    <span ng-if="key!=0">
+                        质疑{{key}}:
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row" ng-repeat="(key,val) in everyStatementData.obj track by $index">
+        <div class="row" ng-show="changeAnalysisVal[key] == 'active'">
+            <span ng-if="key==0">请对结论做分析</span>
+            <span ng-if="key!=0">请对第{{key}}个疑问解释做分析</span>
+            <my-form objs="objs" key="key"></my-form>
+        </div>
+    </div>
+
+
+    <div class="row" ng-if="err==1">
+        <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"><!/span>
+                <span class="sr-only">警告:</span>
+                请填写完所有的输入项
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-sm-offset-6"><button type="button" class="btn btn-default btn-lg" ng-click="submit()">送信</button></div>
+    </div>
+
+</div>
+
+<div class="row">
+    <request-for-twice-statement ng-if="changeFormVal[1] == 'active'" ></request-for-twice-statement>
+</div>
+
+</div>

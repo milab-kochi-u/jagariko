@@ -5,7 +5,7 @@
 
 var express = require('express');
 var router = express.Router();
-var debateCNController = require('../controller/_debate.js');
+var debateCNController = require('../controller/debateCN.js');
 
 
 /* GET users listing. */

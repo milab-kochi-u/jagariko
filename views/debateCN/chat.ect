@@ -14,7 +14,7 @@
     <script src="/tmp/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/tmp/angular-route.min.js"></script>
 </head>
-<body ng-app="myApp">
+<body ng-app="myApp" ng-init="LAN='CN'">
 <div ng-controller="myCtr" class="container">
 <setting-part ng-show="debateInfo.setting != 1"  setting-info="settingInfo" set-up="setUp()"></setting-part>
 <div class="row">
@@ -31,52 +31,52 @@
 <div class="row" ng-show="changeTabVal[0] == 'active'">
    <table class="table table-striped ">
      <!-- On rows -->
-     <tr class="info"><th>テーマ</th><td>{{debateInfo.title}}</td><td></td></tr>
+     <tr class="info"><th>辩论主题</th><td>{{debateInfo.title}}</td><td></td></tr>
 
          <tr class="info">
-            <th>立場</th>
+            <th>立场</th>
             <td>
-            <span ng-if="debateInfo.position == 1">賛成</span>
-            <span ng-if="debateInfo.position == 2">反対</span>
+            <span ng-if="debateInfo.position == 1">正方</span>
+            <span ng-if="debateInfo.position == 2">反方</span>
             </td>
             <td></td>
          </tr>
 
      <tr class="active">
-     <th>肯定側</th>
+     <th>正方</th>
      <td>{{debateInfo.pro}}</td>
      <td>
             <div ng-if="debateInfo.status<0">
              <div ng-if="debateInfo.position == 1">
-                <button ng-click="prepare()" class="btn btn-info" ng-if="debateInfo.proPrepare != 1">準備</button>
-                <span ng-if="debateInfo.proPrepare == 1">準備済み</span>
+                <button ng-click="prepare()" class="btn btn-info" ng-if="debateInfo.proPrepare != 1">点击准备</button>
+                <span ng-if="debateInfo.proPrepare == 1">已准备</span>
              </div>
 
              <div ng-if="debateInfo.position == 2">
-                <span ng-if="debateInfo.proPrepare == 1">準備済み</span>
-                <span ng-if="debateInfo.proPrepare != 1">未準備</span>
+                <span ng-if="debateInfo.proPrepare == 1">已准备</span>
+                <span ng-if="debateInfo.proPrepare != 1">未准备</span>
              </div>
             </div>
 
             <div ng-if="debateInfo.status>=0">
-                討論中
+                辩论中
             </div>
      </td>
      </tr>
 
      <tr class="success">
-     <th>否定側</th>
+     <th>反方</th>
      <td>{{debateInfo.con}}</td>
      <td>
           <div ng-if="debateInfo.status<0">
           <div ng-if="debateInfo.position == 2">
-             <button ng-click="prepare()" class="btn btn-info" ng-if="debateInfo.conPrepare != 1">準備</button>
-             <span ng-if="debateInfo.conPrepare == 1">準備済み</span>
+             <button ng-click="prepare()" class="btn btn-info" ng-if="debateInfo.conPrepare != 1">点击准备</button>
+             <span ng-if="debateInfo.conPrepare == 1">已准备</span>
           </div>
 
           <div ng-if="debateInfo.position == 1">
-             <span ng-if="debateInfo.conPrepare == 1">準備済み</span>
-             <span ng-if="debateInfo.conPrepare != 1">未準備</span>
+             <span ng-if="debateInfo.conPrepare == 1">已准备</span>
+             <span ng-if="debateInfo.conPrepare != 1">未准备</span>
           </div>
           </div>
 
@@ -87,9 +87,9 @@
      </td>
      </tr>
 
-     <tr class="warning"><th>総回数</th><td>{{debateInfo.config.timeNumbers}}</td><td></td></tr>
-     <tr class="warning"><th>回数</th><td>{{debateInfo.order}}</td><td></td></tr>
-     <tr class="danger"><th>時間制限</th><td>{{debateInfo.config.timeLimitValDefault}}</td><td></td></tr>
+     <tr class="warning"><th>总次数</th><td>{{debateInfo.config.timeNumbers}}</td><td></td></tr>
+     <tr class="warning"><th>当前次数</th><td>{{debateInfo.order}}</td><td></td></tr>
+     <tr class="danger"><th>时间限制</th><td>{{debateInfo.config.timeLimitValDefault}}</td><td></td></tr>
 
    </table>
 </div>
@@ -99,9 +99,9 @@
         <div ng-repeat="(key,val) in statement track by $index">
             <div ng-repeat="(_key,_val) in val.obj">
                 <div ng-class="(val.position == 1)? 'panel-info':'panel-success'" class="panel">
-                  <div class="panel-heading">主張</div>
+                  <div class="panel-heading">结论</div>
                   <div class="panel-body">
-                        主張内容:{{_val.content}}
+                        结论内容:{{_val.content}}
                   </div>
                 </div>
             </div>
@@ -117,7 +117,7 @@
                             <div class="col-sm-1">
                                 <div ng-class="(val.position == 1)? 'panel-info':'panel-success'" class="panel">
                                <div class="panel-heading">
-                                 主張
+                                 结论
                                </div>
                              </div>
                              </div>
@@ -125,13 +125,13 @@
                              <div class="col-sm-10">
                              <div class="panel panel-default">
                                  <div class="panel-body">
-                                    主張内容:{{_val.claimTxt}}
+                                    结论内容:{{_val.claimTxt}}
                                  </div>
                              </div>
                              </div>
 
                                 <div ng-if="_val.dissent == 1" class="col-sm-1" style="line-height:50px;">
-                                   <button class="btn btn-danger">意義</button>
+                                   <button class="btn btn-danger">质疑</button>
                                 </div>
 
     </div>
@@ -140,7 +140,7 @@
                             <div class="col-sm-1 col-sm-offset-1">
                             <div ng-class="(val.position == 1)? 'panel-info':'panel-success'" class="panel">
                                <div class="panel-heading">
-                                 論拠
+                                 理由
                                </div>
                              </div>
                              </div>
@@ -148,13 +148,13 @@
                              <div class="col-sm-9">
                              <div class="panel panel-default">
                                  <div class="panel-body">
-                                    論拠内容:{{__val.warrantTxt}}
+                                    理由内容:{{__val.warrantTxt}}
                                  </div>
                              </div>
                              </div>
 
                                 <div ng-if="__val.dissent == 1" class="col-sm-1" style="line-height:50px;">
-                                   <button class="btn btn-danger">意義</button>
+                                   <button class="btn btn-danger">质疑</button>
                              </div>
     </div>
 
@@ -163,7 +163,7 @@
                             <div class="col-sm-1 col-sm-offset-2">
                             <div ng-class="(val.position == 1)? 'panel-info':'panel-success'" class="panel">
                                <div class="panel-heading">
-                                 根拠
+                                 证据
                                </div>
                              </div>
                              </div>
@@ -171,13 +171,13 @@
                              <div class="col-sm-8">
                              <div class="panel panel-default">
                                  <div class="panel-body">
-                                    根拠内容:{{___val.evidenceTxt}}
+                                    证据内容:{{___val.evidenceTxt}}
                                  </div>
                              </div>
                              </div>
 
                                 <div ng-if="___val.dissent == 1" class="col-sm-1" style="line-height:50px;">
-                                   <button class="btn btn-danger">意義</button>
+                                   <button class="btn btn-danger">质疑</button>
                              </div>
 
     </div>
@@ -287,7 +287,7 @@
 
                     var deferred = $q.defer();
 
-                    myPost.postData("/_debate/getDebateInformation").then(function(_res){
+                    myPost.postData("/debateCN/getDebateInformation").then(function(_res){
 
                     if(_res.data){
 
@@ -305,7 +305,7 @@
                             $scope.debateInfo.config = _res.data.config
                             $scope.debateInfo.username = _res.data.username
 
-                            $scope.everyStatementData = _res.data.everyStatement || {position:1,obj:[{title:"主張を述べてください",dissent:0,content:"主張を述べてください"}]}
+                            $scope.everyStatementData = _res.data.everyStatement || {position:1,obj:[{title:"请阐述你的结论",dissent:0,content:"请阐述你的结论"}]}
                             $scope.objs = _res.data.objs
 
                             $scope.requestStatementMessage = _res.data.requestStatementMessage
@@ -430,7 +430,7 @@
                 }
 
 
-                //分析結果が今日日された
+                //分析結果がされた
 
                 if(parseInt($scope.debateInfo.position) == 1 && parseInt(preVal) == 5 && parseInt(val) == 4){
                      changeStatusController(["pro71112"])
@@ -478,8 +478,6 @@
                     $scope.statement = $scope.statement.concat(_res.sendObj)
                     $scope.everyStatementData = _res.sendObj
                     $scope.objs = _res.objs
-
-
                 })
             })
 
@@ -587,13 +585,13 @@
             $scope.objs = []
 
             $scope.inputMessage = [
-                        {title:"主張を述べてください",dissent:0,content:"",index:Math.round(Math.random()*10000)}
+                        {title:"请阐述你的结论",dissent:0,content:"",index:Math.round(Math.random()*10000)}
                     ]
 
             $scope.requestStatementMessage = ""
             $scope.refuseAnalysisResultReason = ""
 
-            //statement = [{position:1,obj:[{title:"主張を述べてください",dissent:0,content:"主張を述べてください"}]}]
+            //statement = [{position:1,obj:[{title:"请阐述你的结论",dissent:0,content:"请阐述你的结论"}]}]
 
             $scope.statement = []
 
@@ -642,7 +640,7 @@
     myApp.directive("myNavy",function(){
         return {
             scope:false,
-            templateUrl:"/_debate/navy.html"
+            templateUrl:"/debateCN/navy.html"
         }
     })
 
@@ -686,6 +684,7 @@
 
           return{
               controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.addClaim = function(key){
                             $scope.objs[key].push(JSON.parse(JSON.stringify(claim)))
                     }
@@ -711,9 +710,6 @@
                             $scope.objs[key][_key].warrant[__key].evidence.splice(___key,1)
                     }
 
-                    $scope.submit = function(){
-                        coreSocket.emit("giveAnalysis",{objs:$scope.objs})
-                    }
 
               },
               scope:{
@@ -727,9 +723,10 @@
     myApp.directive("myInputForm",function(coreSocket){
         return {
            scope:{
-            inputMessage:"="
+            inputMessage:"=",
            },
            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
                 $scope._submit = function(){
                     coreSocket.emit("giveStatement",{inputMessage:$scope.inputMessage})
                 }
@@ -744,6 +741,7 @@
             everyStatementData:"="
            },
            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
                 $scope._submit = function(){
                     coreSocket.emit("giveTwiceStatement",$scope.everyStatementData)
                 }
@@ -781,7 +779,7 @@
                     settingInfo:"=",
                     setUp:"&"
                 },
-                templateUrl:"/_debate/settingPart.html"
+                templateUrl:"/debateCN/settingPart.html"
            }
     })
 
@@ -789,7 +787,7 @@
             return {
                 scope:{everyAnalysisData:"="},
                 controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
                 },
                 templateUrl:"/angularTemplate/everyAnalysis.html"
             }
@@ -799,6 +797,7 @@
             return {
                 scope:{everyStatementData:"="},
                 controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.selectTitle = function(msg){
                         alert(msg)
                     }
@@ -828,11 +827,22 @@
             }
     })
 
-    myApp.directive("con21",function(){
+    myApp.directive("con21",function($rootScope,coreSocket){
             return {
                 scope:{everyStatementData:"=",objs:"=",requestStatementMessage:"="},
                 controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.changeFormVal = ["active",""]
+                    $scope.changeAnalysisVal = []
+                    for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                        if(i==0){
+                        $scope.changeAnalysisVal.push("active")
+                        }else{
+                        $scope.changeAnalysisVal.push("")
+                        }
+                    }
+
+
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
                             $scope.changeFormVal[i] = ""
@@ -840,17 +850,21 @@
                         $scope.changeFormVal[n] = "active"
                     }
 
-                    $scope.changeAnalysisVal = []
-
-                    for(var i=0;i<$scope.everyStatementData.obj.length;i++){
-                        $scope.changeAnalysisVal.push("")
-                    }
 
                     $scope.changeAnalysis = function(n){
                         for(var i=0;i<$scope.changeAnalysisVal.length;i++){
                             $scope.changeAnalysisVal[i] = ""
                         }
                         $scope.changeAnalysisVal[n] = "active"
+                    }
+                    $scope.submit = function(){
+                        var res = checkObjsEmpty($scope.objs)
+                        console.log(res)
+                        if(res.msg == 0){
+                           coreSocket.emit("giveAnalysis",{objs:$scope.objs,LAN:'CN'})
+                        }else{
+                            $scope.err = 1
+                        }
                     }
                 },
                 templateUrl:"/angularTemplate/status/con21.html"
@@ -861,7 +875,7 @@
         return {
             scope:{everyAnalysisData:"=",everyStatementData:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
             controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
                 $scope.confirmVal = ["","",""]
                 $scope.confirm = function(n){
                     for(var i=0;i<$scope.confirmVal.length;i++){
@@ -882,7 +896,7 @@
         return {
             scope:{},
             controller:function($scope){
-
+            $scope.LAN = $scope.$parent.LAN
             },
             templateUrl:"/angularTemplate/status/con31.html"
         }
@@ -894,7 +908,7 @@
         return {
             scope:false,
             controller:function($scope){
-
+            $scope.LAN = $scope.$parent.LAN
             },
             templateUrl:"/angularTemplate/status/pro32.html"
         }
@@ -904,7 +918,7 @@
         return{
             scope:{},
             controller:function($scope){
-
+            $scope.LAN = $scope.$parent.LAN
             },
             templateUrl:"/angularTemplate/status/con32.html",
         }
@@ -915,7 +929,7 @@
 
         scope:{everyAnalysisData:"=",inputMessage:"="},
         controller:function($scope){
-
+        $scope.LAN = $scope.$parent.LAN
         },
         templateUrl:"/angularTemplate/status/con411.html"
         }
@@ -923,6 +937,9 @@
 
     myApp.directive("pro411",function(){
         return {
+           controller:function($scope){
+           $scope.LAN = $scope.$parent.LAN
+           },
            templateUrl:"/angularTemplate/status/pro411.html"
         }
     })
@@ -931,6 +948,7 @@
         return {
                 scope:{everyStatementData:"=",objs:"=",requestStatementMessage:"="},
                 controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
@@ -957,6 +975,9 @@
 
     myApp.directive("pro412",function(){
         return {
+            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
+            },
             templateUrl:"/angularTemplate/status/pro412.html"
         }
     })
@@ -965,14 +986,18 @@
         return{
             scope:{obj:"=",everyStatementData:"="},
             controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
             },
             templateUrl:"/angularTemplate/status/con42.html"
         }
     })
 
     myApp.directive("pro42",function(){
+        return {controller:function($scope){
+         $scope.LAN = $scope.$parent.LAN
+        },
         templateUrl:"/angularTemplate/status/pro42.html"
+        }
     })
 
     myApp.directive("pro521",function(){
@@ -1007,10 +1032,11 @@
 
     })
 
-    myApp.directive("pro511",function(){
+    myApp.directive("pro511",function(coreSocket){
             return {
                 scope:{everyStatementData:"=",objs:"="},
                 controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
@@ -1019,7 +1045,15 @@
                         $scope.changeFormVal[n] = "active"
                     }
 
-                    $scope.changeAnalysisVal = []
+                                        $scope.changeAnalysisVal = []
+                                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                                            if(i==0){
+                                            $scope.changeAnalysisVal.push("active")
+                                            }else{
+                                            $scope.changeAnalysisVal.push("")
+                                            }
+                                        }
+
 
                     for(var i=0;i<$scope.everyStatementData.obj.length;i++){
                         $scope.changeAnalysisVal.push("")
@@ -1031,6 +1065,17 @@
                         }
                         $scope.changeAnalysisVal[n] = "active"
                     }
+
+
+                    $scope.submit = function(){
+                        var res = checkObjsEmpty($scope.objs)
+                        console.log(res)
+                        if(res.msg == 0){
+                           coreSocket.emit("giveAnalysis",{objs:$scope.objs,LAN:'CN'})
+                        }else{
+                            $scope.err = 1
+                        }
+                    }
                 },
                 templateUrl:"/angularTemplate/status/pro511.html"
             }
@@ -1038,6 +1083,9 @@
 
     myApp.directive("con511",function(){
             return {
+              controller:function($scope){
+                  $scope.LAN = $scope.$parent.LAN
+              },
               templateUrl:"/angularTemplate/status/con511.html"
             }
     })
@@ -1074,7 +1122,7 @@
         return {
             scope:{everyAnalysisData:"=",everyStatementData:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
             controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
                 $scope.confirmVal = ["","",""]
                 $scope.confirm = function(n){
                     for(var i=0;i<$scope.confirmVal.length;i++){
@@ -1093,47 +1141,45 @@
 
     myApp.directive("pro6111",function(){
             return {
+                controller:function($scope){
+                 $scope.LAN = $scope.$parent.LAN
+                },
                 templateUrl:"/angularTemplate/status/pro6111.html"
             }
     })
 
     myApp.directive("con6112",function(){
             return {
-                 templateUrl:"/angularTemplate/status/con6112.html"
+                controller:function($scope){
+                 $scope.LAN = $scope.$parent.LAN
+                },
+                templateUrl:"/angularTemplate/status/con6112.html"
             }
     })
 
     myApp.directive("pro71111",function(){
             return {
-                 templateUrl:"/angularTemplate/status/pro71111.html"
+                controller:function($scope){
+                 $scope.LAN = $scope.$parent.LAN
+                },
+                templateUrl:"/angularTemplate/status/pro71111.html"
             }
     })
 
     myApp.directive("con71111",function(){
              return {
-                  templateUrl:"/angularTemplate/status/con71111.html"
+                controller:function($scope){
+                 $scope.LAN = $scope.$parent.LAN
+                },
+                templateUrl:"/angularTemplate/status/con71111.html"
              }
     })
 
     myApp.directive("pro71112",function(){
-            //return {
-            //    scope:{everyStatementData:"=",obj:"=",requestStatementMessage:"="},
-            //    controller:function($scope){
-            //        $scope.changeFormVal = ["active",""]
-            //        $scope.changeForm = function(n){
-            //            for(var i=0;i<$scope.changeFormVal.length;i++){
-            //                $scope.changeFormVal[i] = ""
-            //            }
-            //            $scope.changeFormVal[n] = "active"
-            //        }
-            //    },
-            //    templateUrl:"/angularTemplate/status/pro71112.html"
-            //}
-
-
                         return {
                             scope:{everyStatementData:"=",objs:"="},
                             controller:function($scope){
+                                $scope.LAN = $scope.$parent.LAN
                                 $scope.changeFormVal = ["active",""]
                                 $scope.changeForm = function(n){
                                     for(var i=0;i<$scope.changeFormVal.length;i++){
@@ -1157,55 +1203,69 @@
                             },
                             templateUrl:"/angularTemplate/status/pro71112.html"
                         }
-
-
     })
 
     myApp.directive("con71112",function(){
             return {
-                 templateUrl:"/angularTemplate/status/con71112.html"
+                                 controller:function($scope){
+                                  $scope.LAN = $scope.$parent.LAN
+                                 },templateUrl:"/angularTemplate/status/con71112.html"
             }
     })
 
     myApp.directive("pro81111",function(){
             return {
-                 templateUrl:"/angularTemplate/status/pro81111.html"
+                                 controller:function($scope){
+                                  $scope.LAN = $scope.$parent.LAN
+                                 },templateUrl:"/angularTemplate/status/pro81111.html"
             }
     })
 
     myApp.directive("con81111",function(){
             return {
-                 templateUrl:"/angularTemplate/status/con81111.html"
+                                controller:function($scope){
+                                 $scope.LAN = $scope.$parent.LAN
+                                }, templateUrl:"/angularTemplate/status/con81111.html"
             }
     })
 
     myApp.directive("pro811121",function(){
             return {
-                templateUrl:"/angularTemplate/status/pro811121.html"
+                                controller:function($scope){
+                                 $scope.LAN = $scope.$parent.LAN
+                                },templateUrl:"/angularTemplate/status/pro811121.html"
             }
     })
 
     myApp.directive("con811121",function(){
             return {
-                templateUrl:"/angularTemplate/status/con811121.html"
+                                controller:function($scope){
+                                 $scope.LAN = $scope.$parent.LAN
+                                },templateUrl:"/angularTemplate/status/con811121.html"
             }
     })
 
     myApp.directive("pro811122",function(){
             return {
-                templateUrl:"/angularTemplate/status/pro811122.html"
+                                controller:function($scope){
+                                 $scope.LAN = $scope.$parent.LAN
+                                },templateUrl:"/angularTemplate/status/pro811122.html"
             }
     })
 
     myApp.directive("con811122",function(){
             return {
-                templateUrl:"/angularTemplate/status/con811122.html"
+                                controller:function($scope){
+                                 $scope.LAN = $scope.$parent.LAN
+                                },templateUrl:"/angularTemplate/status/con811122.html"
             }
     })
 
     myApp.directive("debateFinish",function(){
             return {
-                templateUrl:"/angularTemplate/status/debateFinish.html"
+                                controller:function($scope){
+                                 $scope.LAN = $scope.$parent.LAN
+                                },templateUrl:"/angularTemplate/status/debateFinish.html"
             }
     })
 
@@ -1213,6 +1273,7 @@
             return {
                 scope:{refuseAnalysisResultReason:"="},
                 controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.refuse = function(){
                         coreSocket.emit("refuseAnalysis",{refuseAnalysisResultReason:$scope.refuseAnalysisResultReason})
                     }
@@ -1220,5 +1281,37 @@
                 templateUrl:"/angularTemplate/refuseAnalysisResult.html"
             }
     })
+
+
+
+    function checkObjsEmpty(objs){
+        console.log(1111)
+         console.log(objs)
+
+         for(var i=0;i<objs.length;i++){
+            for(var j=0;j<objs[i].length;j++){
+                if(!objs[i][j].claimTxt){
+                    return {msg:1,empty:'claim'}
+                    break;
+                }
+
+                for(var k=0;k<objs[i][j].warrant.length;k++){
+                    if(!objs[i][j].warrant[k].warrantTxt){
+                        return {msg:1,empty:'warrant'}
+                        break;
+                    }
+
+                    for(var s=0;s<objs[i][j].warrant[k].evidence.length;s++){
+                        if(!objs[i][j].warrant[k].evidence[s].evidenceTxt){
+                            return {msg:1,empty:'evidence'}
+                            break;
+                        }
+                    }
+                }
+            }
+         }
+
+         return {msg:0,empty:0}
+    }
 </script>
 </html>

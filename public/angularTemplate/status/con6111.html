@@ -1,3 +1,4 @@
+<div class="row" ng-if="LAN=='JP'">
 <div class="row">
     <div class="alert alert-warning" role="alert">
         <a href="#" class="alert-link">分析の結果以下である</a>
@@ -22,4 +23,46 @@
 
 <div class="row" ng-if="confirmVal[2] == 'active'">
     <my-input-twice-form every-statement-data="everyStatementData"></my-input-twice-form>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="row" ng-if="LAN=='CN'">
+    <div class="row">
+        <div class="alert alert-warning" role="alert">
+            <a href="#" class="alert-link">已下是正方对你的结论阐述做出的分析</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <every-analysis every-analysis-data="everyAnalysisData"></every-analysis>
+    </div>
+
+    <div class="row">
+        <ul class="nav nav-pills nav-justified">
+            <li role="presentation" class="{{confirmVal[0]}}"><a ng-click="confirm(0);confirmAnalysisResult()">同意</a></li>
+            <li role="presentation" class="{{confirmVal[1]}}"><a ng-click="confirm(1);">拒绝</a></li>
+            <li role="presentation" class="{{confirmVal[2]}}"><a ng-click="confirm(2)">拒绝并再次阐述结论</a></li>
+        </ul>
+    </div>
+
+    <div class="row" ng-if="confirmVal[1] == 'active'">
+        <refuse-analysis-result refuse-analysis-result-reason="refuseAnalysisResultReason"></refuse-analysis-result>
+    </div>
+
+    <div class="row" ng-if="confirmVal[2] == 'active'">
+        <my-input-twice-form every-statement-data="everyStatementData"></my-input-twice-form>
+    </div>
 </div>

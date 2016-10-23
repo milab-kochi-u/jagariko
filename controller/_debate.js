@@ -16,7 +16,7 @@ module.exports = {
         }
     },
     loginController:function(req,res){
-        res.render("debateCN/login",{})
+        res.render("_debate/login",{})
     },
     loginPostController:function(req,res){
 
@@ -110,7 +110,7 @@ module.exports = {
                 themes = list
             }))
         },function(){
-            res.render("debateCN/group",{userInformation:req.session.debateLogin,themes:themes,debatingList:debatingList,finishList:finishList})
+            res.render("_debate/group",{userInformation:req.session.debateLogin,themes:themes,debatingList:debatingList,finishList:finishList})
         })()
     },
     getThemeListController:function(req,res){
@@ -201,7 +201,7 @@ module.exports = {
                     res.redirect("group")
                     return
                 }else{
-                    res.render("debateCN/chat",{})
+                    res.render("_debate/chat",{})
                 }
             }))
         })()
@@ -221,7 +221,7 @@ module.exports = {
         if(tool.isEmpty(req.session.debateLogin)){
             res.redirect("login")
         }
-        res.render("debateCN/review",{})
+        res.render("_debate/review",{})
     },
     fetchAnalysisLogController:function(req,res){
 

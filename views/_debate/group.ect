@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<div ng-app="myApp" class="container">
+<div ng-app="myApp" class="container" ng-init="LAN='JP'">
     <my-navy></my-navy>
 
     <div class="row" ng-controller="myController">
@@ -154,7 +154,8 @@ myApp.controller("finishedCtr",function($scope,getDataFromServer){
 
 myApp.directive("myNavy",function(){
     return {
-        templateUrl:"/_debate/navy.html"
+        scope:false,
+        templateUrl:"/angularTemplate/navy.html"
     }
 })
 

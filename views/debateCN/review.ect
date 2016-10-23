@@ -12,8 +12,6 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/tmp/jquery-2.2.4.min.js" ></script>
 
-
-
     <script type="text/javascript" src="/tmp/angular-route.min.js"></script>
     <script src="/_debate/d3/d3.js"></script>
 
@@ -43,10 +41,10 @@
 
         <div class="row">
                 <table class="table table-striped">
-                <tr class="info"><th>テーマ</th><td>{{debateInfo.title}}</td><td></td></tr>
-                <tr class="warning"><th>総回数</th><td>{{debateInfo.config.timeNumbers}}</td><td></td></tr>
-                <tr class="info"><th>賛成側</th><td>{{debateInfo.pro}}</td><td></td></tr>
-                <tr class="success"><th>反対側</th><td>{{debateInfo.con}}</td><td></td></tr>
+                <tr class="info"><th>辩论主题</th><td>{{debateInfo.title}}</td><td></td></tr>
+                <tr class="warning"><th>总次数</th><td>{{debateInfo.config.timeNumbers}}</td><td></td></tr>
+                <tr class="info"><th>正方</th><td>{{debateInfo.pro}}</td><td></td></tr>
+                <tr class="success"><th>反方</th><td>{{debateInfo.con}}</td><td></td></tr>
                </table>
         </div>
 
@@ -193,7 +191,7 @@
     myApp.directive("myNavy",function(){
         return {
             scope:{debateInfo:"="},
-            templateUrl:"/_debate/navy.html"
+            templateUrl:"/debateCN/navy.html"
         }
     })
 
@@ -966,7 +964,7 @@
                                 div.attr("class","col-sm-6")
                                 var image = div.append("img")
 
-                                image.attr("src", "./leftPointer.png")
+                                image.attr("src", "/leftPointer.png")
                                 image.attr("width", "60")
                                         .attr("height", "50");
 
@@ -978,7 +976,7 @@
 
                                 var image = div.append("img")
 
-                                image.attr("src", "./dissent.png")
+                                image.attr("src", "/dissent.png")
                                         .attr("width", "60")
                                         .attr("height", "50");
 

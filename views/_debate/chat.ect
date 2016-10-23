@@ -14,7 +14,7 @@
     <script src="/tmp/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/tmp/angular-route.min.js"></script>
 </head>
-<body ng-app="myApp">
+<body ng-app="myApp" ng-init="LAN='JP'">
 <div ng-controller="myCtr" class="container">
 <setting-part ng-show="debateInfo.setting != 1"  setting-info="settingInfo" set-up="setUp()"></setting-part>
 <div class="row">
@@ -642,7 +642,7 @@
     myApp.directive("myNavy",function(){
         return {
             scope:false,
-            templateUrl:"/_debate/navy.html"
+            templateUrl:"/angularTemplate/navy.html"
         }
     })
 
@@ -686,6 +686,7 @@
 
           return{
               controller:function($scope){
+                     $scope.LAN = $scope.$parent.LAN
                     $scope.addClaim = function(key){
                             $scope.objs[key].push(JSON.parse(JSON.stringify(claim)))
                     }
@@ -712,7 +713,7 @@
                     }
 
                     $scope.submit = function(){
-                        coreSocket.emit("giveAnalysis",{objs:$scope.objs})
+                        coreSocket.emit("giveAnalysis",{objs:$scope.objs,LAN:'JP'})
                     }
 
               },
@@ -727,9 +728,11 @@
     myApp.directive("myInputForm",function(coreSocket){
         return {
            scope:{
-            inputMessage:"="
+            inputMessage:"=",
+            lan:"="
            },
            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
                 $scope._submit = function(){
                     coreSocket.emit("giveStatement",{inputMessage:$scope.inputMessage})
                 }
@@ -744,6 +747,7 @@
             everyStatementData:"="
            },
            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
                 $scope._submit = function(){
                     coreSocket.emit("giveTwiceStatement",$scope.everyStatementData)
                 }
@@ -756,6 +760,7 @@
         return{
             scope:false,
             controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
                 $scope.submit = function(){
                     coreSocket.emit("requestStatement",{requestStatementMessage:$scope.requestStatementMessage})
                 }
@@ -768,7 +773,7 @@
         return {
            scope:false,
            controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
            },
            templateUrl:"/angularTemplate/mySubNavy.html"
         }
@@ -789,7 +794,7 @@
             return {
                 scope:{everyAnalysisData:"="},
                 controller:function($scope){
-
+                    $scope.LAN = $scope.$parent.LAN
                 },
                 templateUrl:"/angularTemplate/everyAnalysis.html"
             }
@@ -799,6 +804,7 @@
             return {
                 scope:{everyStatementData:"="},
                 controller:function($scope){
+                     $scope.LAN = $scope.$parent.LAN
                     $scope.selectTitle = function(msg){
                         alert(msg)
                     }
@@ -828,10 +834,11 @@
             }
     })
 
-    myApp.directive("con21",function(){
+    myApp.directive("con21",function(coreSocket){
             return {
                 scope:{everyStatementData:"=",objs:"=",requestStatementMessage:"="},
                 controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
@@ -840,7 +847,16 @@
                         $scope.changeFormVal[n] = "active"
                     }
 
-                    $scope.changeAnalysisVal = []
+
+                                        $scope.changeAnalysisVal = []
+                                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                                            if(i==0){
+                                            $scope.changeAnalysisVal.push("active")
+                                            }else{
+                                            $scope.changeAnalysisVal.push("")
+                                            }
+                                        }
+
 
                     for(var i=0;i<$scope.everyStatementData.obj.length;i++){
                         $scope.changeAnalysisVal.push("")
@@ -852,6 +868,19 @@
                         }
                         $scope.changeAnalysisVal[n] = "active"
                     }
+
+
+                                        $scope.submit = function(){
+                                            var res = checkObjsEmpty($scope.objs)
+                                            console.log(res)
+                                            if(res.msg == 0){
+                                               coreSocket.emit("giveAnalysis",{objs:$scope.objs,LAN:'CN'})
+                                            }else{
+                                                $scope.err = 1
+                                            }
+                                        }
+
+
                 },
                 templateUrl:"/angularTemplate/status/con21.html"
             }
@@ -861,7 +890,7 @@
         return {
             scope:{everyAnalysisData:"=",everyStatementData:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
             controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
                 $scope.confirmVal = ["","",""]
                 $scope.confirm = function(n){
                     for(var i=0;i<$scope.confirmVal.length;i++){
@@ -882,7 +911,7 @@
         return {
             scope:{},
             controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
             },
             templateUrl:"/angularTemplate/status/con31.html"
         }
@@ -894,7 +923,7 @@
         return {
             scope:false,
             controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
             },
             templateUrl:"/angularTemplate/status/pro32.html"
         }
@@ -904,7 +933,7 @@
         return{
             scope:{},
             controller:function($scope){
-
+                    $scope.LAN = $scope.$parent.LAN
             },
             templateUrl:"/angularTemplate/status/con32.html",
         }
@@ -915,7 +944,7 @@
 
         scope:{everyAnalysisData:"=",inputMessage:"="},
         controller:function($scope){
-
+            $scope.LAN = $scope.$parent.LAN
         },
         templateUrl:"/angularTemplate/status/con411.html"
         }
@@ -923,6 +952,9 @@
 
     myApp.directive("pro411",function(){
         return {
+           controller:function($scope){
+               $scope.LAN = $scope.$parent.LAN
+           },
            templateUrl:"/angularTemplate/status/pro411.html"
         }
     })
@@ -931,6 +963,7 @@
         return {
                 scope:{everyStatementData:"=",objs:"=",requestStatementMessage:"="},
                 controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
@@ -957,7 +990,10 @@
 
     myApp.directive("pro412",function(){
         return {
-            templateUrl:"/angularTemplate/status/pro412.html"
+               controller:function($scope){
+                   $scope.LAN = $scope.$parent.LAN
+               },
+               templateUrl:"/angularTemplate/status/pro412.html"
         }
     })
 
@@ -965,20 +1001,29 @@
         return{
             scope:{obj:"=",everyStatementData:"="},
             controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
             },
             templateUrl:"/angularTemplate/status/con42.html"
         }
     })
 
     myApp.directive("pro42",function(){
-        templateUrl:"/angularTemplate/status/pro42.html"
+        return{
+            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
+            },
+            templateUrl:"/angularTemplate/status/pro42.html"
+        }
+
     })
 
     myApp.directive("pro521",function(){
 
         return {
             scope:false,
+            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
+            },
             templateUrl:"/angularTemplate/status/pro521.html"
         }
 
@@ -987,6 +1032,9 @@
     myApp.directive("con521",function(){
         return {
             scope:false,
+            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
+            },
             templateUrl:"/angularTemplate/status/con521.html"
         }
     })
@@ -994,6 +1042,9 @@
     myApp.directive("con522",function(){
         return {
             scope:false,
+            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
+            },
             templateUrl:"/angularTemplate/status/con522.html"
         }
     })
@@ -1002,15 +1053,19 @@
 
         return {
           scope:false,
+          controller:function($scope){
+              $scope.LAN = $scope.$parent.LAN
+          },
           templateUrl:"/angularTemplate/status/pro522.html"
         }
 
     })
 
-    myApp.directive("pro511",function(){
+    myApp.directive("pro511",function(coreSocket){
             return {
                 scope:{everyStatementData:"=",objs:"="},
                 controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
@@ -1019,11 +1074,14 @@
                         $scope.changeFormVal[n] = "active"
                     }
 
-                    $scope.changeAnalysisVal = []
-
-                    for(var i=0;i<$scope.everyStatementData.obj.length;i++){
-                        $scope.changeAnalysisVal.push("")
-                    }
+                                        $scope.changeAnalysisVal = []
+                                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                                            if(i==0){
+                                            $scope.changeAnalysisVal.push("active")
+                                            }else{
+                                            $scope.changeAnalysisVal.push("")
+                                            }
+                                        }
 
                     $scope.changeAnalysis = function(n){
                         for(var i=0;i<$scope.changeAnalysisVal.length;i++){
@@ -1031,6 +1089,20 @@
                         }
                         $scope.changeAnalysisVal[n] = "active"
                     }
+
+
+                                    $scope.submit = function(){
+                                        var res = checkObjsEmpty($scope.objs)
+                                        console.log(res)
+                                        if(res.msg == 0){
+                                           coreSocket.emit("giveAnalysis",{objs:$scope.objs,LAN:'CN'})
+                                        }else{
+                                            $scope.err = 1
+                                        }
+                                    }
+
+
+
                 },
                 templateUrl:"/angularTemplate/status/pro511.html"
             }
@@ -1038,7 +1110,10 @@
 
     myApp.directive("con511",function(){
             return {
-              templateUrl:"/angularTemplate/status/con511.html"
+            controller:function($scope){
+                $scope.LAN = $scope.$parent.LAN
+            },
+            templateUrl:"/angularTemplate/status/con511.html"
             }
     })
 
@@ -1074,7 +1149,7 @@
         return {
             scope:{everyAnalysisData:"=",everyStatementData:"=",requestStatementMessage:"=",refuseAnalysisResultReason:"="},
             controller:function($scope){
-
+                $scope.LAN = $scope.$parent.LAN
                 $scope.confirmVal = ["","",""]
                 $scope.confirm = function(n){
                     for(var i=0;i<$scope.confirmVal.length;i++){
@@ -1093,47 +1168,48 @@
 
     myApp.directive("pro6111",function(){
             return {
-                templateUrl:"/angularTemplate/status/pro6111.html"
+                            controller:function($scope){
+                                $scope.LAN = $scope.$parent.LAN
+                            },
+                            templateUrl:"/angularTemplate/status/pro6111.html"
             }
     })
 
     myApp.directive("con6112",function(){
             return {
-                 templateUrl:"/angularTemplate/status/con6112.html"
+                             controller:function($scope){
+                                 $scope.LAN = $scope.$parent.LAN
+                             },
+                             templateUrl:"/angularTemplate/status/con6112.html"
             }
     })
 
     myApp.directive("pro71111",function(){
             return {
-                 templateUrl:"/angularTemplate/status/pro71111.html"
+                             controller:function($scope){
+                                 $scope.LAN = $scope.$parent.LAN
+                             },
+                             templateUrl:"/angularTemplate/status/pro71111.html"
             }
     })
 
     myApp.directive("con71111",function(){
              return {
-                  templateUrl:"/angularTemplate/status/con71111.html"
+                              controller:function($scope){
+                                  $scope.LAN = $scope.$parent.LAN
+                              },
+                              templateUrl:"/angularTemplate/status/con71111.html"
              }
     })
 
     myApp.directive("pro71112",function(){
-            //return {
-            //    scope:{everyStatementData:"=",obj:"=",requestStatementMessage:"="},
-            //    controller:function($scope){
-            //        $scope.changeFormVal = ["active",""]
-            //        $scope.changeForm = function(n){
-            //            for(var i=0;i<$scope.changeFormVal.length;i++){
-            //                $scope.changeFormVal[i] = ""
-            //            }
-            //            $scope.changeFormVal[n] = "active"
-            //        }
-            //    },
-            //    templateUrl:"/angularTemplate/status/pro71112.html"
-            //}
+
 
 
                         return {
                             scope:{everyStatementData:"=",objs:"="},
                             controller:function($scope){
+                                $scope.LAN = $scope.$parent.LAN
                                 $scope.changeFormVal = ["active",""]
                                 $scope.changeForm = function(n){
                                     for(var i=0;i<$scope.changeFormVal.length;i++){
@@ -1163,48 +1239,72 @@
 
     myApp.directive("con71112",function(){
             return {
+               controller:function($scope){
+                   $scope.LAN = $scope.$parent.LAN
+               },
                  templateUrl:"/angularTemplate/status/con71112.html"
             }
     })
 
     myApp.directive("pro81111",function(){
             return {
+               controller:function($scope){
+                   $scope.LAN = $scope.$parent.LAN
+               },
                  templateUrl:"/angularTemplate/status/pro81111.html"
             }
     })
 
     myApp.directive("con81111",function(){
             return {
+               controller:function($scope){
+                   $scope.LAN = $scope.$parent.LAN
+               },
                  templateUrl:"/angularTemplate/status/con81111.html"
             }
     })
 
     myApp.directive("pro811121",function(){
             return {
+              controller:function($scope){
+                  $scope.LAN = $scope.$parent.LAN
+              },
                 templateUrl:"/angularTemplate/status/pro811121.html"
             }
     })
 
     myApp.directive("con811121",function(){
             return {
+              controller:function($scope){
+                  $scope.LAN = $scope.$parent.LAN
+              },
                 templateUrl:"/angularTemplate/status/con811121.html"
             }
     })
 
     myApp.directive("pro811122",function(){
             return {
+              controller:function($scope){
+                  $scope.LAN = $scope.$parent.LAN
+              },
                 templateUrl:"/angularTemplate/status/pro811122.html"
             }
     })
 
     myApp.directive("con811122",function(){
             return {
+              controller:function($scope){
+                  $scope.LAN = $scope.$parent.LAN
+              },
                 templateUrl:"/angularTemplate/status/con811122.html"
             }
     })
 
     myApp.directive("debateFinish",function(){
             return {
+              controller:function($scope){
+                  $scope.LAN = $scope.$parent.LAN
+              },
                 templateUrl:"/angularTemplate/status/debateFinish.html"
             }
     })
@@ -1213,6 +1313,7 @@
             return {
                 scope:{refuseAnalysisResultReason:"="},
                 controller:function($scope){
+                    $scope.LAN = $scope.$parent.LAN
                     $scope.refuse = function(){
                         coreSocket.emit("refuseAnalysis",{refuseAnalysisResultReason:$scope.refuseAnalysisResultReason})
                     }
@@ -1220,5 +1321,38 @@
                 templateUrl:"/angularTemplate/refuseAnalysisResult.html"
             }
     })
+
+
+
+
+        function checkObjsEmpty(objs){
+            console.log(1111)
+             console.log(objs)
+
+             for(var i=0;i<objs.length;i++){
+                for(var j=0;j<objs[i].length;j++){
+                    if(!objs[i][j].claimTxt){
+                        return {msg:1,empty:'claim'}
+                        break;
+                    }
+
+                    for(var k=0;k<objs[i][j].warrant.length;k++){
+                        if(!objs[i][j].warrant[k].warrantTxt){
+                            return {msg:1,empty:'warrant'}
+                            break;
+                        }
+
+                        for(var s=0;s<objs[i][j].warrant[k].evidence.length;s++){
+                            if(!objs[i][j].warrant[k].evidence[s].evidenceTxt){
+                                return {msg:1,empty:'evidence'}
+                                break;
+                            }
+                        }
+                    }
+                }
+             }
+
+             return {msg:0,empty:0}
+        }
 </script>
 </html>

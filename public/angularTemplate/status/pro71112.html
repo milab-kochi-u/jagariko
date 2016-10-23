@@ -1,3 +1,4 @@
+<div class="row" ng-if="LAN=='JP'">
 <div class="row">
     <div class="alert alert-warning" role="alert">
         <a href="#" class="alert-link">あなたの分析が拒否されました,もう一度分析するかまた再投稿をお願いするのかを選んでください</a>
@@ -45,4 +46,73 @@
 
 <div class="row">
     <request-for-twice-statement ng-if="changeFormVal[1] == 'active'" ></request-for-twice-statement>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="row" ng-if="LAN=='CN'">
+    <div class="row">
+        <div class="alert alert-warning" role="alert">
+            <a href="#" class="alert-link">很遗憾,你的分析结果没有经过正方的同意<br/>理由:{{refuseAnalysisResultReason}}<br/>请再次对对方的结论做出分析,或者请求正方再一次做结论阐述</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <every-statement every-statement-data="everyStatementData"></every-statement>
+
+    </div>
+    <div class="row">
+        <ul class="nav nav-pills nav-justified">
+            <li role="presentation" class="{{changeFormVal[0]}}"><a ng-click="changeForm(0)">对阐述做分析</a></li>
+            <li role="presentation" class="{{changeFormVal[1]}}"><a ng-click="changeForm(1)">请求对方再次做结论阐述</a></li>
+        </ul>
+    </div>
+
+    <div ng-if="changeFormVal[0] == 'active'" class="row">
+
+
+        <div class="row">
+            <ul class="nav nav-pills nav-justified">
+                <li ng-repeat="(key,val) in everyStatementData.obj track by $index" role="presentation" class="{{changeAnalysisVal[key]}}" >
+                    <a ng-click="changeAnalysis(key)">
+                    <span ng-if="key==0">
+                        结论:
+                    </span>
+                    <span ng-if="key!=0">
+                        质疑{{key}}:
+                    </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="row" ng-repeat="(key,val) in everyStatementData.obj track by $index">
+            <div class="row" ng-show="changeAnalysisVal[key] == 'active'">
+                <span ng-if="key==0">请对结论做分析</span>
+                <span ng-if="key!=0">请对第{{key}}个质疑做分析</span>
+                <my-form objs="objs" key="key"></my-form>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <request-for-twice-statement ng-if="changeFormVal[1] == 'active'" ></request-for-twice-statement>
+    </div>
 </div>
