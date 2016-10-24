@@ -5,7 +5,7 @@
  * http://mongodb.github.io/node-mongodb-native/2.0/
  */
 var db;
-var MongoClient = require('mongodb').MongoClient;
+var MongoClient = require('mongodb').MongoClient
 var assert = require('assert');
 var conf = require("../config/config.js");
 
@@ -20,7 +20,7 @@ function connect(callback){
         console.log("Connected correctly to server");
         db = mongodb;
 
-        if(err) callback(1);
+        if(err) callback(1)
         callback(0)
     })
 }
