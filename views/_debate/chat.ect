@@ -539,6 +539,10 @@
                 for(var i in arr){
                     $scope.statusController[arr[i]] = true
                 }
+
+                console.log("now the showing flat is ....")
+                console.log(arr)
+                console.log("---------------------------")
             }
 
 
@@ -712,9 +716,7 @@
                             $scope.objs[key][_key].warrant[__key].evidence.splice(___key,1)
                     }
 
-                    $scope.submit = function(){
-                        coreSocket.emit("giveAnalysis",{objs:$scope.objs,LAN:'JP'})
-                    }
+
 
               },
               scope:{
@@ -762,6 +764,7 @@
             controller:function($scope){
                 $scope.LAN = $scope.$parent.LAN
                 $scope.submit = function(){
+                    $scope.initVal()
                     coreSocket.emit("requestStatement",{requestStatementMessage:$scope.requestStatementMessage})
                 }
             },
@@ -839,7 +842,28 @@
                 scope:{everyStatementData:"=",objs:"=",requestStatementMessage:"="},
                 controller:function($scope){
                     $scope.LAN = $scope.$parent.LAN
-                    $scope.changeFormVal = ["active",""]
+
+
+
+
+                                        $scope.initVal = function(){
+
+                                            $scope.changeFormVal = ["active",""]
+                                            $scope.changeAnalysisVal = []
+                                            for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                                                if(i==0){
+                                                $scope.changeAnalysisVal.push("active")
+                                                }else{
+                                                $scope.changeAnalysisVal.push("")
+                                                }
+                                            }
+
+                                        }
+
+
+                                        $scope.initVal()
+
+
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
                             $scope.changeFormVal[i] = ""
@@ -847,20 +871,6 @@
                         $scope.changeFormVal[n] = "active"
                     }
 
-
-                                        $scope.changeAnalysisVal = []
-                                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
-                                            if(i==0){
-                                            $scope.changeAnalysisVal.push("active")
-                                            }else{
-                                            $scope.changeAnalysisVal.push("")
-                                            }
-                                        }
-
-
-                    for(var i=0;i<$scope.everyStatementData.obj.length;i++){
-                        $scope.changeAnalysisVal.push("")
-                    }
 
                     $scope.changeAnalysis = function(n){
                         for(var i=0;i<$scope.changeAnalysisVal.length;i++){
@@ -871,6 +881,7 @@
 
 
                                         $scope.submit = function(){
+                                            $scope.initVal()
                                             var res = checkObjsEmpty($scope.objs)
                                             console.log(res)
                                             if(res.msg == 0){
@@ -959,7 +970,7 @@
         }
     })
 
-    myApp.directive("con412",function(){
+    myApp.directive("con412",function(coreSocket){
         return {
                 scope:{everyStatementData:"=",objs:"=",requestStatementMessage:"="},
                 controller:function($scope){
@@ -972,7 +983,14 @@
                         $scope.changeFormVal[n] = "active"
                     }
 
-                    $scope.changeAnalysisVal = []
+                                        $scope.changeAnalysisVal = []
+                                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                                            if(i==0){
+                                            $scope.changeAnalysisVal.push("active")
+                                            }else{
+                                            $scope.changeAnalysisVal.push("")
+                                            }
+                                        }
                     for(var i=0;i<$scope.everyStatementData.obj.length;i++){
                         $scope.changeAnalysisVal.push("")
                     }
@@ -983,6 +1001,21 @@
                         }
                         $scope.changeAnalysisVal[n] = "active"
                     }
+
+
+
+                                        $scope.submit = function(){
+                                            var res = checkObjsEmpty($scope.objs)
+                                            console.log(res)
+                                            if(res.msg == 0){
+                                               coreSocket.emit("giveAnalysis",{objs:$scope.objs,LAN:'CN'})
+                                            }else{
+                                                $scope.err = 1
+                                            }
+                                        }
+
+
+
                 },
             templateUrl:"/angularTemplate/status/con412.html"
         }
@@ -1066,7 +1099,20 @@
                 scope:{everyStatementData:"=",objs:"="},
                 controller:function($scope){
                     $scope.LAN = $scope.$parent.LAN
-                    $scope.changeFormVal = ["active",""]
+                    $scope.initVal = function(){
+                      $scope.changeFormVal = ["active",""]
+                      $scope.changeAnalysisVal = []
+                      for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                          if(i==0){
+                          $scope.changeAnalysisVal.push("active")
+                          }else{
+                          $scope.changeAnalysisVal.push("")
+                          }
+                      }
+                    }
+
+                    $scope.initVal()
+
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
                             $scope.changeFormVal[i] = ""
@@ -1074,14 +1120,7 @@
                         $scope.changeFormVal[n] = "active"
                     }
 
-                                        $scope.changeAnalysisVal = []
-                                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
-                                            if(i==0){
-                                            $scope.changeAnalysisVal.push("active")
-                                            }else{
-                                            $scope.changeAnalysisVal.push("")
-                                            }
-                                        }
+
 
                     $scope.changeAnalysis = function(n){
                         for(var i=0;i<$scope.changeAnalysisVal.length;i++){
@@ -1092,6 +1131,7 @@
 
 
                                     $scope.submit = function(){
+                                        $scope.initVal()
                                         var res = checkObjsEmpty($scope.objs)
                                         console.log(res)
                                         if(res.msg == 0){
@@ -1218,7 +1258,14 @@
                                     $scope.changeFormVal[n] = "active"
                                 }
 
-                                $scope.changeAnalysisVal = []
+                                        $scope.changeAnalysisVal = []
+                                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                                            if(i==0){
+                                            $scope.changeAnalysisVal.push("active")
+                                            }else{
+                                            $scope.changeAnalysisVal.push("")
+                                            }
+                                        }
 
                                 for(var i=0;i<$scope.everyStatementData.obj.length;i++){
                                     $scope.changeAnalysisVal.push("")
@@ -1230,6 +1277,17 @@
                                     }
                                     $scope.changeAnalysisVal[n] = "active"
                                 }
+
+                                                                $scope.submit = function(){
+                                                                    var res = checkObjsEmpty($scope.objs)
+                                                                    console.log(res)
+                                                                    if(res.msg == 0){
+                                                                       coreSocket.emit("giveAnalysis",{objs:$scope.objs,LAN:'CN'})
+                                                                    }else{
+                                                                        $scope.err = 1
+                                                                    }
+                                                                }
+
                             },
                             templateUrl:"/angularTemplate/status/pro71112.html"
                         }
