@@ -735,6 +735,7 @@
            },
            controller:function($scope){
                 $scope.LAN = $scope.$parent.LAN
+
                 $scope._submit = function(){
                     coreSocket.emit("giveStatement",{inputMessage:$scope.inputMessage})
                 }
@@ -763,8 +764,10 @@
             scope:false,
             controller:function($scope){
                 $scope.LAN = $scope.$parent.LAN
+
+
                 $scope.submit = function(){
-                    $scope.initVal()
+                    $scope.$parent.initVal()
                     coreSocket.emit("requestStatement",{requestStatementMessage:$scope.requestStatementMessage})
                 }
             },
@@ -975,7 +978,6 @@
                 scope:{everyStatementData:"=",objs:"=",requestStatementMessage:"="},
                 controller:function($scope){
                     $scope.LAN = $scope.$parent.LAN
-                    $scope.changeFormVal = ["active",""]
                     $scope.changeForm = function(n){
                         for(var i=0;i<$scope.changeFormVal.length;i++){
                             $scope.changeFormVal[i] = ""
@@ -983,17 +985,6 @@
                         $scope.changeFormVal[n] = "active"
                     }
 
-                                        $scope.changeAnalysisVal = []
-                                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
-                                            if(i==0){
-                                            $scope.changeAnalysisVal.push("active")
-                                            }else{
-                                            $scope.changeAnalysisVal.push("")
-                                            }
-                                        }
-                    for(var i=0;i<$scope.everyStatementData.obj.length;i++){
-                        $scope.changeAnalysisVal.push("")
-                    }
 
                     $scope.changeAnalysis = function(n){
                         for(var i=0;i<$scope.changeAnalysisVal.length;i++){
@@ -1003,8 +994,25 @@
                     }
 
 
+                                        $scope.initVal = function(){
+
+                                            $scope.changeFormVal = ["active",""]
+                                            $scope.changeAnalysisVal = []
+                                            for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                                                if(i==0){
+                                                $scope.changeAnalysisVal.push("active")
+                                                }else{
+                                                $scope.changeAnalysisVal.push("")
+                                                }
+                                            }
+
+                                        }
+
+
+                                        $scope.initVal()
 
                                         $scope.submit = function(){
+                                            $scope.initVal()
                                             var res = checkObjsEmpty($scope.objs)
                                             console.log(res)
                                             if(res.msg == 0){
@@ -1215,6 +1223,18 @@
             }
     })
 
+
+    myApp.directive("pro6112",function(){
+                return {
+                                 controller:function($scope){
+                                     $scope.LAN = $scope.$parent.LAN
+                                 },
+                                 templateUrl:"/angularTemplate/status/pro6112.html"
+                }
+    })
+
+
+
     myApp.directive("con6112",function(){
             return {
                              controller:function($scope){
@@ -1242,7 +1262,7 @@
              }
     })
 
-    myApp.directive("pro71112",function(){
+    myApp.directive("pro71112",function(coreSocket){
 
 
 
@@ -1250,7 +1270,6 @@
                             scope:{everyStatementData:"=",objs:"="},
                             controller:function($scope){
                                 $scope.LAN = $scope.$parent.LAN
-                                $scope.changeFormVal = ["active",""]
                                 $scope.changeForm = function(n){
                                     for(var i=0;i<$scope.changeFormVal.length;i++){
                                         $scope.changeFormVal[i] = ""
@@ -1258,18 +1277,6 @@
                                     $scope.changeFormVal[n] = "active"
                                 }
 
-                                        $scope.changeAnalysisVal = []
-                                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
-                                            if(i==0){
-                                            $scope.changeAnalysisVal.push("active")
-                                            }else{
-                                            $scope.changeAnalysisVal.push("")
-                                            }
-                                        }
-
-                                for(var i=0;i<$scope.everyStatementData.obj.length;i++){
-                                    $scope.changeAnalysisVal.push("")
-                                }
 
                                 $scope.changeAnalysis = function(n){
                                     for(var i=0;i<$scope.changeAnalysisVal.length;i++){
@@ -1278,7 +1285,27 @@
                                     $scope.changeAnalysisVal[n] = "active"
                                 }
 
+
+
+                    $scope.initVal = function(){
+
+                        $scope.changeFormVal = ["active",""]
+                        $scope.changeAnalysisVal = []
+                        for(var i=0;i<$scope.everyStatementData.obj.length;i++){
+                            if(i==0){
+                            $scope.changeAnalysisVal.push("active")
+                            }else{
+                            $scope.changeAnalysisVal.push("")
+                            }
+                        }
+
+                    }
+
+
+                    $scope.initVal()
+
                                                                 $scope.submit = function(){
+                                                                    $scope.initVal()
                                                                     var res = checkObjsEmpty($scope.objs)
                                                                     console.log(res)
                                                                     if(res.msg == 0){

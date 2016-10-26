@@ -1,0 +1,115 @@
+<div class="row">
+    <div  class="panel panel-info">
+        <div class="panel-body" >
+            <div class="row col-sm-4">
+                <concept></concept>
+            </div>
+
+            <div class="row col-sm-1"></div>
+
+            <div class="row col-sm-7">
+                <div  class="panel panel-info">
+                    <div class="panel-heading">入力</div>
+                    <div class="panel-body" id="inputBody">
+
+
+                        <div  ng-if="inputStatus.name == 'claim' && inputStatus.i == 0">
+
+                            <div class=" col-sm-12  alert alert-warning"   role="alert">
+                                <a href="#" class="alert-link">相手の結論に主張を見つかりませんか</a>
+                            </div>
+
+                            <div class=" col-sm-3">
+                            <!--<button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noClaim()">主張なし</button>-->
+                            </div>
+
+                        </div>
+
+
+                        <div  ng-if="inputStatus.name == 'claim' && inputStatus.i != 0">
+
+                            <div class=" col-sm-7  alert alert-warning"   role="alert">
+                                <a href="#" class="alert-link">相手の結論に主張を見つけましょう</a>
+                            </div>
+
+                            <div class=" col-sm-5">
+                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noClaim()">諦めそのまま送信</button>
+                            </div>
+
+                        </div>
+
+
+
+
+                        <div ng-if="inputStatus.name == 'evidence'">
+                            <div class=" col-sm-9 alert alert-warning"  role="alert">
+                                <a href="#" class="alert-link">この主張を支えるための根拠を見つけましょう</a>
+                            </div>
+                            <div class=" col-sm-3">
+                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noEvidence()">根拠諦め</button>
+                            </div>
+                        </div>
+
+
+
+                        <div ng-if="inputStatus.name == 'warrant'">
+                            <div class=" col-sm-9 alert alert-warning"  role="alert">
+                                <a href="#" class="alert-link">どうしてその根拠が理由として主張を支えていますか?論拠を文章から掘り出してくださいまた自分で考えてください</a>
+                            </div>
+                            <div class=" col-sm-3">
+                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noWarrant()">論拠諦め</button>
+                            </div>
+                        </div>
+
+                        <div ng-if="inputStatus.name == 'newEvidence'">
+                            <div class=" col-sm-12 alert alert-warning"  role="alert">
+                                <a href="#" class="alert-link">この文章に新しい根拠がまたありますか?</a>
+                            </div>
+
+                            <div class=" col-sm-6">
+                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="setNewEvidence()">またある</button>
+                            </div>
+
+
+                            <div class=" col-sm-6">
+                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noEvidence()">もうない</button>
+                            </div>
+                        </div>
+
+                        <div ng-if="inputStatus.name == 'newClaim'">
+                            <div class=" col-sm-12 alert alert-warning"  role="alert">
+                                <a href="#" class="alert-link">この文章に新しい主張がまたありますか?</a>
+                            </div>
+
+
+                            <div class=" col-sm-6">
+                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="setNewClaim()">またある</button>
+                            </div>
+
+
+                            <div class=" col-sm-6">
+                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noClaim()">もうないそのまま送信する</button>
+                            </div>
+                        </div>
+
+
+                        <div style="clear: both"></div>
+                        <div ng-show="inputStatus.name != 'newClaim' && inputStatus.name != 'newEvidence'">
+                            <label ng-if="inputStatus.name == 'claim'">主張:</label>
+                            <label ng-if="inputStatus.name == 'evidence' || inputStatus.name == 'newEvidence'">根拠:</label>
+                            <label ng-if="inputStatus.name == 'warrant'">論拠:</label>
+                            <textarea class="form-control" rows="7" ng-model="contents" ></textarea>
+                            <p>
+                                <button type="button" class="btn btn-default pull-right" ng-click="output()" >次へ</button>
+                            </p>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -154,6 +154,10 @@ module.exports = {
                 req.session.debateLogin.model = "debate"
                 res.end(JSON.stringify({err:0,msg:"successfully"}))
             }))
+        },function(){
+            mongo.update("debateMembers",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},{$set:{debateInvolve:true,num:num,rNum:rNum}},{},function(){
+
+            })
         })()
     },
     participateRoomController:function(req,res){
@@ -180,6 +184,10 @@ module.exports = {
                 req.session.debateLogin.model = "debate"
                 res.end(JSON.stringify({err:0,msg:"successfully"}))
             }))
+        },function(){
+            mongo.update("debateMembers",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},{$set:{debateInvolve:true,num:num,rNum:rNum}},{},function(){
+
+            })
         })()
     },
     reviewRoomController:function(req,res){

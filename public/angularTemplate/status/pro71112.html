@@ -43,6 +43,14 @@
     </div>
 
 
+    <div class="row" ng-if="err==1">
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true">!</span>
+            <span class="sr-only">警告:</span>
+            全ての入力項目を完成してください
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-sm-offset-6"><button type="button" class="btn btn-default btn-lg" ng-click="submit()">送信</button></div>
     </div>
@@ -114,6 +122,14 @@
             </div>
         </div>
 
+
+        <div class="row" ng-if="err==1">
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"><!/span>
+                <span class="sr-only">警告:</span>
+                请填写完所有的输入项
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-sm-offset-6"><button type="button" class="btn btn-default btn-lg" ng-click="submit()">发送</button></div>

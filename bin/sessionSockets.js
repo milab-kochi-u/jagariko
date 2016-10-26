@@ -82,6 +82,9 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                                 _update = {$set:{status:1,preStatus:_res[0].status},$inc:{order:1}}
                             }else{
                                 _update = {$set:{status:1,preStatus:_res[0].status,finish:true}}
+                                mongo.update("debateMembers",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{debateInvolve:false}},{multi: true},this.hold(function () {
+                                    return _update
+                                }))
                             }
 
                         }else{
@@ -279,6 +282,86 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                 }))
             })()
         })
+
+
+        socket.on('disconnect', function(msg){
+
+            console.log("room debate has been out of connection")
+            console.log(msg)
+            if(!session){
+                return
+            }
+            console.log(session.debateLogin)
+
+            var username = session.debateLogin.username
+            var group = session.debateLogin.group
+            var num = session.debateLogin.num
+            var rNum = session.debateLogin.rNum
+            var position = session.debateLogin.position
+
+
+            //userStatus status
+            //   -1 logout
+            //    0 login
+            //    1 entering
+            //    2 debating
+
+            steps(function(){
+
+            },function(){
+                mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                    var pro = result[0].pro
+                    var con = result[0].con
+                    var status = result[0].status
+                    if(status < 0){
+                        //比赛还没有开始
+
+
+
+                        if((position == 1 && !con) || (position == 2 && !pro)){
+                            mongo.remove("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                                delete session.debateLogin.num
+                                delete session.debateLogin.position
+                                delete session.debateLogin.rNum
+                                session.save()
+
+                                mongo.update("debateMembers",{username:session.debateLogin.username,group:session.debateLogin.group},{$set:{debateInvolve:false},$unset:{num:1,rNum:1}},{},this.hold(function(){
+
+                                }))
+
+
+
+                            }))
+                        }else{
+                                mongo.update("debateMembers",{username:session.debateLogin.username,group:session.debateLogin.group},{$set:{debateInvolve:false},$unset:{num:1,rNum:1}},{},this.hold(function(){
+                                        if(position==1){
+                                            var update = {$unset:{pro:1,proPrepare:1}}
+                                        }else{
+                                            var update = {$unset:{con:1,conPrepare:1}}
+                                        }
+
+                                        mongo.update("debateStatus",{num:num,rNum:rNum},update,{},this.hold(function(result){
+                                            delete session.debateLogin.num
+                                            delete session.debateLogin.position
+                                            delete session.debateLogin.rNum
+                                            session.save()
+                                        }))
+                                }))
+                        }
+
+
+                    }else{
+                        //比赛已经开始了
+
+
+                    }
+
+
+
+                }))
+            })()
+
+        });
 
     })
 
@@ -674,6 +757,10 @@ var sessionSockets = function(sessionSockets,steps,mongo){
                                 }))
                             }
                    }))
+             },function(){
+                 mongo.update("debateMembers",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{debateInvolve:false}},{},this.hold(function (_res) {
+                        
+                 }))
              })()
         })
 
@@ -688,92 +775,7 @@ var sessionSockets = function(sessionSockets,steps,mongo){
         })
 
 
-        socket.on('disconnect', function(msg){
 
-            console.log("room debate has been out of connection")
-            console.log(msg)
-            if(!session){
-                return
-            }
-            console.log(session.debateLogin)
-
-            var username = session.debateLogin.username
-            var group = session.debateLogin.group
-            var num = session.debateLogin.num
-            var rNum = session.debateLogin.rNum
-            var position = session.debateLogin.position
-
-
-            //userStatus status
-            //   -1 logout
-            //    0 login
-            //    1 entering
-            //    2 debating
-
-            steps(function(){
-                mongo.find("userStatus",{username:username,num:num,rNum:session.debateLogin.rNum},{},this.hold(function(result){
-                    if(result[0].status<2){
-                        mongo.update("userStatus",{username:username,num:num,rNum:session.debateLogin.rNum},{$set:{status:0},$unset:{num:1}},this.hold(function(result){
-
-                        }))
-                    }else{
-                        this.terminate()
-                    }
-                }))
-            },function(){
-                mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
-                    var pro = result[0].pro
-                    var con = result[0].con
-                    if((position == 1 && !con) || (position == 2 && !pro)){
-                        mongo.remove("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
-                            delete session.debateLogin.num
-                            delete session.debateLogin.position
-                            delete session.debateLogin.rNum
-                            session.save()
-                            this.terminate()
-                        }))
-                    }
-
-
-                }))
-            },function(){
-
-                if(position==1){
-                    var update = {$unset:{pro:1,proPrepare:1}}
-                }else{
-                    var update = {$unset:{con:1,conPrepare:1}}
-                }
-
-                mongo.update("debateStatus",{num:num,rNum:rNum},update,{},this.hold(function(result){
-                    delete session.debateLogin.num
-                    delete session.debateLogin.position
-                    delete session.debateLogin.rNum
-                    session.save()
-                }))
-
-
-            })()
-
-            //if(!session){
-            //    return;
-            //}
-            //if(!session.debateLogin){
-            //    return;
-            //}
-            //var num = session.debateLogin.num;
-            //var position = session.debateLogin.position
-            //
-            //if(position == 1){
-            //        var update = {$unset:{pro:1}}
-            //}else{
-            //        var update = {$unset:{con:1}}
-            //}
-            //
-            //mongo.update("debateStatus",{num:num},update,{},function(result){
-            //
-            //})
-            //console.log('user disconnected');
-        });
 
     });
 
