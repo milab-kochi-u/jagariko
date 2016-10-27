@@ -317,13 +317,14 @@
                                         //再画evidence
 
                                         LASTX += (RECTWIDTH + SPACEWEW)
+                                        if($scope.analysisData.analysisResult[i].support[j].evidence){
+                                            appendRect($scope.analysisData.analysisResult[i].support[j].evidence,LASTX,LASTY)
+                                            drawArrow(MAINLINEOFFSETLEFT,LASTX,LASTY+RECTHEIGHT/2,LASTY+RECTHEIGHT/2)
+                                        }
 
-                                        appendRect($scope.analysisData.analysisResult[i].support[j].evidence,LASTX,LASTY)
-                                        drawArrow(MAINLINEOFFSETLEFT,LASTX,LASTY+RECTHEIGHT/2,LASTY+RECTHEIGHT/2)
                                         LASTX -= (RECTWIDTH + SPACEWEW + SPACECWW)
 
                                     }
-
 
                                         LASTY += (SPACECCH + RECTHEIGHT)
                                 }
