@@ -100,6 +100,10 @@
                             <label ng-if="inputStatus.name == 'warrant'">論拠:</label>
                             <textarea class="form-control" rows="7" ng-model="contents" ></textarea>
                             <p>
+                                <label>
+                                    <input type="checkbox" ng-model="dissent"> 異議あり
+                                </label>
+                                <span ng-if="dataSucess==0">入力項目が必須</span>
                                 <button type="button" class="btn btn-default pull-right" ng-click="output()" >次へ</button>
                             </p>
                         </div>

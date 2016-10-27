@@ -49,7 +49,7 @@
 <div class="container "  ng-controller="chat" >
 
     <div class="row">
-    <nav class="navbar navbar-default" ng-if="LAN=='CN'">
+    <nav class="navbar navbar-default" >
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -72,11 +72,11 @@
                     <div class="form-group">
                         <input type="text" class="form-control" placeholder="王宝强经得起推敲吗?">
                     </div>
-                    <button type="submit" class="btn btn-default">搜索</button>
+                    <button type="button" ng-click="changeTab()" class="btn btn-default">搜索</button>
                 </form>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="">你好:</a></li>
-                    <li><a href="#">个人页面</a></li>
+                    <li><a href="#" >个人页面</a></li>
                     <!--
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
@@ -108,13 +108,15 @@
             </div>
         </div>
 
+        <div ng-show="set1==1">
+
         <div class="row" id="resultForm">
            <div class="row">
                <div  class="panel panel-info">
                    <div class="panel-body" id="resultFormBody">
                       <p>分析結果:</p>
 
-                       <analysis-result></analysis-result>
+                        <analysis-result></analysis-result>
 
                    </div>
                </div>
@@ -127,6 +129,34 @@
             <bottom-input></bottom-input>
         </div>
 
+        </div>
+
+
+
+
+
+        <div ng-if="set2 == 1">
+
+            <div class="row" id="resultStatement">
+               <div class="row">
+                <div  class="panel panel-info">
+                    <div class="panel-body" id="resultFormBody">
+                        <p>立論結果:</p>
+                        <statement-result></statement-result>
+                    </div>
+                </div>
+               </div>
+            </div>
+
+
+
+            <div class="row" id="input2">
+                <bottom-input2></bottom-input2>
+            </div>
+
+        </div>
+
+
 
 </div>
 
@@ -138,6 +168,18 @@
                 var myApp = angular.module("myChat",[])
 
                 myApp.controller("chat",function($scope){
+
+                    //临时变量
+                    $scope.set1 = 0
+                    $scope.set2 = 1
+
+
+                    $scope.changeTab = function(){
+                        $scope.set1 = ($scope.set1 + 1)%2
+                        $scope.set2 = ($scope.set2 + 1)%2
+                    }
+
+
                     $scope.click = 0
                     function init(){
                        console.log("init.....")
@@ -148,9 +190,16 @@
 
                         ]}
 
+
                         $scope.inputStatus = {name:"claim",i:0,j:0}
                         //$scope.inputStatus = {name:"evidence",i:0,j:0}
                         //$scope.inputStatus = {name:"warrant",i:0,j:0}
+
+
+                        $scope.dissentData = [{type:"claim",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",i:0,j:0}]
+                        $scope.statementData = ""
+                        $scope.statementStatus = {name:"dissent",i:0}
+
 
                     }
 
@@ -167,10 +216,37 @@
                 })
 
 
+
+                myApp.service('myService',function(){
+                    this.checkData = function($scope){
+                        $scope.dataSuccess = 1
+                        if(!$scope.contents){
+                            $scope.dataSucess = 0
+                            return false;
+                        }else{
+                            return true;
+                        }
+                    }
+
+
+
+                    this.checkData2 = function($scope){
+                        $scope.data2Success = 1
+                        if(!$scope.statement){
+                            $scope.data2Success = 0
+                            return false;
+                        }else{
+                            return true;
+                        }
+                    }
+                });
+
+
+
                 myApp.directive("bottomInput",function(){
                     return {
                         scope:false,
-                        controller:function($scope,$rootScope){
+                        controller:function($scope,$rootScope,myService){
 
                             function print(){
                                 console.log($scope.analysisData.analysisResult)
@@ -182,18 +258,30 @@
                                     var j = $scope.inputStatus.j
                                     if(name == "claim"){
                                         $scope.analysisData.analysisResult[i].claim = $scope.contents
+                                        $scope.analysisData.analysisResult[i].cDissent = $scope.dissent
                                     }
 
                                     if(name == "evidence"){
                                         $scope.analysisData.analysisResult[i].support[j].evidence = $scope.contents
+                                        $scope.analysisData.analysisResult[i].support[j].eDissent = $scope.dissent
                                     }
 
                                     if(name == "warrant"){
                                         $scope.analysisData.analysisResult[i].support[j].warrant = $scope.contents
+                                        $scope.analysisData.analysisResult[i].support[j].wDissent = $scope.dissent
                                     }
+
+                                    $scope.dissent = 0
                             }
 
+
+
                             $scope.output = function(){
+
+                                if(!myService.checkData($scope)){
+                                    return false
+                                }
+
                                 if($scope.inputStatus.name == "claim"){
                                     addIntoAnalysisData("claim")
                                     $scope.inputStatus.name = "evidence"
@@ -294,22 +382,31 @@
 
 
                                 for(var i=0;i<$scope.analysisData.analysisResult.length;i++){
-                                    appendRect($scope.analysisData.analysisResult[i].claim,LASTX,LASTY)
+                                    appendRect($scope.analysisData.analysisResult[i].claim,$scope.analysisData.analysisResult[i].cDissent,LASTX,LASTY)
 
 
                                     for(var j=0;j<$scope.analysisData.analysisResult[i].support.length;j++){
 
                                         //先画warrant
-                                        if(j==0){
-                                            LASTY += (SPACECWH+RECTHEIGHT)
-                                        }else{
-                                            LASTY += (SPACEWWH+RECTHEIGHT)
+
+                                        if($scope.analysisData.analysisResult[i].support[j].warrant || $scope.analysisData.analysisResult[i].support[j].evidence){
+
+                                            if(j==0){
+                                                LASTY += (SPACECWH+RECTHEIGHT)
+                                            }else{
+                                                LASTY += (SPACEWWH+RECTHEIGHT)
+                                            }
+
+
                                         }
+
+
+
 
                                         LASTX += (SPACECWW)
 
                                         if($scope.analysisData.analysisResult[i].support[j].warrant){
-                                            appendRect($scope.analysisData.analysisResult[i].support[j].warrant,LASTX,LASTY)
+                                            appendRect($scope.analysisData.analysisResult[i].support[j].warrant,$scope.analysisData.analysisResult[i].support[j].wDissent,LASTX,LASTY)
                                         }
 
 
@@ -318,7 +415,7 @@
 
                                         LASTX += (RECTWIDTH + SPACEWEW)
                                         if($scope.analysisData.analysisResult[i].support[j].evidence){
-                                            appendRect($scope.analysisData.analysisResult[i].support[j].evidence,LASTX,LASTY)
+                                            appendRect($scope.analysisData.analysisResult[i].support[j].evidence,$scope.analysisData.analysisResult[i].support[j].eDissent,LASTX,LASTY)
                                             drawArrow(MAINLINEOFFSETLEFT,LASTX,LASTY+RECTHEIGHT/2,LASTY+RECTHEIGHT/2)
                                         }
 
@@ -361,7 +458,7 @@
 
 
 
-                            function appendRect(txt,x,y){
+                            function appendRect(txt,dissent,x,y){
                                 var foreignObject = svg.append("foreignObject")
                                 foreignObject.attr("width",RECTWIDTH)
                                 foreignObject.attr("height",RECTHEIGHT)
@@ -369,18 +466,79 @@
                                 foreignObject.attr("x",x)
                                 foreignObject.attr("y",y)
 
-                                var div = foreignObject.append('xhtml:div')
-                                var div = div.append("div")
+                                var _div = foreignObject.append('xhtml:div')
+                                var div = _div.append("div")
                                 div.attr("class","alert alert-info draw")
                                 div.attr("role","alert")
-                                div.attr("style","height: 100px; overflow: auto;")
+                                div.attr("style","height: 100px; overflow: auto;margin-bottom:1px")
 
                                 var p = div.append("p")
                                 p.html(txt)
+
+                                if(dissent){
+                                    var div = _div.append("div")
+                                    var button = _div.append("button")
+                                    button.html("異議あり")
+                                    button.attr("type","button")
+                                    button.attr("class","btn btn-danger pull-right")
+                                }
+
+
+                                var div = _div.append("div")
+                                var button = _div.append("button")
+                                button.html("編集")
+                                button.attr("type","button")
+                                button.attr("class","btn btn-warning pull-right")
+
                             }
 
                         },
                         templateUrl:"/angularJSTemplate/analysisResult.html"
+                    }
+                })
+
+
+
+
+
+                myApp.directive("statementResult",function() {
+                    return {
+                        scope: false,
+                        link: function (scope) {
+
+                        },
+                        templateUrl:"/angularJSTemplate/statementResult.html"
+                    }
+                })
+
+
+
+                myApp.directive("bottomInput2",function(myService) {
+                    return {
+                        scope: false,
+                        link: function (scope) {
+
+
+
+                            scope.output2 = function(){
+                                if(!myService.checkData2(scope)){
+                                    return false
+                                }
+                                var i = scope.statementStatus.i
+                                if(scope.dissentData.length == 0 || i == scope.dissentData.length-1){
+                                    //说明这里没有质疑或者已经完成对所有质疑的解释
+                                    scope.statementStatus = {name:"claim",i:0}
+                                }else{
+                                    i++
+                                    scope.statementStatus.i = i
+                                }
+
+                                console.log(scope.statementStatus)
+
+                                scope.statement = ""
+                            }
+                        },
+                        templateUrl:"/angularJSTemplate/bottomInput2.html"
                     }
                 })
     </script>
