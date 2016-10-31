@@ -9,8 +9,8 @@
 
             <div class="row col-sm-7">
                 <div  class="panel panel-info">
-                    <div class="panel-heading">入力</div>
-                    <div class="panel-body" id="inputBody">
+                    <div class="panel-heading"><span style="cursor:pointer" ng-click="changeInputTab()">入力</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="cursor:pointer"  ng-click="changeInputTab()">再投稿のお願い</span></div>
+                    <div class="panel-body" id="inputBody" ng-show="inputFormValue == 1">
 
 
                         <div  ng-if="inputStatus.name == 'claim' && inputStatus.i == 0">
@@ -105,6 +105,29 @@
                                 </label>
                                 <span ng-if="dataSucess==0">入力項目が必須</span>
                                 <button type="button" class="btn btn-default pull-right" ng-click="output()" >次へ</button>
+                            </p>
+                        </div>
+
+
+
+                    </div>
+                    <div class="panel-body" id="inputBody2" ng-show="inputFormValue == 0">
+
+                        <div >
+                            <div class=" col-sm-12 alert alert-warning"  role="alert">
+                                <a href="#" class="alert-link">相手の立論を再投稿をお願いしますか?</a>
+                            </div>
+
+                        </div>
+
+
+                        <div style="clear: both"></div>
+                        <div>
+                            <label>再投稿お願いの理由を書いてください:</label>
+                            <textarea class="form-control" rows="7" ng-model="requestContentReason" ></textarea>
+                            <p>
+                                <span ng-if="dataSucessOfRequestTwice==0">入力項目が必須</span>
+                                <button type="button" class="btn btn-default pull-right" ng-click="requestTwiceStatement()" >送信</button>
                             </p>
                         </div>
 

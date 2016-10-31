@@ -141,13 +141,18 @@
                <div class="row">
                 <div  class="panel panel-info">
                     <div class="panel-body" id="resultFormBody">
-                        <p>立論結果:</p>
-                        <statement-result></statement-result>
+                        <p id="scoll">
+                            <span ng-click="changeAnalysisAndStatementTab(1)" style="cursor: pointer">立論結果</span>
+                            &nbsp;&nbsp;&nbsp;
+                            <span ng-click="changeAnalysisAndStatementTab(0)" style="cursor: pointer">分析結果</span>
+                        </p>
+                        <statement-result ng-show="changeAnalysisAndStatementTabValue==1"></statement-result>
+                        <analysis-result ng-show="changeAnalysisAndStatementTabValue==0"></analysis-result>
+
                     </div>
                 </div>
                </div>
             </div>
-
 
 
             <div class="row" id="input2">
@@ -155,7 +160,6 @@
             </div>
 
         </div>
-
 
 
 </div>
@@ -179,6 +183,15 @@
                         $scope.set2 = ($scope.set2 + 1)%2
                     }
 
+                    $scope.changeAnalysisAndStatementTabValue = 1
+                    $scope.changeAnalysisAndStatementTab = function () {
+                        $scope.analysisData = {txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",analysisResult:[
+                            {claim:"じお金があれば、コート、カバン、時計、アクセサリ",support:[
+                                {evidence:"じお金があれば、コート、カバン、時計、アクセサリ",warrant:"じお金があれば、コート、カバン、時計、アクセサリ"},
+                            ]},
+                        ]}
+                        $scope.changeAnalysisAndStatementTabValue = ($scope.changeAnalysisAndStatementTabValue + 1) % 2
+                    }
 
                     $scope.click = 0
                     function init(){
@@ -196,9 +209,13 @@
                         //$scope.inputStatus = {name:"warrant",i:0,j:0}
 
 
-                        $scope.dissentData = [{type:"claim",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",i:0,j:0}]
+                        $scope.dissentData = [{type:"claim",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",reply:"",i:0,j:0},
+                                              {type:"claim",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",reply:"",i:0,j:2},
+                                              {type:"claim",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",reply:"",i:0,j:2},
+                                             ]
                         $scope.statementData = ""
                         $scope.statementStatus = {name:"dissent",i:0}
+
 
 
                     }
@@ -247,7 +264,7 @@
                     return {
                         scope:false,
                         controller:function($scope,$rootScope,myService){
-
+                            $scope.inputFormValue = 1
                             function print(){
                                 console.log($scope.analysisData.analysisResult)
                                 $scope.contents = ""
@@ -274,6 +291,10 @@
                                     $scope.dissent = 0
                             }
 
+                            //入力再投稿のお願い
+                            $scope.changeInputTab = function(){
+                                    $scope.inputFormValue = ($scope.inputFormValue+1)%2
+                            }
 
 
                             $scope.output = function(){
@@ -333,6 +354,17 @@
                                 $scope.inputStatus.name ="evidence"
                             }
 
+                            $scope.dataSucessOfRequestTwice = 1
+                            $scope.requestTwiceStatement = function(){
+                                if(!$scope.requestContentReason){
+                                    $scope.dataSucessOfRequestTwice = 0
+                                }else{
+                                    alert("send request")
+                                }
+                            }
+
+
+
 
 
                         },
@@ -362,6 +394,14 @@
                             var LASTY = 0
                             var LASTX = 0
                             var svg = d3.select("#mainSVG")
+
+                            function init(){
+                                clearDraw()
+                                draw()
+                                drawMainArrow()
+                            }
+
+                            init()
 
                             $scope.$on('click',function(event, data){
                                 clearDraw()
@@ -452,12 +492,6 @@
 
 
 
-
-
-
-
-
-
                             function appendRect(txt,dissent,x,y){
                                 var foreignObject = svg.append("foreignObject")
                                 foreignObject.attr("width",RECTWIDTH)
@@ -512,31 +546,211 @@
                 })
 
 
-
                 myApp.directive("bottomInput2",function(myService) {
                     return {
                         scope: false,
                         link: function (scope) {
 
+                            var TOP = 15   //最先画的方块距离顶端的距离
+                            var LEFT = 80   //最先画的方块距离左边的距离
+                            var DISSENTWIDTH = 250 //异议方块的长度
+                            var DISSENTHEIGHT = 260//异议方块的高度
+                            var DISSENTANDEXPLAINSPACE = 250 //异议方块距离右边的赛解释说明方块的横向距离
+                            var DISSENTSPACEY = 80 //异议方块之间间隔的距离
+                            var EXPLAINWIDTH = 460
+                            var EXPLAINHEIGHT = 260
+                            var DISSENTANDLINESPACEY = 90 //异议方块距离下面虚线的纵向距离
+                            var DOTTEDLINEX = 40//虚线的左边位移
+                            var DOTTEDWIDTH = 360 //虚线的长度
+                            var DOTTEDSPACEWIDTH = 300 //虚线间隔的长度
+                            var DOTTEDLINEANDCONSTRUCTSPACE = 50 //虚线距离下面方块的纵向距离
+                            var CONSTRUCTX = LEFT //结论方块距离左侧的位移
+                            var CONSTRUCTWIDTH = 960 //结论方块的长度
+                            var CONSTRUCTHEIGHT = 260 //结论方块的高度
 
-
+                            var LASTX = 0
+                            var LASTY = 0
+                            var svg = d3.select("#_mainSVG")
+                            clearDraw()
+                            draw()
                             scope.output2 = function(){
                                 if(!myService.checkData2(scope)){
                                     return false
                                 }
+
                                 var i = scope.statementStatus.i
+
+                                if(scope.statementStatus.name == "claim"){
+                                    scope.statementData = scope.statement
+                                }else{
+                                    scope.dissentData[i].reply = scope.statement
+                                }
+
                                 if(scope.dissentData.length == 0 || i == scope.dissentData.length-1){
                                     //说明这里没有质疑或者已经完成对所有质疑的解释
                                     scope.statementStatus = {name:"claim",i:0}
                                 }else{
+                                    //说明这里还是对异议做解释的阶段
                                     i++
                                     scope.statementStatus.i = i
                                 }
 
                                 console.log(scope.statementStatus)
+                                console.log(scope.dissentData)
 
                                 scope.statement = ""
+
+                                clearDraw()
+                                draw()
+
+                                if(scope.statementStatus.name == "dissent"){
+                                    scrollTop("statementResult",1000,(parseInt(document.getElementById("dissent"+i).getAttribute("y")))+DISSENTSPACEY/2)
+                                }else{
+                                    scrollTop("statementResult",1000,(parseInt(document.getElementById("constructClaim").getAttribute("y")))+DOTTEDLINEANDCONSTRUCTSPACE/2)
+                                }
                             }
+
+
+                            function scrollTop(id,time,y){
+                                var _scrollTop = 0
+                                var start = new Date().getTime()
+                                var startScrollTop = document.getElementById(id).scrollTop
+                                console.log(startScrollTop)
+                                setInterval(function(){
+                                    if(new Date().getTime()-start > time) return;
+                                    _scrollTop += (y - startScrollTop)/10
+                                    document.getElementById(id).scrollTop = _scrollTop + startScrollTop
+                                },time/10)
+                            }
+
+
+                            function draw(){
+                                LASTX = LEFT
+                                LASTY = TOP
+                                for(var i = 0;i<scope.dissentData.length;i++){
+                                    if(i>0) LASTY += DISSENTSPACEY
+                                    appendRect(scope.dissentData[i].txt,1,LASTX,LASTY,DISSENTWIDTH,DISSENTHEIGHT,"dissent"+i)
+
+                                    if(scope.dissentData[i].reply){
+                                        drawArrow(LASTX+DISSENTWIDTH,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE,LASTY+DISSENTHEIGHT/2,LASTY+DISSENTHEIGHT/2)
+                                        drawText("この異議の説明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
+                                        appendRect(scope.dissentData[i].reply,0,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE+5,LASTY,EXPLAINWIDTH,EXPLAINHEIGHT,"explain"+i)
+                                    }else{
+                                        drawPointer(LASTX+DISSENTWIDTH,LASTY+DISSENTHEIGHT/4,200,200)
+                                    }
+
+                                    LASTY += DISSENTHEIGHT
+                                }
+
+
+                                LASTY += DISSENTANDLINESPACEY
+
+                                drawDottedLine(DOTTEDLINEX,LASTY,DOTTEDLINEX+DOTTEDWIDTH,LASTY)
+                                drawText("ここから立論の部分",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+                                drawDottedLine(DOTTEDLINEX+DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY,DOTTEDLINEX+2*DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY)
+
+                                appendRect(scope.statementData,0,CONSTRUCTX,LASTY+DOTTEDLINEANDCONSTRUCTSPACE,CONSTRUCTWIDTH,CONSTRUCTHEIGHT,"constructClaim")
+                                if(scope.statementData){
+                                    d3.select("#constructClaim").style("display","block")
+                                }else{
+                                    d3.select("#constructClaim").style("display","none")
+                                }
+
+                            }
+
+
+
+                            function clearDraw(){
+                                svg.selectAll(".draw").remove()
+                                LASTX = 0
+                                LASTY = 0
+                            }
+
+                            function drawDottedLine(x1,y1,x2,y2){
+                                var line = svg.insert("line")
+                                        .attr("x1",x1)
+                                        .attr("y1",y1)
+                                        .attr("x2",x2)
+                                        .attr("y2",y2)
+                                        .attr("stroke","#000")
+                                        .attr("stroke-width",3)
+                                        .attr("class","arrow draw")
+                                        .attr("stroke-dasharray","4,10")
+                            }
+
+                            function drawPointer(x,y,width,height){
+                                var foreignObject = svg.append("foreignObject")
+                                .attr("width",width)
+                                .attr("height",height)
+                                .attr("x",x)
+                                .attr("y",y)
+                                .attr("class","draw")
+
+                                var div = foreignObject.append('xhtml:div')
+                                var image = div.append("img")
+
+                                image.attr("src", "./leftPointer.png")
+                                        .attr("width", "100")
+                                        .attr("height", "100");
+
+
+                                drawText("左の異議を説明してください",x+100,y+100/2,20)
+                            }
+
+                            function drawArrow(x1,x2,y1,y2){
+                                var line = svg.insert("line",":first-child")
+                                        .attr("x1",x1)
+                                        .attr("y1",y1)
+                                        .attr("x2",x2)
+                                        .attr("y2",y2)
+                                        .attr("stroke","#9acfea")
+                                        .attr("stroke-width",3)
+                                        .attr("class","arrow draw")
+                                        .attr("marker-end","url(#arrow)")
+                            }
+
+                            function drawText(txt,x,y,font){
+                                var text = svg.insert("text")
+                                    text.text(txt)
+                                    text.attr("x",x)
+                                            .attr("y",y)
+                                            .attr("font-size",font)
+                                            .attr("fill","#8a6d3b")
+                                            .attr("class","draw")
+                            }
+
+                            function appendRect(txt,dissent,x,y,w,h,id){
+                                var foreignObject = svg.append("foreignObject")
+                                foreignObject.attr("width",w)
+                                foreignObject.attr("height",h)
+
+                                foreignObject.attr("x",x)
+                                foreignObject.attr("y",y)
+                                foreignObject.attr("id",id)
+
+
+                                var _div = foreignObject.append('xhtml:div')
+                                var div = _div.append("div")
+                                div.attr("class","alert alert-warning draw")
+                                div.attr("role","alert")
+                                div.attr("style","height: "+ h +"px; overflow: auto;margin-bottom:1px")
+
+
+                                var p = div.append("p")
+                                p.html(txt)
+
+                                if(dissent){
+                                    var div = _div.append("div")
+                                    var button = _div.append("button")
+                                    button.html("異議あり")
+                                    button.attr("type","button")
+                                    button.attr("class","btn btn-danger pull-right")
+                                }
+
+                            }
+
+
+
                         },
                         templateUrl:"/angularJSTemplate/bottomInput2.html"
                     }
