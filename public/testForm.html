@@ -108,16 +108,14 @@
             </div>
         </div>
 
-        <div ng-show="set1==1">
+        <div ng-if="set1==1">
 
         <div class="row" id="resultForm">
            <div class="row">
                <div  class="panel panel-info">
                    <div class="panel-body" id="resultFormBody">
                       <p>分析結果:</p>
-
                         <analysis-result></analysis-result>
-
                    </div>
                </div>
            </div>
@@ -132,9 +130,6 @@
         </div>
 
 
-
-
-
         <div ng-if="set2 == 1">
 
             <div class="row" id="resultStatement">
@@ -147,8 +142,7 @@
                             <span ng-click="changeAnalysisAndStatementTab(0)" style="cursor: pointer">分析結果</span>
                         </p>
                         <statement-result ng-show="changeAnalysisAndStatementTabValue==1"></statement-result>
-                        <analysis-result ng-show="changeAnalysisAndStatementTabValue==0"></analysis-result>
-
+                        <analysis-result prepareId="11" ng-show="changeAnalysisAndStatementTabValue==0"></analysis-result>
                     </div>
                 </div>
                </div>
@@ -162,6 +156,8 @@
         </div>
 
 
+
+
 </div>
 
 
@@ -171,7 +167,7 @@
 
                 var myApp = angular.module("myChat",[])
 
-                myApp.controller("chat",function($scope){
+                myApp.controller("chat",function($scope,$rootScope){
 
                     //临时变量
                     $scope.set1 = 0
@@ -181,16 +177,24 @@
                     $scope.changeTab = function(){
                         $scope.set1 = ($scope.set1 + 1)%2
                         $scope.set2 = ($scope.set2 + 1)%2
+
+                        init()
+
                     }
 
                     $scope.changeAnalysisAndStatementTabValue = 1
                     $scope.changeAnalysisAndStatementTab = function () {
-                        $scope.analysisData = {txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",analysisResult:[
-                            {claim:"じお金があれば、コート、カバン、時計、アクセサリ",support:[
-                                {evidence:"じお金があれば、コート、カバン、時計、アクセサリ",warrant:"じお金があれば、コート、カバン、時計、アクセサリ"},
-                            ]},
-                        ]}
                         $scope.changeAnalysisAndStatementTabValue = ($scope.changeAnalysisAndStatementTabValue + 1) % 2
+
+                        if($scope.changeAnalysisAndStatementTabValue == 0){
+                            $scope.analysisData = {txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",analysisResult:[
+                                {claim:"じお金があれば、コート、カバン、時計、アクセサリ",cDissent:1,support:[
+                                    {evidence:"じお金があれば、コート、カバン、時計、アクセサリ",eDissent:1,warrant:"じお金があれば、コート、カバン、時計、アクセサリ",wDissent:1},
+                                ]},
+                            ]}
+                        }
+
+                        $rootScope.$broadcast('analysisInit',{});
                     }
 
                     $scope.click = 0
@@ -216,8 +220,6 @@
                         $scope.statementData = ""
                         $scope.statementStatus = {name:"dissent",i:0}
 
-
-
                     }
 
                     init()
@@ -231,6 +233,9 @@
                         templateUrl:"/angularJSTemplate/concept.html"
                     }
                 })
+
+
+
 
 
 
@@ -393,15 +398,17 @@
                             var MAINLINEOFFSETLEFT = OFFSETLEFT + 40
                             var LASTY = 0
                             var LASTX = 0
-                            var svg = d3.select("#mainSVG")
-
+                            var svg = d3.select("#mainSVG").append("svg")
+                            svg.attr("width","100%")
+                            svg.attr("height","2000px")
+                            svg.attr("id","mainSVG"+Math.round(Math.random()*1000))
+                            console.log(svg)
                             function init(){
                                 clearDraw()
                                 draw()
                                 drawMainArrow()
                             }
 
-                            init()
 
                             $scope.$on('click',function(event, data){
                                 clearDraw()
@@ -409,6 +416,11 @@
                                 drawMainArrow()
                             });
 
+
+
+                            $scope.$on('analysisInit',function(event, data){
+                                init()
+                            });
 
                             function clearDraw(){
                                 svg.selectAll(".draw").remove()
@@ -428,7 +440,6 @@
                                     for(var j=0;j<$scope.analysisData.analysisResult[i].support.length;j++){
 
                                         //先画warrant
-
                                         if($scope.analysisData.analysisResult[i].support[j].warrant || $scope.analysisData.analysisResult[i].support[j].evidence){
 
                                             if(j==0){
@@ -527,6 +538,11 @@
                             }
 
                         },
+                        link:function(scope,element,attrs){
+                                console.log("attr is ...")
+                                console.log(element.attr("prepareId"))
+                                scope.prepareId = element.attr("prepareId")
+                        },
                         templateUrl:"/angularJSTemplate/analysisResult.html"
                     }
                 })
@@ -537,7 +553,7 @@
 
                 myApp.directive("statementResult",function() {
                     return {
-                        scope: false,
+                        scope: {},
                         link: function (scope) {
 
                         },
