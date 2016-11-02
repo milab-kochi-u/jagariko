@@ -9,16 +9,21 @@ var session = require('express-session');
 var debate = require('./routes/debate');
 var _debate = require('./routes/_debate');
 var debateCN = require("./routes/debate_cn.js")
+var release = require("./routes/release.js")
 
 var ECT = require('ect'); // ECT 読み込み
 
 var app = express();
 
 // view engine setup
-app.engine('ect', ECT({ watch: true, root: __dirname + '/views', ext: '.ect' }).render);
-//app.set('view engine', 'jade');
 
-app.set('view engine', 'ect');
+//app.engine('ect', ECT({ watch: true, root: __dirname + '/views', ext: '.ect' }).render);
+//app.set('view engine', 'ect');
+
+
+var ejs = require('ejs');
+app.engine('.html', ejs.__express);
+app.set('view engine', 'html');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -51,6 +56,7 @@ app.sessionStore = sessionStore;
 app.use('/debate',debate);
 app.use('/_debate',_debate);
 app.use("/debateCN",debateCN)
+app.use("/release",release)
 
 
 // catch 404 and forward to error handler

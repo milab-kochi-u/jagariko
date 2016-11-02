@@ -3,7 +3,7 @@
  */
 
 module.exports = {
-    dbName:"blog",
+    dbName:"release",
     dbPort:27017,
     dbHost:"localhost"
 }

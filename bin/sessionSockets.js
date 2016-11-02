@@ -7,6 +7,19 @@
 var sessionSockets = function(sessionSockets,steps,mongo){
 
 
+
+    sessionSockets.of("/release").on("connection",function(err,socket,session){
+
+    })
+
+
+
+
+
+
+
+
+
     sessionSockets.of("/_group").on('connection',function(err,socket,session){
 
     })
