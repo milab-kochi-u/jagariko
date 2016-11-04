@@ -8,6 +8,20 @@ var tool = require("./tool.js");
 var steps = require('ocsteps');
 
 
+
+function makeid(n)
+{
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < n; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+
+
+
 module.exports = {
     indexController: function (req, res) {
         if (tool.isEmpty(req.session.debateLogin)) {
@@ -36,25 +50,20 @@ module.exports = {
                 }))
             },
             function(){
-                mongo.find("userStatus",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},{},this.hold(function(result){
                     // user status
                     //   -1 logout
                     //    0 login
                     //    1 entering
                     //    2 debating
 
-                    if(result.length>0){
-                        mongo.update("userStatus",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},{$set:{status:0}},{},this.hold(function(){
+                        mongo.update("debateMembers",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},{$set:{status:0}},{},this.hold(function(){
 
                         }))
-                    }else{
-                        mongo.insert("userStatus",{username:req.session.debateLogin.username,group:req.session.debateLogin.group,status:0},{},this.hold(function(){
 
-                        }))
-                    }
-                }))
             },function(){
-                res.end(JSON.stringify({error:0,msg:"successful"}))
+                var cookieId = makeid(10)
+                req.session.cookieId = cookieId
+                res.end(JSON.stringify({error:0,msg:"successful",cookieId:cookieId}))
             })()
     },
 
@@ -84,16 +93,97 @@ module.exports = {
     },
     getDebatingListController:function(req,res){
         steps(function(){
-            mongo.find("debateStatus",{group:req.session.debateLogin.group,setting:1,finish:false},{},this.hold(function(_res){
+            mongo.find("debateStatus",{group:req.session.debateLogin.group,finish:false},{},this.hold(function(_res){
                 res.end(JSON.stringify(_res))
             }))
         })()
     },
     getDebateFinishListController:function(req,res){
         steps(function(){
-            mongo.find("debateStatus",{group:req.session.debateLogin.group,setting:1,finish:true},{},this.hold(function(_res){
+            mongo.find("debateStatus",{group:req.session.debateLogin.group,finish:true},{},this.hold(function(_res){
                 res.end(JSON.stringify(_res))
             }))
         })()
+    },
+    createNewRoomController:function(req,res){
+        var position = req.body.position
+        var num = req.body.num
+        var title = req.body.title
+
+        var rNum = Math.round(Math.random()*10000)
+        if(position == 1){
+            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:"wait",preStatus:null,group:req.session.debateLogin.group}
+        }else{
+            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:"wait",preStatus:null,group:req.session.debateLogin.group}
+        }
+
+        req.session.debateLogin.position = position
+        steps(function(){
+            mongo.insert("debateStatus",newRoom,{},this.hold(function(_res){
+                req.session.debateLogin.num = num
+                req.session.debateLogin.rNum = rNum
+                req.session.debateLogin.model = "debate"
+                res.end(JSON.stringify({err:0,msg:"successfully"}))
+            }))
+        },function(){
+            mongo.update("debateMembers",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},{$set:{debateInvolve:true,num:num,rNum:rNum}},{},function(){
+
+            })
+        })()
+    },
+    participateRoomController:function(req,res){
+        var position = req.body.position
+        var num = req.body.num
+        var rNum = req.body.rNum
+
+        if(position == 1){
+            var _update = {pro:req.session.debateLogin.username}
+        }else{
+            var _update = {con:req.session.debateLogin.username}
+        }
+
+        req.session.debateLogin.position = position
+
+        steps(function(){
+            mongo.update("debateStatus",{num:num,rNum:rNum},{$set:_update},this.hold(function(result){
+                req.session.debateLogin.num = num
+                req.session.debateLogin.rNum = rNum
+                req.session.debateLogin.model = "debate"
+                res.end(JSON.stringify({err:0,msg:"successfully"}))
+            }))
+        },function(){
+            mongo.update("debateMembers",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},{$set:{debateInvolve:true,num:num,rNum:rNum}},{},function(){
+
+            })
+        })()
+    },
+    chatController:function(req,res){
+        res.render("release/chat.html")
+    },
+    getUserInformationController:function(req,res){
+        var num = req.session.debateLogin.num
+        var rNum = req.session.debateLogin.rNum
+        var username = req.session.debateLogin.username
+        var group = req.session.debateLogin.group
+
+        mongo.find("debateMembers",{username:username,group:group},{},function(_result){
+            if(_result.length>0){
+                res.end(JSON.stringify({err:0,data:{num:num,rNum:rNum,username:username,group:group,status:_result[0].status,debateInvolve:_result[0].debateInvolve}}))
+            }else{
+                res.end(JSON.stringify({err:1,msg:"no data find"}))
+            }
+        })
+    },
+
+
+    getDebateInformationController:function(req,res){
+        mongo.find("debateStatus",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum},{},function(_res){
+            _res[0].position = req.session.debateLogin.position
+            _res[0].username = req.session.debateLogin.username
+            _res[0].status = _res[0].status
+            
+            console.log(JSON.stringify(_res[0]))
+            res.end(JSON.stringify(_res[0]))
+        })
     },
 }

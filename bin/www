@@ -38,3 +38,8 @@ var sessionSockets = new SessionSockets(io, app.sessionStore, app.cookieParser);
 
 var sessionSockets = require("./sessionSockets.js").sessionSockets(sessionSockets,steps,mongo)
 
+
+var sessionSocketsRelease = new SessionSockets(io, app.sessionStore, app.cookieParser);
+
+
+var sessionSocketsRelease = require("./sessionSocketsRelease.js").sessionSockets(sessionSocketsRelease,steps,mongo)

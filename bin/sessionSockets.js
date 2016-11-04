@@ -8,14 +8,6 @@ var sessionSockets = function(sessionSockets,steps,mongo){
 
 
 
-    sessionSockets.of("/release").on("connection",function(err,socket,session){
-
-    })
-
-
-
-
-
 
 
 

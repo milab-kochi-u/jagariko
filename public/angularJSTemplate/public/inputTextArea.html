@@ -1,0 +1,46 @@
+<div class="row">
+    <div  class="panel panel-info">
+        <div class="panel-body" >
+            <div class="row col-sm-4">
+                <concept></concept>
+            </div>
+
+            <div class="row col-sm-1"></div>
+
+            <div class="row col-sm-7">
+                <div  class="panel panel-info">
+                    <div class="panel-heading">入力</div>
+                    <div class="panel-body" id="statementBody">
+
+                        <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'dissent'"  role="alert">
+                            <a href="#" class="alert-link">まず異議の部分を説明してください</a>
+                        </div>
+
+                        <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'claim'"  role="alert">
+                            <a href="#" class="alert-link">これから自分の立論の部分をたちください</a>
+                        </div>
+
+                        <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'submit'"  role="alert">
+                            <a href="#" class="alert-link">以上の論点を送信しますか</a>
+                        </div>
+
+                        <label ng-show="statementStatus.name == 'dissent'" >説明:</label>
+                        <label ng-show="statementStatus.name == 'claim'" >立論:</label>
+
+
+                        <textarea class="form-control" rows="7" ng-show="statementStatus.name == 'dissent' || statementStatus.name == 'claim'" ng-model="statement" ></textarea>
+                        <p>
+                            <span ng-if="data2Success==0">入力項目が必須</span>
+                            <button type="button" class="btn btn-default pull-right" ng-show="statementStatus.name == 'dissent'" ng-click="output2()" >次へ</button>
+                            <button type="button" ng-show="statementStatus.name == 'claim'" class="btn btn-default pull-right" ng-click="output2()" >次へ</button>
+                            <button type="button" ng-show="statementStatus.name == 'submit'" class="btn btn-default pull-right" ng-click="output2()" >送信</button>
+                        </p>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,24 @@
+<div id="topArticle">
+    <div class="row">
+        <div  class="panel panel-info">
+            <div class="panel-heading">
+
+            <span ng-click="topArticleChangeTab(0)">立論</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+            <span ng-click="topArticleChangeTab(i+1)" ng-repeat="(i,val) in everyStatementData.dissentExplain">異議説明({{i+1}})&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+            <div class="panel-body" ng-show="topArticleChangeTabVal == 0" id="claimBody" >
+                {{everyStatementData.statementData}}
+            </div>
+
+            <div class="panel-body" ng-show="topArticleChangeTabVal == (i+1)"  ng-repeat="(i,val) in everyStatementData.dissentExplain">
+
+                <div class="alert alert-success" role="alert">{{everyStatementData.dissentExplain[i].txt}}</div>
+                <div class="alert alert-info" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+

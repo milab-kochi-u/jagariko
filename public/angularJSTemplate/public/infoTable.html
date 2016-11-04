@@ -1,0 +1,66 @@
+<div class="row">
+<table class="table">
+    <tr class="danger">
+        <td>テーマ</td>
+        <td>{{debateInfo.title}}</td>
+
+    </tr>
+    <tr class="info">
+        <td>あなた</td>
+        <td>{{debateInfo.username}}
+            <span ng-if="debateInfo.position == 1">(賛成)</span>
+            <span ng-if="debateInfo.position == 2">(反対)</span>
+
+        </td>
+
+    </tr>
+    <tr class="active">
+
+        <td>賛成(Pro)
+
+                            <span ng-if="debateInfo.proPrepare == 1">
+                                準備済み
+                            </span>
+
+                            <span ng-if="debateInfo.proPrepare != 1">
+                                未準備
+                            </span>
+
+        </td>
+        <td>{{debateInfo.pro}}</td>
+    </tr>
+    <tr class="success">
+
+
+        <td>反対(Con)
+                            <span ng-if="debateInfo.conPrepare == 1">
+                                準備済み
+                            </span>
+
+                            <span ng-if="debateInfo.conPrepare != 1">
+                                未準備
+                            </span>
+        </td>
+        <td>{{debateInfo.con}}</td>
+
+    </tr>
+    <tr class="warning">
+
+        <td>観戦</td>
+        <td></td>
+
+    </tr>
+    <tr class="danger">
+        <td>回数</td>
+        <td></td>
+
+    </tr>
+    <tr class="info">
+
+
+        <td>今の段階</td>
+        <td></td>
+
+    </tr>
+</table>
+</div>
