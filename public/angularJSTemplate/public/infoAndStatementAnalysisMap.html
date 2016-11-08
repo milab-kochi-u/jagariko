@@ -1,0 +1,13 @@
+<div class="row">
+    <div  class="panel panel-info">
+        <div class="panel-heading">
+            <span ng-click="infoAndStatementAnalysisMapTab(1)">試合の情報</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <span ng-click="infoAndStatementAnalysisMapTab(2)">分析の結果マップ</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <span ng-click="infoAndStatementAnalysisMapTab(3)">立論の結果マップ</span></div>
+        <div class="panel-body" style="height: 400px">
+            <info-table ng-show="infoAndStatementAnalysisMapTabVal == 1"></info-table>
+            <analysis-map-result  ng-show="infoAndStatementAnalysisMapTabVal == 2"></analysis-map-result>
+            <statement-map-result  ng-show="infoAndStatementAnalysisMapTabVal == 3"></statement-map-result>
+        </div>
+    </div>
+</div>

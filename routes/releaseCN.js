@@ -7,7 +7,7 @@
 
 var express = require('express');
 var router = express.Router();
-var releaseController = require('../controller/release.js');
+var releaseCNController = require('../controller/releaseCN.js');
 
 
 
@@ -40,7 +40,7 @@ var addPathIntoSession = function(req,res,next){
 }
 
 router.get("*",function(req,res,next){
-    req.session.LAN = "JP"
+    req.session.LAN = "CN"
     console.log("session is ...")
     console.log(req.session)
     next()
@@ -49,52 +49,52 @@ router.get("*",function(req,res,next){
 
 
 router.get('/',checkCookie,addPathIntoSession)
-router.get('/',releaseController.indexController);
+router.get('/',releaseCNController.indexController);
 
 
 
-router.get('/login',releaseController.loginController,addPathIntoSession);
+router.get('/login',releaseCNController.loginController,addPathIntoSession);
 
 
 router.get("/group",checkCookie,addPathIntoSession);
-router.get('/group',releaseController.groupController)
+router.get('/group',releaseCNController.groupController)
 
 router.get('/chat',checkCookie,addPathIntoSession)
-router.get('/chat',releaseController.chatController)
+router.get('/chat',releaseCNController.chatController)
 
 
-router.post('/loginPost',releaseController.loginPostController);
+router.post('/loginPost',releaseCNController.loginPostController);
 router.post('/getThemeList',checkCookie)
-router.post('/getThemeList',releaseController.getThemeListController)
+router.post('/getThemeList',releaseCNController.getThemeListController)
 router.post('/getDebatingList',checkCookie)
-router.post('/getDebatingList',releaseController.getDebatingListController)
+router.post('/getDebatingList',releaseCNController.getDebatingListController)
 router.post('/getDebateFinishList',checkCookie)
-router.post('/getDebateFinishList',releaseController.getDebateFinishListController)
+router.post('/getDebateFinishList',releaseCNController.getDebateFinishListController)
 
 
 router.post('/createNewRoom',checkCookie)
-router.post('/createNewRoom',releaseController.createNewRoomController)
+router.post('/createNewRoom',releaseCNController.createNewRoomController)
 
 router.post('/participateRoom',checkCookie)
-router.post('/participateRoom',releaseController.participateRoomController)
+router.post('/participateRoom',releaseCNController.participateRoomController)
 
 
 
 
 //api
 router.post("/getUserInformation",checkCookie)
-router.post("/getUserInformation",releaseController.getUserInformationController)
+router.post("/getUserInformation",releaseCNController.getUserInformationController)
 
 
 router.post("/getDebateInformation",checkCookie)
-router.post("/getDebateInformation",releaseController.getDebateInformationController)
+router.post("/getDebateInformation",releaseCNController.getDebateInformationController)
 
 
 router.post("/getDebateStatementMapInformation",checkCookie)
-router.post("/getDebateStatementMapInformation",releaseController.getDebateStatementMapInformationController)
+router.post("/getDebateStatementMapInformation",releaseCNController.getDebateStatementMapInformationController)
 
 router.post("/getDebateAnalysisMapInformation",checkCookie)
-router.post("/getDebateAnalysisMapInformation",releaseController.getDebateAnalysisMapInformationController)
+router.post("/getDebateAnalysisMapInformation",releaseCNController.getDebateAnalysisMapInformationController)
 
 module.exports = router;
 

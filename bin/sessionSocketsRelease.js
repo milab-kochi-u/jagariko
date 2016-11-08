@@ -67,19 +67,47 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                     var _update = {}
 
                     order = _res[0].order
+
+                    /*
                     if(parseInt(_res[0].status)=="last"){
 
-                        if(_res[0].order < _res[0].config.timeNumbers){
-                            _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
+                        if(_res[0].order < 2){
+
+
+                            if(_res[0].status == "start" || _res[0].status == "lookup"){
+                                _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
+                            }else{
+                                _update = {$set:{status:"bunseki",preStatus:_res[0].status}}
+                            }
+
                         }else{
-                            _update = {$set:{status:"finish",preStatus:_res[0].status,finish:true}}
-                            mongo.update("debateMembers",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{debateInvolve:false}},{multi: true},this.hold(function () {
-                                return _update
-                            }))
+
                         }
 
                     }else{
-                        _update = {$set:{status:"analysis",preStatus:_res[0].status}}
+                        if(_res[0].status == "start" || _res[0].status == "lookup"){
+                            _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
+                        }else{
+                            _update = {$set:{status:"bunseki",preStatus:_res[0].status}}
+                        }
+                    }
+                    */
+
+
+
+                    if(_res[0].order < 3){
+                        if(_res[0].status == "start" || _res[0].status == "lookup"){
+                            _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
+                        }else if(_res[0].status == "appeal"){
+                            _update = {$set:{status:"bunseki",preStatus:_res[0].status}}
+                        }else{
+
+                        }
+                    }else{
+                        _update = {$set:{status:"finish",preStatus:_res[0].status,finish:true}}
+                        mongo.update("debateMembers",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{debateInvolve:false}},{multi: true},this.hold(function () {
+                            return _update
+                        }))
                     }
 
                     return _update
@@ -100,16 +128,31 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
 
                 var sendObj = {}
                 sendObj.position = session.debateLogin.position
-                sendObj.dissentExplain = msg.dissentData
+
+
+
                 sendObj.statementData = msg.statementData
+
+                //分别给立論和異議説明的陈述语言加random,以便之后做map时候的骨肉相连
+
+                sendObj.statementDataRandom  = Math.round(Math.random()*100000)
+
+                for(var s=0;s<msg.dissentData.length;s++){
+                    msg.dissentData[s].random = Math.round(Math.random()*100000)
+                }
+
+                sendObj.dissentExplain = msg.dissentData
+
                 sendObj.order = order
+
 
                 mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyStatement:sendObj}},{},this.hold(function(_res){
                     socket.emit("receiveStatement",{sendObj:sendObj})
                     socket.broadcast.emit("receiveStatement",{sendObj:sendObj})
+                    return sendObj
                 }))
-            },function(){
-                mongo.insert("statementLog",{num:session.debateLogin.num,rNum:session.debateLogin.rNum,dissentExplain:msg.dissentExplain,statementData:msg.statementData,position:session.debateLogin.position,time:
+            },function(sendObj){
+                mongo.insert("statementLog",{num:session.debateLogin.num,rNum:session.debateLogin.rNum,everyStatement:sendObj,position:session.debateLogin.position,time:
                     (new Date()).getTime(),type:"first"},{},this.hold(function(_res){
                 }))
             })()
@@ -128,9 +171,18 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                     return  _res[0].status
                 }))
             },function(status){
-                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{preStatus:status,status:"check"}},this.hold(function(){
+
+                if(status == "analysis"){
+                        var update = {$set:{preStatus:status,status:"check"}}
+                }else{
+                        var update = {$set:{preStatus:status,status:"kentou"}}
+                }
+
+
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},update,this.hold(function(){
 
                 }))
+
             },function(){
                 sendObj = msg
                 sendObj.position = session.debateLogin.position
@@ -144,15 +196,130 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                 }))
             })()
 
-
-
-
-
         })
 
 
 
+        socket.on("confirmAnalysisResult",function(msg){
+            var pro
+            var con
+            var everyAnalysisData
 
+            steps(function() {
+                mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
+                    pro = _res[0].pro
+                    con = _res[0].con
+                    everyAnalysisData = _res[0].everyAnalysisData
+                    return  _res[0].status
+                }))
+            },function(status){
+                if(status == "check"){
+                    var update = {$set:{preStatus:status,status:"appeal"}}
+                }else if(status == "kentou"){
+                    var update = {$set:{preStatus:status,status:"lookup"}}
+                }else{
+
+                }
+
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},update,this.hold(function(){
+
+                }))
+            },function(){
+                socket.emit("confirmAnalysisResultFinish",{})
+                socket.broadcast.emit("confirmAnalysisResultFinish",{})
+            },function(){
+                everyAnalysisData.rNum = session.debateLogin.rNum
+                everyAnalysisData.num = session.debateLogin.num
+                everyAnalysisData.pro = pro
+                everyAnalysisData.con = con
+                mongo.insert("analysisLog",everyAnalysisData,{},this.hold(function(_res){
+
+                }))
+            })()
+        })
+
+
+        socket.on("selectDissent",function(msg){
+
+            socket.emit("selectDissentFinish",msg)
+            socket.broadcast.emit("selectDissentFinish",msg)
+
+        })
+
+
+        socket.on('disconnect', function(msg){
+
+            console.log("room debate has been out of connection")
+            console.log(msg)
+            if(!session){
+                return
+            }
+
+            var username = session.debateLogin.username
+            var group = session.debateLogin.group
+            var num = session.debateLogin.num
+            var rNum = session.debateLogin.rNum
+            var position = session.debateLogin.position
+
+            return;
+            //userStatus status
+            //   -1 logout
+            //    0 login
+            //    1 entering
+            //    2 debating
+/*
+            steps(function(){
+
+            },function(){
+                mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                    var pro = result[0].pro
+                    var con = result[0].con
+                    var status = result[0].status
+                    if(status == "wait"){
+                        //比赛还没有开始
+
+                        if((position == 1 && !con) || (position == 2 && !pro)){
+                            mongo.remove("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                                delete session.debateLogin.num
+                                delete session.debateLogin.position
+                                delete session.debateLogin.rNum
+                                session.save()
+
+                                mongo.update("debateMembers",{username:session.debateLogin.username,group:session.debateLogin.group},{$set:{debateInvolve:false},$unset:{num:1,rNum:1}},{},this.hold(function(){
+
+                                }))
+
+                            }))
+                        }else{
+                            mongo.update("debateMembers",{username:session.debateLogin.username,group:session.debateLogin.group},{$set:{debateInvolve:false},$unset:{num:1,rNum:1}},{},this.hold(function(){
+                                if(position==1){
+                                    var update = {$unset:{pro:1,proPrepare:1}}
+                                }else{
+                                    var update = {$unset:{con:1,conPrepare:1}}
+                                }
+
+                                mongo.update("debateStatus",{num:num,rNum:rNum},update,{},this.hold(function(result){
+                                    delete session.debateLogin.num
+                                    delete session.debateLogin.position
+                                    delete session.debateLogin.rNum
+                                    session.save()
+                                }))
+                            }))
+                        }
+
+
+                    }else{
+                        //比赛已经开始了
+
+
+                    }
+
+
+
+                }))
+            })()
+*/
+        });
 
     })
 

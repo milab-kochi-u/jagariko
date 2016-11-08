@@ -46,9 +46,13 @@
   start //both of the user prepare pro is writing construct
   analysis // pro has given construct and con is analyzing or request for another construct
   check  //pro check the result of the analysis from con is right or not
-
-
-
+  appeal //con's result of analysis gets the approval and con start to appeal
+    state // con select dissent from the result of analysis and give statement
+  bunseki  //con do the statement and it is the turn for pro to do the analysis
+  kentou //pro give the result of analysis and it is the turn for con to check it is right or not
+  lookup    // pro's result of analysis gets the approval and pro start to pick dissent
+    noberu   // pro select dissent from the result of analysis and give statement
+  ....analysis
 
 变量说明
 
@@ -63,3 +67,16 @@ inputStatus //分析师表单输入时的状态,比如现在正在输入claim,�
 analysisObject //现在正在对那个文字段做分析,比如现在正在对立論做分析或者说现在正在对异议的解释文字段做分析
 {target:"construct",i:0} {target:"dissentExplain",i:0}
 inputFormAreachangeInputTabVal  //分析时候填写表单和分析时候请求再次陈述的表单的切换
+
+
+statementStatus //记录目前做陈述是立論还是对异议做分析
+当对异议做分析的时候  {name:"dissent",i:0}  i表示对第几个异议说明做分析
+
+
+analysisDissentExplainData //这个变量很重要,存放有当前的分析结果信息,里面主要有两大部分,第一部分是对立論的分析,另一部分是对异议说明的分析
+$scope.analysisDissentExplainData[i].analysisResult
+
+statementData //陈述意见时立論的主管变量
+dissentExplain  //异议说明时陈述时的主管明亮
+
+

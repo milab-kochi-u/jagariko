@@ -1,4 +1,4 @@
-<div id="topArticle">
+<div id="topArticle" class="row">
     <div class="row">
         <div  class="panel panel-info">
             <div class="panel-heading">
@@ -8,6 +8,7 @@
 
             <span ng-click="topArticleChangeTab(i+1)" ng-repeat="(i,val) in everyStatementData.dissentExplain">異議説明({{i+1}})&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
             <div class="panel-body" ng-show="topArticleChangeTabVal == 0" id="claimBody" >
+                <div class="alert alert-default" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>
                 {{everyStatementData.statementData}}
             </div>
 

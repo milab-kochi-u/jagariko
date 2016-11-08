@@ -10,6 +10,7 @@ var debate = require('./routes/debate');
 var _debate = require('./routes/_debate');
 var debateCN = require("./routes/debate_cn.js")
 var release = require("./routes/release.js")
+var releaseCN = require("./routes/releaseCN.js")
 
 var ECT = require('ect'); // ECT 読み込み
 
@@ -21,9 +22,11 @@ var app = express();
 //app.set('view engine', 'ect');
 
 
+
 var ejs = require('ejs');
 app.engine('.html', ejs.__express);
 app.set('view engine', 'html');
+
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -57,6 +60,7 @@ app.use('/debate',debate);
 app.use('/_debate',_debate);
 app.use("/debateCN",debateCN)
 app.use("/release",release)
+app.use("/releaseCN",releaseCN)
 
 
 // catch 404 and forward to error handler

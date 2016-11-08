@@ -28,6 +28,7 @@
 
     <div class="row" ng-controller="myController">
 
+
         <div class="btn-group btn-group-justified" role="group" aria-label="...">
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-default" ng-click="jumpTo('theme')">テーマ一覧</button>
@@ -40,8 +41,8 @@
             </div>
         </div>
 
-
         <div ng-view></div>
+
     </div>
 
 </div>
@@ -51,6 +52,7 @@
 </body>
 
 <script>
+
 
     var myApp = angular.module("myApp",["ngRoute"]);
 
@@ -115,6 +117,8 @@
             console.log(_res)
             $scope.themeList = _res.data
         })
+
+        alert(document.cookie)
 
         $scope.createRoom = function(title,num,position){
             getDataFromServer.getData("/release/createNewRoom",{title:title,num:num,position:position}).then(function(_res){
