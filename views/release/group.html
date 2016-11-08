@@ -106,9 +106,12 @@
     })
 
     myApp.controller("myController",function($scope,$location){
+
         $scope.jumpTo = function(url){
             $location.path(url)
         }
+
+
     });
 
     myApp.controller("themeCtr",function($scope,getDataFromServer){
@@ -118,7 +121,6 @@
             $scope.themeList = _res.data
         })
 
-        alert(document.cookie)
 
         $scope.createRoom = function(title,num,position){
             getDataFromServer.getData("/release/createNewRoom",{title:title,num:num,position:position}).then(function(_res){
@@ -160,10 +162,28 @@
     myApp.directive("myNavy",function(){
         return {
             scope:false,
-            templateUrl:"/angularTemplate/navy.html"
+            templateUrl:"/angularJSTemplate/navy.html"
         }
     })
 
 
+
+    // クッキーの値を取得 getCookie(クッキー名); //
+    function getCookie(c_name){
+        var st="";
+        var ed="";
+        if(document.cookie.length>0){
+            // クッキーの値を取り出す
+            st=document.cookie.indexOf(c_name + "=");
+            if(st!=-1){
+                st=st+c_name.length+1;
+                ed=document.cookie.indexOf(";",st);
+                if(ed==-1) ed=document.cookie.length;
+                // 値をデコードして返す
+                return unescape(document.cookie.substring(st,ed));
+            }
+        }
+        return "";
+    }
 </script>
 </html>

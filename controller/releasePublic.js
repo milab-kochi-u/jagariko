@@ -19,7 +19,7 @@ function makeid(n)
     for( var i=0; i < n; i++ )
         text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-    return text;
+    return text
 }
 
 
@@ -172,10 +172,11 @@ var obj  = {
         var rNum = req.session.debateLogin.rNum
         var username = req.session.debateLogin.username
         var group = req.session.debateLogin.group
+        var LAN = req.session.LAN
 
         mongo.find("debateMembers",{username:username,group:group},{},function(_result){
             if(_result.length>0){
-                res.end(JSON.stringify({err:0,data:{num:num,rNum:rNum,username:username,group:group,status:_result[0].status,debateInvolve:_result[0].debateInvolve}}))
+                res.end(JSON.stringify({err:0,data:{num:num,rNum:rNum,username:username,group:group,status:_result[0].status,debateInvolve:_result[0].debateInvolve,cookieId:cookieId}}))
             }else{
                 res.end(JSON.stringify({err:1,msg:"no data find"}))
             }

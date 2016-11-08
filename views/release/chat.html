@@ -314,7 +314,6 @@
                     $scope.num = _res.data.data.num
                     $scope.rNum = _res.data.data.rNum
                     $scope.status = _res.data.data.rNum
-
                     deferred.resolve({err:0,msg:"data acquired"});
                 }else{
                     deferred.reject({err:1,msg:"data not acquired"});

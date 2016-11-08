@@ -24,7 +24,7 @@ var checkCookie = function(req,res,next){
         console.log(req.cookies.cookieId)
         console.log(req.session.cookieId)
         console.log(req.path)
-        res.redirect("/release/login")
+        res.redirect("/releaseCN/login")
         next()
     }else{
         next()
