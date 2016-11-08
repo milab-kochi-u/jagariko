@@ -9,7 +9,15 @@
     <exam-analysis-result></exam-analysis-result>
 </div>
 
-
+<div ng-if="LAN=='JP'">
 <div class="row" ng-if="debateInfo.position == 2">
     <div class="alert alert-success" role="alert">分析結果を送りました,相手に検討されています、しばらく相手の返事をお待ちください</div>
+</div>
+</div>
+
+
+<div ng-if="LAN=='CN'">
+    <div class="row" ng-if="debateInfo.position == 2">
+        <div class="alert alert-success" role="alert">分析结果已经发送,对方正在核对,稍稍等待</div>
+    </div>
 </div>

@@ -314,6 +314,7 @@
                     $scope.num = _res.data.data.num
                     $scope.rNum = _res.data.data.rNum
                     $scope.status = _res.data.data.rNum
+                    $scope.LAN = _res.data.data.LAN
                     deferred.resolve({err:0,msg:"data acquired"});
                 }else{
                     deferred.reject({err:1,msg:"data not acquired"});
@@ -731,9 +732,20 @@
                     drawDottedLine(LASTX+DOTTEDLINEMARGINLEFT-OFFSETLEFT,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP,LASTX+DOTTEDLINEMARGINLEFT+DOTTEDLINELENGTH-OFFSETLEFT,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP)
 
                     if(type == "construct"){
-                        drawText("立論の分析結果",LASTX+DOTTEDLINEMARGINLEFT+DOTTEDLINELENGTH-OFFSETLEFT+110,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP+8,16)
+                        if($scope.LAN == 'JP'){
+                            drawText("立論の分析結果",LASTX+DOTTEDLINEMARGINLEFT+DOTTEDLINELENGTH-OFFSETLEFT+110,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP+8,16)
+                        }else{
+                            drawText("原始阐述说明的分析结果",LASTX+DOTTEDLINEMARGINLEFT+DOTTEDLINELENGTH-OFFSETLEFT+110,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP+8,16)
+                        }
+
                     }else{
-                        drawText("異議説明文の分析結果",LASTX+DOTTEDLINEMARGINLEFT+DOTTEDLINELENGTH-OFFSETLEFT+110,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP+8,16)
+
+                        if($scope.LAN == 'JP'){
+                            drawText("異議説明文の分析結果",LASTX+DOTTEDLINEMARGINLEFT+DOTTEDLINELENGTH-OFFSETLEFT+110,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP+8,16)
+                        }else{
+                            drawText("质疑解释说明的分析结果",LASTX+DOTTEDLINEMARGINLEFT+DOTTEDLINELENGTH-OFFSETLEFT+110,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP+8,16)
+                        }
+
                     }
 
                     drawDottedLine(LASTX+DOTTEDLINEMARGINLEFT+DOTTEDLINELENGTH+DOTTEDLINESPACE-OFFSETLEFT,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP,LASTX+DOTTEDLINEMARGINLEFT+2*DOTTEDLINELENGTH+DOTTEDLINESPACE-OFFSETLEFT,LASTY+DOTTEDLINEMARGINTOP-OFFSETTOP)
@@ -905,19 +917,31 @@
                 function addNextButton(x,y){
                     // will work when we need to add dissent on to the map
                     var foreignObject = svg.append("foreignObject")
-                    foreignObject.attr("width",RECTWIDTH)
+                    foreignObject.attr("width",RECTWIDTH*1.2)
                     foreignObject.attr("height",RECTHEIGHT)
 
-                    foreignObject.attr("x",x+RECTWIDTH+OFFSETLEFT)
+                    foreignObject.attr("x",x+RECTWIDTH)
                     foreignObject.attr("y",y-RECTHEIGHT)
 
-                    drawText("次は立論と異議の説明文です....",x+RECTWIDTH+OFFSETLEFT+100,y-0.6*RECTHEIGHT,16)
+                    if($scope.LAN == 'JP'){
+                        drawText("次は立論と異議の説明文です....",x+RECTWIDTH+OFFSETLEFT+30,y-0.6*RECTHEIGHT,16)
+                    }else{
+                        drawText("接下来进入质疑解释说明和原始阐述说明阶段....",x+RECTWIDTH+OFFSETLEFT+30,y-0.6*RECTHEIGHT,16)
+                    }
+
 
                     var _div = foreignObject.append('xhtml:div')
 
 
                     var button = _div.append("button")
-                    button.html("次へ")
+
+                    if($scope.LAN == 'JP'){
+                        button.html("次へ")
+                    }else{
+                        button.html("下一步")
+                    }
+
+
                     button.attr("type","button")
                     button.attr("class","btn btn-default btn-lg pull-right")
                     button.style("margin-top","30px")
@@ -929,7 +953,7 @@
 
                     var image = _div.append("img")
 
-                    image.attr("src", "./rightPointer.png")
+                    image.attr("src", "/rightPointer.png")
                             .attr("width", "100")
                             .attr("height", "100");
 
@@ -1167,9 +1191,8 @@
     myApp.directive("inputTextArea",function(coreSocket) {
         return {
             scope: false,
+            link:function(scope, element, attrs){
 
-            compile: function(tElement, tAttr){
-                return function postLink(scope, element, attrs){
                     var TOP = 15   //最先画的方块距离顶端的距离
                     var LEFT = 80   //最先画的方块距离左边的距离
                     var DISSENTWIDTH = 250 //异议方块的长度
@@ -1197,7 +1220,7 @@
                     },800)
 
 
-
+                    scope.statement = "..."
                     scope.output2 = function(){
                         var i = scope.statementStatus.i
                         scope.infoAndStatementMapTabVal = 2
@@ -1207,6 +1230,7 @@
 
                         if(scope.statementStatus.name == "claim"){
                             scope.statementData = scope.statement
+
                             scope.statementStatus.name = "submit"
                         }else if(scope.statementStatus.name == "dissent"){
                             scope.dissentData[i].reply = scope.statement
@@ -1236,10 +1260,6 @@
 
 
 
-
-
-                        scope.statement = ""
-
                         clearDraw()
                         draw()
 
@@ -1248,7 +1268,7 @@
                         }else{
                             //scrollTop("constructClaim",1000,(parseInt(document.getElementById("constructClaim").getAttribute("y")))+DOTTEDLINEANDCONSTRUCTSPACE/2)
                         }
-
+                        scope.statement = "..."
                     }
 
 
@@ -1281,7 +1301,18 @@
 
                             if(scope.dissentData[i].reply){
                                 drawArrow(LASTX+DISSENTWIDTH,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE,LASTY+DISSENTHEIGHT/2,LASTY+DISSENTHEIGHT/2)
-                                drawText("この異議の説明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
+
+
+                                if(scope.LAN == 'JP'){
+                                    drawText("この異議の説明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
+                                }else{
+                                    drawText("这里是对质疑的说明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
+                                }
+
+
+
+
+
                                 appendRect(scope.dissentData[i].reply,0,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE+5,LASTY,EXPLAINWIDTH,EXPLAINHEIGHT,"explain"+i)
                             }else{
                                 drawPointer(LASTX+DISSENTWIDTH,LASTY+DISSENTHEIGHT/4,200,200)
@@ -1294,7 +1325,13 @@
                         LASTY += DISSENTANDLINESPACEY
 
                         drawDottedLine(DOTTEDLINEX,LASTY,DOTTEDLINEX+DOTTEDWIDTH,LASTY)
-                        drawText("ここから立論の部分",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+
+                        if(scope.LAN == 'JP'){
+                            drawText("ここから立論の部分",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+                        }else{
+                            drawText("以下是原始阐述说明",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+                        }
+
                         drawDottedLine(DOTTEDLINEX+DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY,DOTTEDLINEX+2*DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY)
 
                         appendRect(scope.statementData,0,CONSTRUCTX,LASTY+DOTTEDLINEANDCONSTRUCTSPACE,CONSTRUCTWIDTH,CONSTRUCTHEIGHT,"constructClaim")
@@ -1337,7 +1374,7 @@
                         var div = foreignObject.append('xhtml:div')
                         var image = div.append("img")
 
-                        image.attr("src", "./leftPointer.png")
+                        image.attr("src", "/leftPointer.png")
                                 .attr("width", "100")
                                 .attr("height", "100");
 
@@ -1396,7 +1433,6 @@
                         }
 
                     }
-                };
             },
             templateUrl:"/angularJSTemplate/public/inputTextArea.html"
         }
@@ -1413,12 +1449,11 @@
                 }
 
                 scope.approval = function(){
-                    alert("approval")
                     coreSocket.emit("confirmAnalysisResult",{comment:scope.examAnalysisResultComment})
                 }
 
                 scope.refuse = function(){
-                    alert("refuse")
+                    
                 }
             },
             templateUrl:"/angularJSTemplate/public/examAnalysisResult.html"

@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" ng-if="LAN=='JP'">
 <table class="table">
     <tr class="danger">
         <td>テーマ</td>
@@ -63,4 +63,73 @@
 
     </tr>
 </table>
+</div>
+
+
+
+<div class="row" ng-if="LAN=='CN'">
+    <table class="table">
+        <tr class="danger">
+            <td>话题</td>
+            <td>{{debateInfo.title}}</td>
+
+        </tr>
+        <tr class="info">
+            <td>你:</td>
+            <td>{{debateInfo.username}}
+                <span ng-if="debateInfo.position == 1">(正方)</span>
+                <span ng-if="debateInfo.position == 2">(反方)</span>
+
+            </td>
+
+        </tr>
+        <tr class="active">
+
+            <td>正方(Pro)
+
+                            <span ng-if="debateInfo.proPrepare == 1">
+                                准备完成
+                            </span>
+
+                            <span ng-if="debateInfo.proPrepare != 1">
+                                未准备
+                            </span>
+
+            </td>
+            <td>{{debateInfo.pro}}</td>
+        </tr>
+        <tr class="success">
+
+
+            <td>反方対(Con)
+                            <span ng-if="debateInfo.conPrepare == 1">
+                                准备完成
+                            </span>
+
+                            <span ng-if="debateInfo.conPrepare != 1">
+                                未准备
+                            </span>
+            </td>
+            <td>{{debateInfo.con}}</td>
+
+        </tr>
+        <tr class="warning">
+
+            <td>观战</td>
+            <td></td>
+
+        </tr>
+        <tr class="danger">
+            <td>次数</td>
+            <td></td>
+
+        </tr>
+        <tr class="info">
+
+
+            <td>现阶段</td>
+            <td></td>
+
+        </tr>
+    </table>
 </div>

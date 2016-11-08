@@ -1,4 +1,4 @@
-<div style="height:800px;overflow:auto">
+<div style="height:800px;overflow:auto" ng-if="LAN=='JP'">
     <div class="panel panel-default" ng-repeat="val in debatingList">
         <div class="panel-heading">
             <h3 class="panel-title">{{val.title}}</h3>
@@ -15,6 +15,32 @@
 
                 <a  ng-click="participateRoom(val.num,val.rNum,2)" class="btn btn-success ">
                     <span class="glyphicon glyphicon-floppy-save"></span><br>討論ルームに参加する
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div style="height:800px;overflow:auto" ng-if="LAN=='CN'">
+    <div class="panel panel-default" ng-repeat="val in debatingList">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{val.title}}</h3>
+        </div>
+        <div class="panel-body">
+            {{val.desc}}
+            <table class="table table-condensed">
+                <tr class="active"><td class="info">正方</td><td class="info">{{val.pro}}</td> <td class="success">反方</td><td class="success">{{val.con}}</td> <td>总次数</td><td>{{val.config.timeNumbers}}次</td><td>时间限制</td><td ng-show="val.config.timeLimit == 0">无</td><td ng-show="val.config.timeLimit!=0">{{val.config.timeLimitValDefault}}</td></tr>
+            </table>
+            <div class="pull-right">
+                <a  ng-click="participateRoom(val.num,val.rNum,1)" class="btn btn-info ">
+                    <span class="glyphicon glyphicon-floppy-save"></span><br>进入这个话题房间
+                </a>
+
+                <a  ng-click="participateRoom(val.num,val.rNum,2)" class="btn btn-success ">
+                    <span class="glyphicon glyphicon-floppy-save"></span><br>进入这个话题房间
                 </a>
             </div>
 

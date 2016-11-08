@@ -6,7 +6,15 @@
 
 </div>
 
+<div class="row" ng-if="LAN=='JP'">
 <div class="row" ng-if="debateInfo.position==1">
     <div class="alert alert-info" role="alert">相手が分析しています,結果をお待ちください</div>
 </div>
+</div>
 
+
+<div class="row" ng-if="LAN=='CN'">
+    <div class="row" ng-if="debateInfo.position==1">
+        <div class="alert alert-info" role="alert">对方正在分析您的阐述说明,请稍等</div>
+    </div>
+</div>

@@ -23,11 +23,11 @@
 </head>
 <body>
 
-<div ng-app="myApp" class="container" ng-init="LAN='JP'">
+<div ng-app="myApp" ng-controller="myController" class="container">
+
     <my-navy></my-navy>
 
-    <div class="row" ng-controller="myController">
-
+    <div class="row" ng-if="LAN=='JP'">
 
         <div class="btn-group btn-group-justified" role="group" aria-label="...">
             <div class="btn-group" role="group">
@@ -41,9 +41,31 @@
             </div>
         </div>
 
-        <div ng-view></div>
+
 
     </div>
+
+
+    <div class="row" ng-if="LAN=='CN'">
+
+        <div class="btn-group btn-group-justified" role="group" aria-label="...">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default" ng-click="jumpTo('theme')">话题列表</button>
+            </div>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default"  ng-click="jumpTo('debating')" >正在讨论中的话题</button>
+            </div>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default"  ng-click="jumpTo('finished')">已经结束完的话题</button>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <div ng-view></div>
+
 
 </div>
 
@@ -105,20 +127,73 @@
         }
     })
 
-    myApp.controller("myController",function($scope,$location){
+
+    myApp.factory("myPost",function($http){
+        return{
+            postData:function(url,data){
+                return $http.post(url,data).success(function(res){
+                    return res;
+                })
+            }
+        }
+    })
+
+    myApp.factory("getUserInformation",function($http,myPost,$q){
+        return{
+            get:function(){
+
+                var deferred = $q.defer();
+                    myPost.postData("/release/getUserInformation").then(function(_res){
+
+                        if(_res.data){
+                            console.log(_res)
+                            var obj = {}
+                            obj.username = _res.data.data.username
+                            obj.debateInvolve = _res.data.data.debateInvolve
+                            obj.group = _res.data.data.group
+                            obj.num = _res.data.data.num
+                            obj.rNum = _res.data.data.rNum
+                            obj.status = _res.data.data.rNum
+                            obj.LAN = _res.data.data.LAN
+                            deferred.resolve({err:0,msg:"data acquired",obj:obj});
+                        }else{
+                            deferred.reject({err:1,msg:"data not acquired"});
+                        }
+
+                    })
+
+                return deferred.promise;
+            }
+
+        }
+    })
+
+
+    myApp.controller("myController",function($scope,$location,getUserInformation){
 
         $scope.jumpTo = function(url){
             $location.path(url)
         }
 
+        getUserInformation.get().then(function(msg){
+            $scope.LAN = msg.obj.LAN
+            $scope.group = msg.obj.group
+            $scope.username = msg.obj.username
+        })
 
     });
 
-    myApp.controller("themeCtr",function($scope,getDataFromServer){
+    myApp.controller("themeCtr",function($scope,getDataFromServer,getUserInformation){
         $scope.title = "themeCtr"
         getDataFromServer.getData("/release/getThemeList",{}).then(function(_res){
             console.log(_res)
             $scope.themeList = _res.data
+        })
+
+        getUserInformation.get().then(function(msg){
+            $scope.LAN = msg.obj.LAN
+            $scope.group = msg.obj.group
+            $scope.username = msg.obj.username
         })
 
 
@@ -131,11 +206,20 @@
         }
     })
 
-    myApp.controller("debatingCtr",function($scope,getDataFromServer){
+    myApp.controller("debatingCtr",function($scope,getDataFromServer,getUserInformation){
         $scope.title = "debatingCtr"
         getDataFromServer.getData("/release/getDebatingList",{}).then(function(_res){
             $scope.debatingList = _res.data
         })
+
+
+        getUserInformation.get().then(function(msg){
+            $scope.LAN = msg.obj.LAN
+            $scope.group = msg.obj.group
+            $scope.username = msg.obj.username
+        })
+
+
         $scope.participateRoom = function(num,rNum,position){
             getDataFromServer.getData("/release/participateRoom",{num:num,rNum:rNum,position:position}).then(function(_res){
                 if(parseInt(_res.data.err) == 0){
@@ -145,11 +229,21 @@
         }
     })
 
-    myApp.controller("finishedCtr",function($scope,getDataFromServer){
+    myApp.controller("finishedCtr",function($scope,getDataFromServer,getUserInformation){
         $scope.title = "finishedCtr"
         getDataFromServer.getData("/release/getDebateFinishList",{}).then(function(_res){
             $scope.getDebateFinishList = _res.data
         })
+
+
+
+        getUserInformation.get().then(function(msg){
+            $scope.LAN = msg.obj.LAN
+            $scope.group = msg.obj.group
+            $scope.username = msg.obj.username
+        })
+
+
         $scope.reviewRoom = function(num,rNum){
             getDataFromServer.getData("/release/reviewRoom",{num:num,rNum:rNum}).then(function(_res){
                 if(parseInt(_res.data.err) == 0){

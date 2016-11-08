@@ -3,9 +3,12 @@
 <input-text-area></input-text-area>
 </div>
 
-
-<div ng-show="debateInfo.position == 2">
+<div ng-show="debateInfo.position == 2" ng-if="LAN=='JP'">
    <middle-info></middle-info>
     <div class="alert alert-info" role="alert">賛成側の立論をお待ちください</div>
 </div>
 
+<div ng-show="debateInfo.position == 2" ng-if="LAN=='CN'">
+    <middle-info></middle-info>
+    <div class="alert alert-info" role="alert">请等待正方阐述结论</div>
+</div>

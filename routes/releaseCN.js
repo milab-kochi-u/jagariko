@@ -7,7 +7,7 @@
 
 var express = require('express');
 var router = express.Router();
-var releaseCNController = require('../controller/releaseCN.js');
+var releaseCNController = require('../controller/release.js');
 
 
 

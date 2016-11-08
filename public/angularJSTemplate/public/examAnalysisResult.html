@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" ng-if="LAN=='JP'">
     <div  class="panel panel-info">
         <div class="panel-heading">
 
@@ -40,3 +40,60 @@
     </div>
 </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="row" ng-if="LAN=='CN'">
+    <div  class="panel panel-info">
+        <div class="panel-heading">
+
+            <span ng-click="examAnalysisResultTab(1)"></span>同意
+            <span ng-click="examAnalysisResultTab(2)"></span>拒绝
+
+        </div>
+        <div class="panel-body" ng-if="examAnalysisResultTabVal == 1">
+            <div class="row col-sm-12">
+
+
+                <form>
+                    <div class="form-group">
+                        <label for="">对方的分析结果和我的阐述说明逻辑相符:</label>
+                        <input type="email" class="form-control" ng-model="examAnalysisResultComment" placeholder="你太了解我了,完美的分析">
+                    </div>
+                    <button type="submit" class="btn btn-default" ng-click="approval()" >下一步</button>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="panel-body" ng-if="examAnalysisResultTabVal == 2">
+            <div class="row col-sm-12">
+
+
+                <form>
+                    <div class="form-group">
+                        <label for="">对方的分析结果和我的阐述说明逻辑不相符,拒絶理由:</label>
+                        <input type="email" class="form-control" ng-model="examAnalysisResultComment" placeholder="和我想的有那么点不一样">
+                    </div>
+                    <button type="submit" class="btn btn-default" ng-click="refuse()">上一步</button>
+                </form>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
