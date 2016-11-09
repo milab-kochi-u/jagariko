@@ -49,7 +49,9 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
 
 
         socket.on("enterRoom",function(msg){
-
+            if(!session.debateLogin){
+                return;
+            }
             var loginInfo = session.debateLogin
             delete loginInfo['password']
 
@@ -248,7 +250,9 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
 
 
         socket.on('disconnect', function(msg){
-
+            if(!session){
+                return;
+            }
             console.log("room debate has been out of connection")
             console.log(msg)
             if(!session){
