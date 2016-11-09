@@ -31,7 +31,7 @@
             <div class="help-block with-errors" ng-show="myForm.password.$error.required">パスワードを入力してください</div>
         </div>
 
-        <button type="button" class="btn btn-default" ng-click="submit()" >Submit</button>
+        <button type="button" class="btn btn-default" ng-click="submit()" >送信</button>
     </form>
 
 
@@ -145,6 +145,8 @@
             $scope.LAN = "JP"
         }
 
+        alert($scope.LAN)
+
         $scope.submit = function(){
             myPost.postData({username:$scope.username,password:$scope.password}).then(function(res){
                 if(parseInt(res.data.error) == 0){
@@ -154,7 +156,7 @@
                         var cookieId = res.data.cookieId
                         setCookie("cookieId",cookieId,7)
 
-                        
+
                         if(res.data.debating){
                             if($scope.LAN == 'JP'){
                                 $window.location = "/release/chat"
