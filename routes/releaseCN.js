@@ -33,6 +33,15 @@ var checkCookie = function(req,res,next){
 }
 
 
+var checkSession = function(req,res,next){
+    if(!req.session.debateLogin){
+        return;
+    }else{
+        next()
+    }
+}
+
+
 var addPathIntoSession = function(req,res,next){
         req.session.path = req.path
         next()
@@ -63,36 +72,36 @@ router.get('/chat',releaseCNController.chatController)
 
 
 router.post('/loginPost',releaseCNController.loginPostController);
-router.post('/getThemeList',checkCookie)
+router.post('/getThemeList',checkSession)
 router.post('/getThemeList',releaseCNController.getThemeListController)
-router.post('/getDebatingList',checkCookie)
+router.post('/getDebatingList',checkSession)
 router.post('/getDebatingList',releaseCNController.getDebatingListController)
-router.post('/getDebateFinishList',checkCookie)
+router.post('/getDebateFinishList',checkSession)
 router.post('/getDebateFinishList',releaseCNController.getDebateFinishListController)
 
 
-router.post('/createNewRoom',checkCookie)
+router.post('/createNewRoom',checkSession)
 router.post('/createNewRoom',releaseCNController.createNewRoomController)
 
-router.post('/participateRoom',checkCookie)
+router.post('/participateRoom',checkSession)
 router.post('/participateRoom',releaseCNController.participateRoomController)
 
 
 
 
 //api
-router.post("/getUserInformation",checkCookie)
+router.post("/getUserInformation",checkSession)
 router.post("/getUserInformation",releaseCNController.getUserInformationController)
 
 
-router.post("/getDebateInformation",checkCookie)
+router.post("/getDebateInformation",checkSession)
 router.post("/getDebateInformation",releaseCNController.getDebateInformationController)
 
 
-router.post("/getDebateStatementMapInformation",checkCookie)
+router.post("/getDebateStatementMapInformation",checkSession)
 router.post("/getDebateStatementMapInformation",releaseCNController.getDebateStatementMapInformationController)
 
-router.post("/getDebateAnalysisMapInformation",checkCookie)
+router.post("/getDebateAnalysisMapInformation",checkSession)
 router.post("/getDebateAnalysisMapInformation",releaseCNController.getDebateAnalysisMapInformationController)
 
 module.exports = router;
