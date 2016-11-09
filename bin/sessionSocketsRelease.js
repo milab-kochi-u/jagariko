@@ -253,6 +253,10 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
             if(!session){
                 return;
             }
+
+            if(!session.debateLogin){
+                return;
+            }
             console.log("room debate has been out of connection")
             console.log(msg)
             if(!session){
