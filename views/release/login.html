@@ -150,6 +150,11 @@
                 if(parseInt(res.data.error) == 0){
                     $timeout(function(){
 
+
+                        var cookieId = res.data.cookieId
+                        setCookie("cookieId",cookieId,7)
+
+                        
                         if(res.data.debating){
                             if($scope.LAN == 'JP'){
                                 $window.location = "/release/chat"
@@ -166,8 +171,7 @@
 
 
 
-                        var cookieId = res.data.cookieId
-                        setCookie("cookieId",cookieId,7)
+
                     })
                 }else{
                     $window.alert(res.data.msg)
