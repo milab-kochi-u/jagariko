@@ -20,6 +20,20 @@ var checkCookie = function(req,res,next){
     console.log("check session .....")
     console.log(req.session)
 
+    if(!req.cookies.cookieId){
+        res.redirect("/release/login")
+        return;
+    }
+
+    if(!req.session){
+        res.redirect("/release/login")
+        return;
+    }
+
+    if(!req.session.cookieId){
+        res.redirect("/release/login")
+        return;
+    }
 
     if(req.cookies.cookieId != req.session.cookieId){
         console.log(req.cookies.cookieId)
