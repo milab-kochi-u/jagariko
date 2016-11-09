@@ -200,7 +200,12 @@
         $scope.createRoom = function(title,num,position){
             getDataFromServer.getData("/release/createNewRoom",{title:title,num:num,position:position}).then(function(_res){
                 if(parseInt(_res.data.err) == 0){
-                    location = "/release/chat"
+                    if($scope.LAN == 'JP'){
+                        location = "/release/chat"
+                    }else{
+                        location = "/releaseCN/chat"
+                    }
+
                 }
             })
         }
@@ -223,7 +228,11 @@
         $scope.participateRoom = function(num,rNum,position){
             getDataFromServer.getData("/release/participateRoom",{num:num,rNum:rNum,position:position}).then(function(_res){
                 if(parseInt(_res.data.err) == 0){
-                    location = "/release/chat"
+                    if($scope.LAN == 'JP'){
+                        location = "/release/chat"
+                    }else{
+                        location = "/releaseCN/chat"
+                    }
                 }
             })
         }
@@ -247,7 +256,11 @@
         $scope.reviewRoom = function(num,rNum){
             getDataFromServer.getData("/release/reviewRoom",{num:num,rNum:rNum}).then(function(_res){
                 if(parseInt(_res.data.err) == 0){
-                    location = "/release/review"
+                    if($scope.LAN == 'JP'){
+                        location = "/release/chat"
+                    }else{
+                        location = "/releaseCN/chat"
+                    }
                 }
             })
         }

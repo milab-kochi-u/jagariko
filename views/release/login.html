@@ -12,13 +12,14 @@
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-<div class="container" ng-app="myApp" ng-init="LAN='JP'">
+<div class="container" ng-app="myApp" ng-controller="myForm" >
 
 
 
     <login-navy></login-navy>
 
-    <form name="myForm" ng-controller="myForm">
+    <form name="myForm" ng-show="LAN == 'JP'">
+
         <div class="form-group">
             <label for="username">ユーザー</label>
             <input type="text" ng-model="username" name="username" class="form-control" required placeholder="">
@@ -32,6 +33,29 @@
 
         <button type="button" class="btn btn-default" ng-click="submit()" >Submit</button>
     </form>
+
+
+
+
+    <form name="myForm" ng-show="LAN == 'CN'">
+
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" ng-model="username" name="username" class="form-control" required placeholder="">
+            <div class="help-block with-errors" ng-show="myForm.username.$error.required">请输入您的用户名</div>
+        </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" ng-model="password" name="password" class="form-control" required placeholder="">
+            <div class="help-block with-errors" ng-show="myForm.password.$error.required">请输入您的密码</div>
+        </div>
+
+        <button type="button" class="btn btn-default" ng-click="submit()" >提交</button>
+    </form>
+
+
+
+
 </div>
 
 </body>
@@ -98,26 +122,41 @@
     angular.directive("loginNavy",function(){
         return {
             scope:false,
-            templateUrl:"/angularTemplate/navy.html"
+            templateUrl:"/angularJSTemplate/navy.html"
         }
     })
 
     angular.factory("myPost",function($http){
         return{
             postData:function(data){
-                return $http.post("/release/loginPost",data).success(function(res){
+                return $http.post("/releaseCN/loginPost",data).success(function(res){
                     return res;
                 })
             }
         }
     })
 
+
     angular.controller("myForm",function($scope,$window,$timeout,myPost){
+
+        if(/CN/.test(location.pathname)){
+            $scope.LAN = "CN"
+        }else{
+            $scope.LAN = "JP"
+        }
+
         $scope.submit = function(){
             myPost.postData({username:$scope.username,password:$scope.password}).then(function(res){
                 if(parseInt(res.data.error) == 0){
                     $timeout(function(){
-                        $window.location = "/release/group#/theme"
+
+                        if($scope.LAN == 'JP'){
+                            $window.location = "/release/group#/theme"
+                        }else{
+                            $window.location = "/releaseCN/group#/theme"
+                        }
+
+
                         var cookieId = res.data.cookieId
                         setCookie("cookieId",cookieId,7)
                     })
@@ -127,6 +166,10 @@
             })
         }
     })
+
+
+
+
 
 </script>
 </html>
