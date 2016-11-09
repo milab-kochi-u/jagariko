@@ -870,9 +870,31 @@
                     div.attr("style","height: 100px; overflow: auto;margin-bottom:1px")
 
                     var p = div.append("p")
-                    p.html(conf[3]+":"+txt)
+
+                    var liebie
+                    if($scope.LAN == "JP"){
+                        if(conf[3] == "claim"){
+                            liebie = "主張"
+                        }else if(conf[3] == "evidence"){
+                            liebie = "根拠"
+                        }else{
+                            liebie = "論拠"
+                        }
+                    }
 
 
+                    if($scope.LAN == "CN"){
+                        if(conf[3] == "claim"){
+                            liebie = "主张"
+                        }else if(conf[3] == "evidence"){
+                            liebie = "证据"
+                        }else{
+                            liebie = "理由"
+                        }
+                    }
+
+
+                    p.html(liebie+":"+txt)
 
 
                     //如果是在表明异议的阶段的话则不提供修改功能
