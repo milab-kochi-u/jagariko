@@ -25,11 +25,10 @@ var checkCookie = function(req,res,next){
         console.log(req.session.cookieId)
         console.log(req.path)
         res.redirect("/releaseCN/login")
-        next()
+        return;
     }else{
         next()
     }
-
 
 }
 
