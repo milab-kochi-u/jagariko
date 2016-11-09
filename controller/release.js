@@ -42,32 +42,48 @@ module.exports = {
         var _username = req.body.username;
         var _password = req.body.password;
 
-        var _isLogin = 0;
-
         steps(
             function(){
                 mongo.find("debateMembers",{username:_username,password:_password},{},this.hold(function(result){
                     if(result.length<=0){res.end(JSON.stringify({error:1,msg:"username or password not correct"}));this.terminate();}
-                    req.session.debateLogin = {username:result[0].username,password:result[0].password,type:result[0].type,group:result[0].group}
 
-                }))
-            },
-            function(){
-                    // user status
-                    //   -1 logout
-                    //    0 login
-                    //    1 entering
-                    //    2 debating
 
-                        mongo.update("debateMembers",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},{$set:{status:0}},{},this.hold(function(){
 
+                    var cookieId = makeid(10)
+                    req.session.cookieId = cookieId
+
+
+
+                    if(result[0].debateInvolve){
+                        req.session.debateLogin = {username:result[0].username,password:result[0].password,type:result[0].type,group:result[0].group,num:result[0].num,rNum:result[0].rNum,debateInvolve:true}
+
+                        mongo.find("debateStatus",{num:result[0].num,rNum:result[0].rNum,group:result[0].group},{},this.hold(function(_result){
+                            if(_result.length>0){
+                                if(_result[0].pro == result[0].username){
+                                    req.session.debateLogin.position = 1
+                                }
+                                if(_result[0].con == result[0].username){
+                                    req.session.debateLogin.position = 2
+                                }
+                                res.end(JSON.stringify({error:0,msg:"successful",cookieId:cookieId,debating:true}))
+                                return;
+                            }else{
+                                res.end(JSON.stringify({error:1,msg:"involved debate not finished yet but no debate log has been found"}))
+                                return;
+                            }
                         }))
 
-            },function(){
-                var cookieId = makeid(10)
-                req.session.cookieId = cookieId
-                res.end(JSON.stringify({error:0,msg:"successful",cookieId:cookieId}))
-            })()
+
+                    }else{
+                        req.session.debateLogin = {username:result[0].username,password:result[0].password,type:result[0].type,group:result[0].group,debateInvolve:false}
+                        res.end(JSON.stringify({error:0,msg:"successful",cookieId:cookieId}))
+                        return;
+                    }
+
+
+                }))
+            }
+           )()
     },
 
     groupController:function(req,res){
@@ -194,8 +210,7 @@ module.exports = {
             _res[0].username = req.session.debateLogin.username
             _res[0].status = _res[0].status
             _res[0].LAN = req.session.LAN
-            _res[0].path = req.session.path
-            
+
             console.log(JSON.stringify(_res[0]))
             res.end(JSON.stringify(_res[0]))
         })

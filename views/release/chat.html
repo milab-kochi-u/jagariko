@@ -793,7 +793,12 @@
                                     this.style.border = "4px solid yellow"
                                     var div = _div.append("div")
                                     var button = _div.append("button")
-                                    button.html("異議あり")
+
+                                    if($scope.LAN == 'JP'){
+                                        button.html("異議あり")
+                                    }else{
+                                        button.html("被质疑")
+                                    }
                                     button.attr("type","button")
                                     button.attr("class","btn btn-danger pull-right")
                                     button.attr("id",conf.join(""))
@@ -1090,11 +1095,12 @@
                 $scope.noClaim = function(){
                     //点击已经没有claim的按钮
                     if($scope.analysisObject.target == "construct"){
+                        $scope.inputStatus.name = "claim"
+                        $scope.inputStatus.i = 0
+                        $scope.inputStatus.j = 0
+
                         if($scope.analysisDissentExplainData.length>0){
                             $scope.analysisObject = {target:"dissentExplain",i:0}
-                            $scope.inputStatus.name = "claim"
-                            $scope.inputStatus.i = 0
-                            $scope.inputStatus.j = 0
                         }else{
                             console.log("send")
                             coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
@@ -1109,14 +1115,11 @@
                         }else{
                             console.log("send")
                             coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
-
-
                             print()
                         }
                     }else{
 
                     }
-
 
                 }
 
@@ -1378,8 +1381,12 @@
                                 .attr("width", "100")
                                 .attr("height", "100");
 
+                        if(scope.LAN == 'JP'){
+                            drawText("左の異議を説明してください",x+100,y+100/2,20)
+                        }else{
+                            drawText("请对左侧您选择的质疑做阐述说明",x+100,y+100/2,20)
+                        }
 
-                        drawText("左の異議を説明してください",x+100,y+100/2,20)
                     }
 
                     function drawArrow(x1,x2,y1,y2){
@@ -1427,7 +1434,12 @@
                         if(dissent){
                             var div = _div.append("div")
                             var button = _div.append("button")
-                            button.html("異議あり")
+                            if(scope.LAN == 'JP'){
+                                button.html("異議あり")
+                            }else{
+                                button.html("被质疑")
+                            }
+
                             button.attr("type","button")
                             button.attr("class","btn btn-danger pull-right")
                         }
@@ -1479,7 +1491,7 @@
         return {
             scope:false,
             link:function(scope,element){
-                scope.infoAndStatementMapTabVal = 1
+                scope.infoAndStatementMapTabVal = 2
                 scope.infoAndStatementMapTab = function(n){
                     scope.infoAndStatementMapTabVal = n
                 }

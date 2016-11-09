@@ -150,11 +150,20 @@
                 if(parseInt(res.data.error) == 0){
                     $timeout(function(){
 
-                        if($scope.LAN == 'JP'){
-                            $window.location = "/release/group#/theme"
+                        if(res.data.debating){
+                            if($scope.LAN == 'JP'){
+                                $window.location = "/release/chat"
+                            }else{
+                                $window.location = "/releaseCN/chat"
+                            }
                         }else{
-                            $window.location = "/releaseCN/group#/theme"
+                            if($scope.LAN == 'JP'){
+                                $window.location = "/release/group#/theme"
+                            }else{
+                                $window.location = "/releaseCN/group#/theme"
+                            }
                         }
+
 
 
                         var cookieId = res.data.cookieId

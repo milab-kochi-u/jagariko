@@ -108,6 +108,8 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                     }else{
                         _update = {$set:{status:"finish",preStatus:_res[0].status,finish:true}}
                         mongo.update("debateMembers",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{debateInvolve:false}},{multi: true},this.hold(function () {
+                            session.debateLogin.debateInvolve = false
+                            session.save()
                             return _update
                         }))
                     }
