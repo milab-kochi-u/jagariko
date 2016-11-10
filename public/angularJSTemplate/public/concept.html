@@ -207,22 +207,19 @@
 <div ng-if="conceptStatus=='statement'">
 
     <div  class="panel panel-info" ng-if="statementStatus.name == 'dissent'">
-        <div class="panel-heading">请对您选择的您觉得有意义的地方,做解释说明</div>
-        <div class="panel-body" id="inputExampleBody">
-            <p>在此您可以表达自己对于本话题的看法,请注意您的逻辑的完整性。尽量在您的阐述中包含以下元素(主张,理由,证据)</p>
+        <div class="panel-heading">请对您选择的您觉得有异议的地方,做解释说明</div>
+        <div class="panel-body" style="height: 315px;overflow: auto" id="inputExampleBody">
+            <p>异议:</p>
+            <p style="color: red">{{dissentTxt}}</p>
+
+            <p>在此您需要对您选择的有异议的地方做解释性说明。尽量在您的阐述中包含以下元素(主张,理由,证据)</p>
             <p>主张:主张就是最终想要表达的一个或者多个结论</p>
             <p>理由:理由是连接证据和主张的解释性语句</p>
             <p>证据:这里证据支撑着结论,比如有关例子,数据等等</p>
 
-            <p>
-            <ul>
-                <li>证据：这件短袖T恤的价格是一万人民币
-                </li>
-                <li class="_border">主张：结果肯定是谁也不会去买的</li>
-                <li>理由：短袖T恤的价格一般在几十元到一千块之间。对于一件价格一万块的短袖T恤来说没有谁可能会去买。如果有一万块钱,可以去买项链,手表,化妆品等等.
-                </li>
-            </ul>
-            </p>
+
+
+
         </div>
     </div>
 

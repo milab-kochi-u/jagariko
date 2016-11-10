@@ -8,7 +8,9 @@
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
     <![endif]-->
-    <script src="/release/angular.min.js"></script>
+    <!--<script src="/release/angular.min.js"></script>-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <!-- Latest compiled and minified JavaScript -->
@@ -27,6 +29,7 @@
 <body ng-app="myApp" ng-init="LAN='JP'">
 
 <div  class="container" ng-controller="myController">
+    {{statementStatus}}
     <my-navy></my-navy>
     <wait-debate ng-if="statusController.waitDebate"></wait-debate>
     <start-debate ng-if="statusController.startDebate"></start-debate>
@@ -160,6 +163,7 @@
             console.log($scope.dissentData)
             $scope.dissentData = msg.dissentData
             $scope.statementStatus = msg.statementStatus
+
             $scope.statementData = msg.statementData
 
         })
@@ -995,7 +999,7 @@
                     $scope.statementData = ""
 
 
-                    $scope.statementStatus = {name:"claim",i:0}
+                    $scope.statementStatus = {name:"dissent",i:0}
 
 
 
@@ -1010,7 +1014,7 @@
                         var indexToAnalysis = $scope.addDissentArr[i].indexToAnalysis
                         var indexToStatement = $scope.addDissentArr[i].indexToStatement
                         $scope.dissentData.push({category:category,type:type,txt:txt,reply:"",i:_i,j:_j,indexToAnalysis:indexToAnalysis,indexToStatement:indexToStatement})
-                        $scope.statementStatus = {name:"dissent",i:0,j:0}
+                        $scope.statementStatus = {name:"dissent",i:0}
 
                     }
 
@@ -1213,7 +1217,7 @@
 
 
 
-    myApp.directive("inputTextArea",function(coreSocket) {
+    myApp.directive("inputTextArea",function(coreSocket,$compile) {
         return {
             scope: false,
             link:function(scope, element, attrs){
@@ -1245,8 +1249,21 @@
                     },800)
 
 
-                    scope.statement = "..."
+                    if(scope.dissentData.length > 0){
+                        scope.dissentTxt = scope.dissentData[0].txt
+                    }
+
+
+
                     scope.output2 = function(){
+
+                        if(!scope.statement){
+                            scope.data2Success = 0
+                            return;
+                        }else{
+                            scope.data2Success = 1
+                        }
+
                         var i = scope.statementStatus.i
                         scope.infoAndStatementMapTabVal = 2
 
@@ -1261,9 +1278,14 @@
                             scope.dissentData[i].reply = scope.statement
                                 if(i<scope.dissentData.length-1){
                                     i++
+                                    scope.statement = scope.dissentData[i].reply
+                                    scope.dissentTxt = scope.dissentData[i].txt
                                     scope.statementStatus.i = i
                                 }else{
-                                    scope.statementStatus = {name:"claim",i:0}
+                                    scope.dissentTxt = ""
+                                    scope.statement = scope.statementData
+                                    scope.statementStatus.i = 0
+                                    scope.statementStatus.name = "claim"
                                 }
                         }else{
                             submit()
@@ -1293,14 +1315,37 @@
                         }else{
                             //scrollTop("constructClaim",1000,(parseInt(document.getElementById("constructClaim").getAttribute("y")))+DOTTEDLINEANDCONSTRUCTSPACE/2)
                         }
-                        scope.statement = "..."
                     }
+
+
+                scope.edit2 = function(type,i){
+                    if(type == "dissent"){
+                        if(i < scope.dissentData.length){
+                            scope.statementStatus.name = "dissent"
+                            scope.statementStatus.i = i
+                            scope.statement = scope.dissentData[0].reply
+                            scope.dissentTxt = scope.dissentData[0].txt
+                        }else{
+                            scope.statementStatus.name = "claim"
+                            scope.statementStatus.i = 0
+                            scope.statement = scope.statementData
+                        }
+                    }else if(type == "claim"){
+                        scope.statementStatus.name = "claim"
+                        scope.statementStatus.i = 0
+                        scope.statement = scope.statementData
+                    }else{
+
+                    }
+
+
+                }
+
 
 
                     function submit(){
                         coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
                     }
-
 
                     function scrollTop(id,time,y){
                         var _scrollTop = 0
@@ -1367,7 +1412,6 @@
                         }
 
                     }
-
 
 
                     function clearDraw(){
@@ -1445,7 +1489,7 @@
 
                         var _div = foreignObject.append('xhtml:div')
                         var div = _div.append("div")
-                        div.attr("class","alert alert-warning draw")
+                        div.attr("class","alert alert-warning draw row")
                         div.attr("role","alert")
                         div.attr("style","height: "+ h +"px; overflow: auto;margin-bottom:1px")
 
@@ -1453,7 +1497,10 @@
                         var p = div.append("p")
                         p.html(txt)
 
-                        if(dissent){
+
+
+                        if(id != 'constructClaim' && dissent == 1){
+                            //如果是左边的被质疑的模块
                             var div = _div.append("div")
                             var button = _div.append("button")
                             if(scope.LAN == 'JP'){
@@ -1464,6 +1511,39 @@
 
                             button.attr("type","button")
                             button.attr("class","btn btn-danger pull-right")
+                        }
+
+
+                        if(id != 'constructClaim' && dissent == 0){
+                            //如果是右侧异议解释模块
+                            var div = _div.append("div")
+                            div.attr("class","row")
+                            var divId = "btn"+Math.round(Math.random()*10000)
+                            div.attr("id",divId)
+
+                            var num = parseInt(/explain(\d)/.exec(id)[1])
+                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">edit</button>'
+
+                            angular.element(document.getElementById(divId)).append($compile(html)(scope));
+
+
+                            /*
+                            var button = div.append("button")
+                            if(scope.LAN == 'JP'){
+                                var span = button.html("span")
+                                span.text("編集")
+                            }else{
+                                var span = button.html("span")
+                                span.text("修改")
+                            }
+
+
+                            button.attr("class","btn btn-default pull-right")
+
+                            span.bind("click",function(){
+                                scope.edit2("dissent",parseInt(/explain(\d)/.exec(id)[1]))
+                            })
+                            */
                         }
 
                     }
@@ -1730,11 +1810,14 @@
         $scope.dissentData = []
 
         $scope.statementData = ""
-        $scope.statementStatus = {name:"claim",i:0}
+        //$scope.statementStatus = {name:"claim",i:0}
 
 
         $scope.conceptStatus = "analysis"
         $scope.conceptStatus = "statement"
+
+        $scope.dissentTxt = "aaa                                                                                      "  //在对质疑进行解释性说明的时候在左侧显示对那一段话有质疑
+
 
 
     }

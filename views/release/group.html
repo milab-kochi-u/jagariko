@@ -197,6 +197,8 @@
         })
 
 
+
+
         $scope.createRoom = function(title,num,position){
             getDataFromServer.getData("/release/createNewRoom",{title:title,num:num,position:position}).then(function(_res){
                 if(parseInt(_res.data.err) == 0){
