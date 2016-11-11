@@ -29,7 +29,6 @@
 <body ng-app="myApp" ng-init="LAN='JP'">
 
 <div  class="container" ng-controller="myController">
-    {{statementStatus}}
     <my-navy></my-navy>
     <wait-debate ng-if="statusController.waitDebate"></wait-debate>
     <start-debate ng-if="statusController.startDebate"></start-debate>
@@ -686,8 +685,11 @@
                     var startY = LASTY
                     for(var i=0;i<data.length;i++){
                         if(!data[i].claim) return;
-                        appendRect(data[i].claim,data[i].cDissent,LASTX,LASTY,[category,i,0,"claim",dissentExplainI])
+                        appendRect(data[i].claim,data[i].cDissent,LASTX,LASTX,[category,i,0,"claim",dissentExplainI])
 
+                        if(($scope.debateInfo.status == 'appeal' && $scope.debateInfo.position == 2) || ($scope.debateInfo.status == 'lookup' && $scope.debateInfo.position == 1)){
+                            appendHint(LASTX,LASTX)
+                        }
 
                         for(var j=0;j<data[i].support.length;j++){
 
@@ -780,13 +782,43 @@
                             .attr("class","arrow draw")
                 }
 
+                function appendHint(x,y){
+                    /*
+                    var circle = svg.append("circle")
+                    var circleR = 10
+                    circle.attr("cy",y + RECTHEIGHT/2 - 2*circleR)
+                    circle.attr("cx",x + 1.4*RECTWIDTH)
+                    circle.style("fill","blue")
+                    circle.attr("r",circleR)
+                    */
 
+                    var foreignObject = svg.append("foreignObject")
+                    var hintWidth = 360
+                    var hintHeight = 120
+                    foreignObject.attr("width",hintWidth)
+                    foreignObject.attr("height",hintHeight)
+
+                    foreignObject.attr("y",y )
+                    foreignObject.attr("x",x + 1.4*RECTWIDTH)
+                    var _div = foreignObject.append('xhtml:div')
+                    var image = _div.append("img")
+                    image.attr("src", "/leftPointer.png")
+                            .attr("width", "100")
+                            .attr("height", "100");
+                    foreignObject.transition().duration(1000).ease(d3.easeBounce).attr("x", x + 1.02*RECTWIDTH).attr("fill", "red");
+
+                    var text = _div.append("span")
+                    text.text("点击选择您想要质疑的那一项")
+                    text.style("color","rgb(138, 109, 59)")
+                    text.style("font-size","16px")
+                }
 
                 function appendRect(txt,dissent,x,y,conf){
+
                     var foreignObject = svg.append("foreignObject")
                     foreignObject.attr("width",RECTWIDTH)
                     foreignObject.attr("height",RECTHEIGHT)
-
+                    foreignObject.attr("class","draw")
 
                     if(($scope.debateInfo.status == 'appeal' && $scope.debateInfo.position == 2) || ($scope.debateInfo.status == 'lookup' && $scope.debateInfo.position == 1)){
                         var bordered = foreignObject.attr("bordered") || 1
@@ -850,8 +882,6 @@
 
                                     $scope.addDissentArr[conf.join("")] = {res:1,category:conf[0],i:conf[1],j:conf[2],type:conf[3],txt:txt,indexToAnalysis:indexToAnalysis,indexToStatement:indexToStatement}
 
-                                    console.log("oooooooooo")
-                                    console.log($scope.addDissentArr)
                                 }else{
                                     this.style.border = ""
                                     d3.select("#"+conf.join("")).remove()
@@ -866,6 +896,8 @@
 
                     foreignObject.attr("x",x)
                     foreignObject.attr("y",y)
+
+
 
                     var _div = foreignObject.append('xhtml:div')
                     var div = _div.append("div")
@@ -965,7 +997,6 @@
 
 
                     var button = _div.append("button")
-
                     if($scope.LAN == 'JP'){
                         button.html("次へ")
                     }else{
@@ -989,6 +1020,8 @@
                             .attr("height", "100");
 
                 }
+
+
 
 
                 function toNextStep(){
@@ -1030,6 +1063,9 @@
                 }
 
 
+
+
+
             },
 
             templateUrl:"/angularJSTemplate/public/analysisResult.html"
@@ -1043,7 +1079,7 @@
             controller:function($scope,$rootScope,coreSocket){
                 $scope.inputFormAreachangeInputTabVal = 1
                 $scope.analysisObject = {target:"construct",i:0}
-
+                $scope.conceptStatus = "analysis"   //concept directive controller
                 function print(){
                     console.log($scope.analysisData.analysisResult)
                     $scope.contents = ""
@@ -1116,7 +1152,118 @@
                     print()
 
                     $rootScope.$broadcast('click',{});
+                    checkIfOriginalDataExists()
                 }
+
+                function checkIfOriginalDataExists(){
+                    var status = $scope.inputStatus.name
+                    var target = $scope.analysisObject.target
+                    if(target == "construct"){
+                        var data = $scope.analysisData.analysisResult
+                    }else{
+                        var data = $scope.analysisDissentExplainData[$scope.analysisObject.i].analysisResult
+                    }
+                    var i = $scope.inputStatus.i
+                    var j = $scope.inputStatus.j
+
+                    if(status == "claim"){
+                            $scope.contents = data[i].claim
+                    }else if(status == "evidence"){
+                            $scope.contents = data[i].support[j].evidence
+                    }else if(status == "warrant"){
+                            $scope.contents = data[i].support[j].warrant
+                    }else{
+
+                    }
+                }
+
+
+                $scope.toLastStep = function(analysisObject,inputStatus){
+                        $scope.preAnalysisObj = $scope.preAnalysisObj || {}
+                        $scope.preInputStatus = $scope.preInputStatus || {}
+
+
+                        if(analysisObject.target == "construct"){
+                            if(inputStatus.name == "claim"){
+                                if(inputStatus.i >0){
+                                    //说明现在已经不是第一个claim了,现在处在的肯定是后来添加的claim
+
+                                    //如果新添加进来的claim还没有来得及写进内容,那么则删除新添加进来的claim
+                                    if(!$scope.analysisData.analysisResult[inputStatus.i].claim){
+                                            $scope.analysisData.analysisResult.splice(inputStatus.i,1)
+                                    }
+
+                                    var _i = inputStatus.i - 1
+                                    $scope.inputStatus.i = _i
+                                    $scope.inputStatus.name = "newClaim"
+                                }else{
+                                    return false;
+                                }
+                            }else if(inputStatus.name == "evidence"){
+                                    var _i = inputStatus.i
+                                    var _j = inputStatus.j
+
+                                    if(_j>0){
+                                        //添加new evidence跳过来的
+
+                                        //如果新添加进来的evidence还没有来得及写进内容,那么删除新添加进来的evidence
+                                        if(!$scope.analysisData.analysisResult[_i].support[_j].evidence){
+                                            $scope.analysisData.analysisResult[_i].support.splice(_j,1)
+                                        }
+
+
+                                        _j = _j -1
+                                        $scope.inputStatus.name = "newEvidence"
+                                        $scope.inputStatus.j = _j
+
+                                    }else{
+                                        //写完claim后跳过来的
+                                        $scope.inputStatus.name = "claim"
+                                        $scope.contents = $scope.analysisData.analysisResult[_i].claim
+                                    }
+
+
+
+                            }else if(inputStatus.name == "warrant"){
+                                    var _i = inputStatus.i
+                                    var _j = inputStatus.j
+                                    $scope.inputStatus.name = "evidence"
+
+                                    $scope.contents = $scope.analysisData.analysisResult[_i].support[_j].evidence
+
+                            }else if(inputStatus.name == "newEvidence"){
+                                    var _i = inputStatus.i
+                                    var _j = inputStatus.j
+                                    $scope.inputStatus.name = "warrant"
+                                    $scope.contents = $scope.analysisData.analysisResult[_i].support[_j].warrant
+
+                            }else if(inputStatus.name == "newClaim"){
+                                $scope.inputStatus.name = "newEvidence"
+                            }else{
+
+                            }
+
+                        }else if(analysisObject.target == "dissentExplain"){
+                            if(inputStatus.name == "claim"){
+
+                            }else if(inputStatus.name == "evidence"){
+
+                            }else if(inputStatus.name == "warrant"){
+
+                            }else if(inputStatus.name == "newEvidence"){
+
+                            }else if(inputStatus.name == "newClaim"){
+
+                            }else{
+
+                            }
+                        }
+
+
+                        $scope.preInputStatus = inputStatus
+                        $scope.preAnalysisObject = analysisObject
+                }
+
 
                 $scope.noClaim = function(){
                     //点击已经没有claim的按钮
@@ -1162,6 +1309,38 @@
                 $scope.setNewClaim = function(){
                     //点击还有claim的按钮
 
+
+                    //如果下一步中有原先添加好的
+                    var nextExistsOrNot = false
+
+                    var _i = $scope.inputStatus.i
+
+                    if($scope.analysisObject.target == "construct"){
+                        if($scope.analysisData.analysisResult[_i+1]){
+                            nextExistsOrNot = true;
+                            $scope.inputStatus.i = _i + 1
+                            $scope.inputStatus.j = 0
+                            $scope.inputStatus.name = "claim"
+                            $scope.contents = $scope.analysisData.analysisResult[_i+1].claim
+                        }
+                    }else if($scope.analysisObject.target == "dissentExplain"){
+                        if($scope.analysisDissentExplainData[$scope.analysisObject.i].analysisResult[_i+1]){
+                            nextExistsOrNot = true;
+                            $scope.inputStatus.i = _i + 1
+                            $scope.inputStatus.j = 0
+                            $scope.inputStatus.name = "claim"
+                            $scope.contents = $scope.analysisDissentExplainData[$scope.analysisObject.i].analysisResult[_i+1].claim
+                        }
+                    }else{
+
+                    }
+
+
+                    if(nextExistsOrNot){
+                        return;
+                    }
+
+
                     $scope.inputStatus.i++
 
                     $scope.inputStatus.j = 0
@@ -1183,6 +1362,36 @@
                 }
 
                 $scope.setNewEvidence = function(){
+
+                    //如果下一步中已经有原先添加的
+                    var nextExistsOrNot = false
+
+                    var _i = $scope.inputStatus.i
+                    var _j = $scope.inputStatus.j
+
+                    if($scope.analysisObject.target == "construct"){
+                        if($scope.analysisData.analysisResult[_i].support[_j+1]){
+                            nextExistsOrNot = true;
+                            $scope.inputStatus.j = _j + 1
+                            $scope.inputStatus.name ="evidence"
+                            $scope.contents = $scope.analysisData.analysisResult[_i].support[_j+1].evidence
+                        }
+                    }else if($scope.analysisObject.target == "dissentExplain"){
+                        if($scope.analysisDissentExplainData[$scope.analysisObject.i].analysisResult[_i].support[_j+1]){
+                            nextExistsOrNot = true;
+                            $scope.inputStatus.j = _j + 1
+                            $scope.inputStatus.name ="evidence"
+                            $scope.contents = $scope.analysisDissentExplainData[$scope.analysisObject.i].analysisResult[_i].support[_j+1].evidence
+                        }
+                    }else{
+
+                    }
+
+                    if(nextExistsOrNot){
+                        return;
+                    }
+
+
                     var i = $scope.inputStatus.i
                     $scope.inputStatus.j++
 
@@ -1253,7 +1462,7 @@
                         scope.dissentTxt = scope.dissentData[0].txt
                     }
 
-
+                    scope.conceptStatus = "statement"   //concept directive controller
 
                     scope.output2 = function(){
 
@@ -1311,9 +1520,9 @@
                         draw()
 
                         if(scope.statementStatus.name == "dissent"){
-                            //scrollTop("dissent"+i,1000,(parseInt(document.getElementById("dissent"+(i-1)).getAttribute("y")))+DISSENTSPACEY/2)
+                            scrollTop("dissent"+i,1000,(parseInt(document.getElementById("dissent"+(i)).getAttribute("y")) - 10))
                         }else{
-                            //scrollTop("constructClaim",1000,(parseInt(document.getElementById("constructClaim").getAttribute("y")))+DOTTEDLINEANDCONSTRUCTSPACE/2)
+                            scrollTop("constructClaim",1000,(parseInt(document.getElementById("constructClaim").getAttribute("y")))-DISSENTANDLINESPACEY)
                         }
                     }
 
@@ -1323,8 +1532,8 @@
                         if(i < scope.dissentData.length){
                             scope.statementStatus.name = "dissent"
                             scope.statementStatus.i = i
-                            scope.statement = scope.dissentData[0].reply
-                            scope.dissentTxt = scope.dissentData[0].txt
+                            scope.statement = scope.dissentData[i].reply
+                            scope.dissentTxt = scope.dissentData[i].txt
                         }else{
                             scope.statementStatus.name = "claim"
                             scope.statementStatus.i = 0
@@ -1348,15 +1557,7 @@
                     }
 
                     function scrollTop(id,time,y){
-                        var _scrollTop = 0
-                        var start = new Date().getTime()
-                        var startScrollTop = document.getElementById(id).scrollTop
-                        console.log(startScrollTop)
-                        setInterval(function(){
-                            if(new Date().getTime()-start > time) return;
-                            _scrollTop += (y - startScrollTop)/10
-                            document.getElementById(id).scrollTop = _scrollTop + startScrollTop
-                        },time/10)
+                            document.getElementById("statementResult").scrollTop = y
                     }
 
 
@@ -1485,11 +1686,12 @@
                         foreignObject.attr("x",x)
                         foreignObject.attr("y",y)
                         foreignObject.attr("id",id)
+                        foreignObject.attr("class","draw")
 
 
                         var _div = foreignObject.append('xhtml:div')
                         var div = _div.append("div")
-                        div.attr("class","alert alert-warning draw row")
+                        div.attr("class","alert alert-warning  row")
                         div.attr("role","alert")
                         div.attr("style","height: "+ h +"px; overflow: auto;margin-bottom:1px")
 
@@ -1522,7 +1724,13 @@
                             div.attr("id",divId)
 
                             var num = parseInt(/explain(\d)/.exec(id)[1])
-                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">edit</button>'
+
+                            if(scope.LAN == 'JP'){
+                                var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">編集</button>'
+                            }else{
+                                var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">修改</button>'
+                            }
+
 
                             angular.element(document.getElementById(divId)).append($compile(html)(scope));
 
@@ -1544,6 +1752,25 @@
                                 scope.edit2("dissent",parseInt(/explain(\d)/.exec(id)[1]))
                             })
                             */
+                        }
+
+
+                        if(id == 'constructClaim'){
+                            //如果是原始阐述的部分的话
+                            var div = _div.append("div")
+                            div.attr("class","row")
+                            var divId = "btn"+Math.round(Math.random()*10000)
+                            div.attr("id",divId)
+
+
+                            if(scope.LAN == 'JP'){
+                                var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'claim\',' + num + ')">編集</button>'
+                            }else{
+                                var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'claim\',' + num + ')">修改</button>'
+                            }
+
+
+                            angular.element(document.getElementById(divId)).append($compile(html)(scope));
                         }
 
                     }
@@ -1597,6 +1824,14 @@
                 scope.infoAndStatementMapTab = function(n){
                     scope.infoAndStatementMapTabVal = n
                 }
+
+                if(scope.debateInfo.status == 'appeal' || scope.debateInfo.status == 'lookup'){
+                    scope.infoAndStatementMapBodyHeight = 600
+                }else{
+                    scope.infoAndStatementMapBodyHeight = 400
+                }
+
+
             },
             templateUrl:"/angularJSTemplate/public/infoAndStatementMap.html"
         }
@@ -1611,6 +1846,14 @@
                 scope.infoAndAnalysisMap = function(n){
                     scope.infoAndAnalysisMapVal = n
                 }
+
+                if(scope.debateInfo.status == 'appeal' || scope.debateInfo.status == 'lookup'){
+                    scope.infoAndAnalysisMapBodyHeight = 600
+                }else{
+                    scope.infoAndAnalysisMapBodyHeight = 400
+                }
+
+
             },
             templateUrl:"/angularJSTemplate/public/infoAndAnalysisMap.html"
         }

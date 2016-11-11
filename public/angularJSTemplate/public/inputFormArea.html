@@ -220,6 +220,12 @@
 
 
 <div class="row" ng-show="LAN=='CN'">
+    {{analysisObject}}
+    {{inputStatus}}
+
+    <br/>
+    {{analysisDissentExplainData}}
+
     <div  class="panel panel-info">
         <div class="panel-body" >
             <div class="row col-sm-4">
@@ -337,6 +343,7 @@
 
 
                             <div class=" col-sm-6">
+                                <button type="button" class="btn-lg btn-default pull-right" ng-click="toLastStep(analysisObject,inputStatus)" >上一步</button>
                                 <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noEvidence()">没有了</button>
                             </div>
                         </div>
@@ -362,6 +369,7 @@
 
 
                             <div class=" col-sm-6">
+                                <button type="button" class="btn-lg btn-default pull-right" ng-click="toLastStep(analysisObject,inputStatus)" >上一步</button>
                                 <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noClaim()">没有了,进行下一步</button>
                             </div>
                         </div>
@@ -379,9 +387,9 @@
 
                             <textarea class="form-control" rows="7" ng-model="contents" ></textarea>
                             <p>
-
                                 <span ng-if="dataSucess==0">输入必须项</span>
                                 <button type="button" class="btn btn-default pull-right" ng-click="output()" >下一步</button>
+                                <button type="button" class="btn btn-default pull-right" ng-click="toLastStep(analysisObject,inputStatus)" >上一步</button>
                             </p>
                         </div>
 

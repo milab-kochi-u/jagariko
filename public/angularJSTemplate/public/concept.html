@@ -57,16 +57,14 @@
 
     <div  class="panel panel-info" ng-if="statementStatus.name == 'dissent'">
         <div class="panel-heading">異議の理由を述べてください</div>
-        <div class="panel-body" id="inputExampleBody">
-            <p>根拠が主張を支えている理由です。論拠は、必ずしも明示的に示されていません。暗黙の前提とも言います。詳しくは、論拠とは何者か？の記事を参照下さい。</p>
-            <p>
-            <ul>
-                <li>根拠：TシャツAの価格は、100,000円である
-                </li>
-                <li>主張：誰も買わない</li>
-                <li class="_border">論拠：Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。</li>
-            </ul>
-            </p>
+        <div class="panel-body" style="height: 315px;overflow: auto"  id="inputExampleBody">
+            <p>异议:</p>
+            <p style="color: red">{{dissentTxt}}</p>
+
+            <p>在此您需要对您选择的有异议的地方做解释性说明。尽量在您的阐述中包含以下元素(主张,理由,证据)</p>
+            <p>主张:主张就是最终想要表达的一个或者多个结论</p>
+            <p>理由:理由是连接证据和主张的解释性语句</p>
+            <p>证据:这里证据支撑着结论,比如有关例子,数据等等</p>
         </div>
     </div>
 
@@ -150,7 +148,7 @@
 <div  ng-if="conceptStatus=='analysis'">
     <div  class="panel panel-info" ng-if="inputStatus.name == 'claim' || inputStatus.name == 'newClaim'">
         <div class="panel-heading">主张</div>
-        <div class="panel-body" id="inputExampleBody">
+        <div class="panel-body" style="height: 315px;overflow: auto" id="inputExampleBody">
             <p>主张就是最终想要表达的一个或者多个结论,比如一下的例子里面</p>
             <p>
             <ul>
@@ -168,7 +166,7 @@
 
     <div  class="panel panel-info" ng-if="inputStatus.name == 'evidence' || inputStatus.name == 'newEvidence'">
         <div class="panel-heading">证据</div>
-        <div class="panel-body" id="inputExampleBody">
+        <div class="panel-body" style="height: 315px;overflow: auto" id="inputExampleBody">
             <p>这里证据支撑着结论,它有可能是事实,也有可能不够准确</p>
             <p>
             <ul>
@@ -187,7 +185,7 @@
 
     <div  class="panel panel-info" ng-if="inputStatus.name == 'warrant' || inputStatus.name == 'newWarrant'">
         <div class="panel-heading">理由</div>
-        <div class="panel-body" id="inputExampleBody">
+        <div class="panel-body" style="height: 315px;overflow: auto" id="inputExampleBody">
             <p>理由是连接证据和主张的解释性语句</p>
             <p>
             <ul>

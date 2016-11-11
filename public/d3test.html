@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/_debate/d3/d3.js"></script>
+</head>
+<body>
+    <svg id="svg" height="500" width="500">
+
+    </svg>
+</body>
+<script>
+
+    var svg = d3.select("#svg")
+    svg.style("background","yellow")
+    var circle = svg.append("circle")
+    circle.attr("cy",100)
+    circle.attr("cx",100)
+    circle.style("fill","blue")
+    circle.attr("r",10)
+
+
+    circle.transition().duration(1000).ease(d3.easeBounce).attr("cy", 200).attr("fill", "red");
+
+</script>
+</html>
