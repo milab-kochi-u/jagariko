@@ -113,6 +113,7 @@
         $scope.$watch("debateInfo.status",checkStatus)
 
 
+
         coreSocket.on("enterRoom",function(_res){
             var promise = getDebateInformation()
         })
@@ -219,6 +220,7 @@
 
 
                     $scope.debateInfo.order =  _res.data.order
+                    $scope.debateInfo.preFinish =  _res.data.preFinish
                     deferred.resolve({err:0,msg:"data acquired"});
                 }else{
                     deferred.reject({err:1,msg:"data not acquired"});
@@ -430,6 +432,14 @@
                 scope.topArticleChangeTab = function(n){
                     scope.topArticleChangeTabVal = n
                 }
+
+                scope.$on('topArticleChangeTab',function(event, data){
+                    scope.topArticleChangeTabVal = data.topArticleChangeTabVal
+                });
+
+                scope.selectedOrNot = function(n){
+                    return parseInt(n)==scope.topArticleChangeTabVal?"active":""
+                }
             },
             templateUrl:"/angularJSTemplate/public/topArticle.html"
         }
@@ -480,6 +490,13 @@
             scope:false,
 
             link:function(scope,element){
+                if(scope.debateInfo.preFinish){
+                    //如果是属于准结束阶段,那么这个时候只有分析異議説明的份儿
+                    scope.analysisObject = {target:"dissentExplain",i:0}
+                }else{
+                    //如果不是准结束的阶段,那么这个时候要分析立論
+                    scope.analysisObject = {target:"construct",i:0}
+                }
 
             },
             templateUrl:"/angularJSTemplate/process/analysisDebate.html"
@@ -531,7 +548,7 @@
             scope:false,
 
             link:function(scope,element){
-
+                scope.analysisObject = {target:"construct",i:0}
             },
             templateUrl:"/angularJSTemplate/process/bunsekiDebate.html"
         }
@@ -554,6 +571,9 @@
             scope:false,
 
             link:function(scope,element){
+                    //如果是最后一轮的话那么这里只能反論,不能立論
+
+
             },
             templateUrl:"/angularJSTemplate/process/lookupDebate.html"
         }
@@ -564,7 +584,11 @@
             scope:false,
 
             link:function(scope,element){
+                    if(scope.debateInfo.order == scope.totalNum-1){
+                        //说明现在这个阶段不能立論了,因为快要结束了
+                        scope.lastStatement = 1
 
+                    }
             },
             templateUrl:"/angularJSTemplate/process/noberuDebate.html"
         }
@@ -605,7 +629,7 @@
         }
     })
 
-    myApp.directive("analysisResult",function(coreSocket){
+    myApp.directive("analysisResult",function(coreSocket,$compile){
         return {
             scope:false,
             link:function($scope,$element){
@@ -669,8 +693,14 @@
                     LASTY += OFFSETTOP
                     LASTX += OFFSETLEFT
 
-                    painTitle("construct",LASTX,LASTY)
-                    paintFromData("construct",$scope.analysisData.analysisResult,0)
+                    if($scope.debateInfo.preFinish){
+                        //如果是准结束阶段,那么只有異議説明可以分析
+
+                    }else{
+                        painTitle("construct",LASTX,LASTY)
+                        paintFromData("construct",$scope.analysisData.analysisResult,0)
+                    }
+
 
                     for(var i=0;i<$scope.analysisDissentExplainData.length;i++){
                         if(!$scope.analysisDissentExplainData[i].analysisResult[0].claim) return
@@ -685,7 +715,7 @@
                     var startY = LASTY
                     for(var i=0;i<data.length;i++){
                         if(!data[i].claim) return;
-                        appendRect(data[i].claim,data[i].cDissent,LASTX,LASTX,[category,i,0,"claim",dissentExplainI])
+                        appendRect(data[i].claim,data[i].cDissent,LASTX,LASTY,[category,i,0,"claim",dissentExplainI])
 
                         if(($scope.debateInfo.status == 'appeal' && $scope.debateInfo.position == 2) || ($scope.debateInfo.status == 'lookup' && $scope.debateInfo.position == 1)){
                             appendHint(LASTX,LASTX)
@@ -934,12 +964,23 @@
 
 
                     //如果是在表明异议的阶段的话则不提供修改功能
-                    if($scope.debateInfo.status != 'appeal' && $scope.debateInfo.status != 'lookup'){
+                    //如果是在检查阶段则不提供修改功能
+                    if($scope.debateInfo.status != 'appeal' && $scope.debateInfo.status != 'lookup' && $scope.debateInfo.status != 'kentou' && $scope.debateInfo.status != 'check'){
                         var div = _div.append("div")
-                        var button = _div.append("button")
-                        button.html("編集")
-                        button.attr("type","button")
-                        button.attr("class","btn btn-warning pull-right")
+
+                        //-----------------------------------------------
+                        var divId = "btn"+Math.round(Math.random()*10000)
+                        div.attr("id",divId)
+
+
+                        if($scope.LAN == 'JP'){
+                            var html = '<button class="btn btn-default pull-right" ng-click="edit(\''+conf[0]+'\','+parseInt(conf[1])+','+parseInt(conf[2])+',\''+conf[3]+'\',\''+parseInt(conf[4])+'\')">編集</button>'
+                        }else{
+                            var html = '<button class="btn btn-default pull-right" ng-click="edit(\''+conf[0]+'\','+parseInt(conf[1])+','+parseInt(conf[2])+',\''+conf[3]+'\',\''+parseInt(conf[4])+'\')">修改</button>'
+                        }
+
+
+                        angular.element(document.getElementById(divId)).append($compile(html)($scope));
                     }
 
 
@@ -1026,15 +1067,12 @@
 
                 function toNextStep(){
 
-
                     $scope.dissentData = []
 
                     $scope.statementData = ""
 
 
                     $scope.statementStatus = {name:"dissent",i:0}
-
-
 
                     for(var i in $scope.addDissentArr){
                         if($scope.addDissentArr[i].res == 0) continue;
@@ -1062,10 +1100,6 @@
                      */
                 }
 
-
-
-
-
             },
 
             templateUrl:"/angularJSTemplate/public/analysisResult.html"
@@ -1078,13 +1112,37 @@
             scope:false,
             controller:function($scope,$rootScope,coreSocket){
                 $scope.inputFormAreachangeInputTabVal = 1
-                $scope.analysisObject = {target:"construct",i:0}
+
+
+
+
                 $scope.conceptStatus = "analysis"   //concept directive controller
                 function print(){
                     console.log($scope.analysisData.analysisResult)
                     $scope.contents = ""
                     console.log($scope.analysisDissentExplainData)
                 }
+
+                $scope.$watch("analysisObject.target",function(val,preVal){
+                    //从 construct变成dissentExplain
+                    if(val == "dissentExplain" && preVal == "construct"){
+                        $scope.topArticleChangeTabVal = 1
+                        $rootScope.$broadcast('topArticleChangeTab',{topArticleChangeTabVal:1});
+                    }
+
+                    if(val == "construct" && preVal == "dissentExplain"){
+                        $scope.topArticleChangeTabVal = 0
+                        $rootScope.$broadcast('topArticleChangeTab',{topArticleChangeTabVal:0});
+                    }
+
+                })
+
+                $scope.$watch("analysisObject.i",function(val,preVal){
+                    //从 dissentExplain[preVal] 变dissentExplain[val]
+                    if($scope.analysisObject.target == "dissentExplain"){
+                        $rootScope.$broadcast('topArticleChangeTab',{topArticleChangeTabVal:val+1});
+                    }
+                })
 
                 function addIntoAnalysisData(name){
                     var i = $scope.inputStatus.i
@@ -1133,6 +1191,16 @@
 
 
                 $scope.output = function(){
+
+
+                    if(!$scope.contents){
+                        $scope.data1Success = 0
+                        return;
+                    }else{
+                        $scope.data1Success = 1
+                    }
+
+
                     if($scope.inputStatus.name == "claim"){
                         addIntoAnalysisData("claim")
                         $scope.inputStatus.name = "evidence"
@@ -1155,6 +1223,8 @@
                     checkIfOriginalDataExists()
                 }
 
+
+
                 function checkIfOriginalDataExists(){
                     var status = $scope.inputStatus.name
                     var target = $scope.analysisObject.target
@@ -1167,102 +1237,16 @@
                     var j = $scope.inputStatus.j
 
                     if(status == "claim"){
-                            $scope.contents = data[i].claim
+                        $scope.contents = data[i].claim
                     }else if(status == "evidence"){
-                            $scope.contents = data[i].support[j].evidence
+                        $scope.contents = data[i].support[j].evidence
                     }else if(status == "warrant"){
-                            $scope.contents = data[i].support[j].warrant
+                        $scope.contents = data[i].support[j].warrant
                     }else{
 
                     }
                 }
 
-
-                $scope.toLastStep = function(analysisObject,inputStatus){
-                        $scope.preAnalysisObj = $scope.preAnalysisObj || {}
-                        $scope.preInputStatus = $scope.preInputStatus || {}
-
-
-                        if(analysisObject.target == "construct"){
-                            if(inputStatus.name == "claim"){
-                                if(inputStatus.i >0){
-                                    //说明现在已经不是第一个claim了,现在处在的肯定是后来添加的claim
-
-                                    //如果新添加进来的claim还没有来得及写进内容,那么则删除新添加进来的claim
-                                    if(!$scope.analysisData.analysisResult[inputStatus.i].claim){
-                                            $scope.analysisData.analysisResult.splice(inputStatus.i,1)
-                                    }
-
-                                    var _i = inputStatus.i - 1
-                                    $scope.inputStatus.i = _i
-                                    $scope.inputStatus.name = "newClaim"
-                                }else{
-                                    return false;
-                                }
-                            }else if(inputStatus.name == "evidence"){
-                                    var _i = inputStatus.i
-                                    var _j = inputStatus.j
-
-                                    if(_j>0){
-                                        //添加new evidence跳过来的
-
-                                        //如果新添加进来的evidence还没有来得及写进内容,那么删除新添加进来的evidence
-                                        if(!$scope.analysisData.analysisResult[_i].support[_j].evidence){
-                                            $scope.analysisData.analysisResult[_i].support.splice(_j,1)
-                                        }
-
-
-                                        _j = _j -1
-                                        $scope.inputStatus.name = "newEvidence"
-                                        $scope.inputStatus.j = _j
-
-                                    }else{
-                                        //写完claim后跳过来的
-                                        $scope.inputStatus.name = "claim"
-                                        $scope.contents = $scope.analysisData.analysisResult[_i].claim
-                                    }
-
-
-
-                            }else if(inputStatus.name == "warrant"){
-                                    var _i = inputStatus.i
-                                    var _j = inputStatus.j
-                                    $scope.inputStatus.name = "evidence"
-
-                                    $scope.contents = $scope.analysisData.analysisResult[_i].support[_j].evidence
-
-                            }else if(inputStatus.name == "newEvidence"){
-                                    var _i = inputStatus.i
-                                    var _j = inputStatus.j
-                                    $scope.inputStatus.name = "warrant"
-                                    $scope.contents = $scope.analysisData.analysisResult[_i].support[_j].warrant
-
-                            }else if(inputStatus.name == "newClaim"){
-                                $scope.inputStatus.name = "newEvidence"
-                            }else{
-
-                            }
-
-                        }else if(analysisObject.target == "dissentExplain"){
-                            if(inputStatus.name == "claim"){
-
-                            }else if(inputStatus.name == "evidence"){
-
-                            }else if(inputStatus.name == "warrant"){
-
-                            }else if(inputStatus.name == "newEvidence"){
-
-                            }else if(inputStatus.name == "newClaim"){
-
-                            }else{
-
-                            }
-                        }
-
-
-                        $scope.preInputStatus = inputStatus
-                        $scope.preAnalysisObject = analysisObject
-                }
 
 
                 $scope.noClaim = function(){
@@ -1274,6 +1258,7 @@
 
                         if($scope.analysisDissentExplainData.length>0){
                             $scope.analysisObject = {target:"dissentExplain",i:0}
+                            checkIfOriginalDataExists()
                         }else{
                             console.log("send")
                             coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
@@ -1284,7 +1269,8 @@
                         $scope.inputStatus.i = 0
                         $scope.inputStatus.j = 0
                         if($scope.analysisObject.i<$scope.analysisDissentExplainData.length-1){
-                            $scope.analysisObject.i = $scope.analysisObject.i + 1
+                            $scope.analysisObject.i = parseInt($scope.analysisObject.i) + 1
+                            checkIfOriginalDataExists()
                         }else{
                             console.log("send")
                             coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
@@ -1294,16 +1280,124 @@
 
                     }
 
+
                 }
 
                 $scope.noEvidence = function(){
                     //点击已经没有evidence的按钮
                     $scope.inputStatus.name = "newClaim"
+
+                    //重新画图
+                    $rootScope.$broadcast('click',{});
+
                 }
 
-                $scope.noWarrant = function(){
+
+                $scope.noCurrentEvidence = function(){
+                    //没有在当前的i,j里找到evidence
+                    if($scope.analysisObject.target == "construct"){
+                        var i = $scope.inputStatus.i
+                        var j = $scope.inputStatus.j
+
+
+                        if(j== $scope.analysisData.analysisResult[i].support.length-1){
+                            //如果是最后一个evidence的话,去下一个claim或者去newClaim
+
+                                if($scope.analysisData.analysisResult[i+1]){
+                                    //如果下一个claim有内容的话,则去下一个claim
+                                    $scope.inputStatus.name = "claim"
+                                    $scope.inputStatus.i = i + 1
+                                }else{
+                                    //如果下一个claim没有内容的话,则去生成claim的选项
+                                    $scope.inputStatus.name = "newClaim"
+                                }
+
+                        }else{
+                            //如果舍弃的不是最后一个evidence的话,去下一个evidence
+                            $scope.inputStatus.name = "evidence"
+                        }
+
+
+                        //不要删唯一的那个那个support
+                        if($scope.analysisData.analysisResult[i].support.length > 1){
+                            //说明至少还有两个support,删掉一个无所谓的
+                            $scope.analysisData.analysisResult[i].support.splice(j,1)
+                        }else{
+                            $scope.analysisData.analysisResult[i].support[j].warrant = ""
+                            $scope.analysisData.analysisResult[i].support[j].evidence = ""
+                        }
+
+
+                    }else if($scope.analysisObject.target == "dissentExplain"){
+                        var i = $scope.inputStatus.i
+                        var j = $scope.inputStatus.j
+                        var _i = $scope.analysisObject.i
+
+
+                        if(j== $scope.analysisDissentExplainData[_i].analysisResult[i].support.length-1){
+                            //如果是最后一个evidence的话,去下一个claim或者去newClaim
+
+                            if($scope.analysisDissentExplainData[_i].analysisResult[i+1]){
+                                //如果下一个claim有内容的话,则去下一个claim
+                                $scope.inputStatus.name = "claim"
+                                $scope.inputStatus.i = i + 1
+                            }else{
+                                //如果下一个claim没有内容的话,则去生成claim的选项
+                                $scope.inputStatus.name = "newClaim"
+                            }
+
+                        }else{
+                            //如果舍弃的不是最后一个evidence的话,去下一个evidence
+                            $scope.inputStatus.name = "evidence"
+                        }
+
+
+                        //不要删唯一的那个那个support
+                        if($scope.analysisDissentExplainData[_i].analysisResult[i].support.length > 1){
+                            //说明至少还有两个support,删掉一个无所谓的
+                            $scope.analysisDissentExplainData[_i].analysisResult[i].support.splice(j,1)
+                        }else{
+                            $scope.analysisDissentExplainData[_i].analysisResult[i].support[j].warrant = ""
+                            $scope.analysisDissentExplainData[_i].analysisResult[i].support[j].evidence = ""
+                        }
+
+
+                    }else{
+
+                    }
+
+
+
+                    //重新画图
+                    $rootScope.$broadcast('click',{});
+
+                }
+
+                $scope.noCurrentWarrant = function(){
                     //点击已经没有warrant的按钮
+
+
+
+                    if($scope.analysisObject.target == "construct"){
+                        var i = $scope.inputStatus.i
+                        var j = $scope.inputStatus.j
+                        $scope.analysisData.analysisResult[i].support[j].warrant = ""
+
+
+                    }else if($scope.analysisObject.target == "dissentExplain"){
+                        var i = $scope.inputStatus.i
+                        var j = $scope.inputStatus.j
+                        var _i = $scope.analysisObject.i
+                        $scope.analysisDissentExplainData[_i].analysisResult[i].support[j].warrant = ""
+
+
+                    }else{
+
+                    }
+
                     $scope.inputStatus.name = "newEvidence"
+                    //重新画图
+                    $rootScope.$broadcast('click',{});
                 }
 
                 $scope.setNewClaim = function(){
@@ -1410,6 +1504,75 @@
                     }
                 }
 
+
+                $scope.noFirstClaim = function(){
+                    //非第一个claim被点击没有claim
+
+
+                    if($scope.analysisObject.target == "construct"){
+                        var i = $scope.inputStatus.i
+
+                        if(i == $scope.analysisData.analysisResult.length-1){
+                            //如果是当前最后一个claim,那么进入newClaim环节
+                            $scope.inputStatus.i = i-1
+                            $scope.inputStatus.name = "newClaim"
+                        }else{
+                            //如果不是当前最后一个claim,那么进入下一个claim
+                            $scope.inputStatus.name = "claim"
+                        }
+
+                        $scope.analysisData.analysisResult.splice(i,1)
+                    }else if($scope.analysisObject.target == "dissentExplain"){
+                        var i = $scope.inputStatus.i
+                        var _i = $scope.analysisObject.i
+
+                        if(i == $scope.analysisDissentExplainData[_i].analysisResult.length-1){
+                            //如果是当前最后一个claim,那么进入newClaim环节
+                            $scope.inputStatus.i = i-1
+                            $scope.inputStatus.name = "newClaim"
+                        }else{
+                            //如果不是当前最后一个claim,那么进入下一个claim
+                            $scope.inputStatus.name = "claim"
+                        }
+
+                        $scope.analysisDissentExplainData[_i].analysisResult.splice(i,1)
+                    }else{
+
+                    }
+
+                    //重新画图
+                    $rootScope.$broadcast('click',{});
+
+
+
+
+                }
+
+
+
+                $scope.edit = function(category,i,j,type,dissentExplainI){
+                    if(category == "construct"){
+                         $scope.inputStatus.i = i
+                         $scope.inputStatus.j = j
+                         $scope.inputStatus.name = type
+                         $scope.analysisObject.target = category
+
+                     }else if(category == "dissentExplain"){
+                         $scope.analysisObject.i = parseInt(dissentExplainI)
+                         $scope.analysisObject.target = category
+                         $scope.inputStatus.i = i
+                         $scope.inputStatus.j = j
+                         $scope.inputStatus.name = type
+                     }else{
+
+                     }
+
+
+
+                    checkIfOriginalDataExists()
+                    //让textarea显示相应的内容
+                }
+
                 $scope.dataSucessOfRequestTwice = 1
                 $scope.requestTwiceStatement = function(){
                     if(!$scope.requestContentReason){
@@ -1491,10 +1654,18 @@
                                     scope.dissentTxt = scope.dissentData[i].txt
                                     scope.statementStatus.i = i
                                 }else{
-                                    scope.dissentTxt = ""
-                                    scope.statement = scope.statementData
-                                    scope.statementStatus.i = 0
-                                    scope.statementStatus.name = "claim"
+
+                                    if(scope.lastStatement == 1){
+                                            //如果到了准结束的阶段,那么发送
+                                            submit()
+                                    }else{
+                                            //如果还没有到准结束的阶段那么阐述立論
+                                            scope.dissentTxt = ""
+                                            scope.statement = scope.statementData
+                                            scope.statementStatus.i = 0
+                                            scope.statementStatus.name = "claim"
+                                    }
+
                                 }
                         }else{
                             submit()
@@ -1562,8 +1733,6 @@
 
 
                     function draw(){
-
-
                         LASTX = LEFT
                         LASTY = TOP
                         for(var i = 0;i<scope.dissentData.length;i++){
@@ -1595,22 +1764,31 @@
 
                         LASTY += DISSENTANDLINESPACEY
 
-                        drawDottedLine(DOTTEDLINEX,LASTY,DOTTEDLINEX+DOTTEDWIDTH,LASTY)
 
-                        if(scope.LAN == 'JP'){
-                            drawText("ここから立論の部分",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
-                        }else{
-                            drawText("以下是原始阐述说明",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
-                        }
 
-                        drawDottedLine(DOTTEDLINEX+DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY,DOTTEDLINEX+2*DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY)
+                            //如果为非准结束阶段,那么是允许立論的,否则不允许立論
 
-                        appendRect(scope.statementData,0,CONSTRUCTX,LASTY+DOTTEDLINEANDCONSTRUCTSPACE,CONSTRUCTWIDTH,CONSTRUCTHEIGHT,"constructClaim")
-                        if(scope.statementData){
-                            d3.select("#constructClaim").style("display","block")
-                        }else{
-                            d3.select("#constructClaim").style("display","none")
-                        }
+                            if(scope.lastStatement != 1){
+
+
+                                drawDottedLine(DOTTEDLINEX,LASTY,DOTTEDLINEX+DOTTEDWIDTH,LASTY)
+
+                                if(scope.LAN == 'JP'){
+                                    drawText("ここから立論の部分",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+                                }else{
+                                    drawText("以下是原始阐述说明",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+                                }
+
+                                drawDottedLine(DOTTEDLINEX+DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY,DOTTEDLINEX+2*DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY)
+
+                                appendRect(scope.statementData,0,CONSTRUCTX,LASTY+DOTTEDLINEANDCONSTRUCTSPACE,CONSTRUCTWIDTH,CONSTRUCTHEIGHT,"constructClaim")
+                                if(scope.statementData){
+                                    d3.select("#constructClaim").style("display","block")
+                                }else{
+                                    d3.select("#constructClaim").style("display","none")
+                                }
+                            }
+
 
                     }
 
@@ -1693,7 +1871,7 @@
                         var div = _div.append("div")
                         div.attr("class","alert alert-warning  row")
                         div.attr("role","alert")
-                        div.attr("style","height: "+ h +"px; overflow: auto;margin-bottom:1px")
+                        div.attr("style","height: "+ h*0.6 +"px; overflow: auto;margin-bottom:1px")
 
 
                         var p = div.append("p")
@@ -1878,6 +2056,35 @@
         return {
             scope:false,
             link:function(scope,element){
+                var RECTWIDTH = 250
+                var RECTHEIGHT = 100
+                var LEFT = 50
+                var TOP = 50
+                var RECTSPACEH = 130  // claim->warrant->evidence之间的纵向距离
+                var RECTSPACEW = 10  // claim<--->warrant<---->evidence之间的横向错位距离
+                var INTERVALX = 10  // 左右的横向间隔
+                var INTERVALY = 30 // 左右相同轮次之间的纵向错位
+                var LASTX,LASTY
+                var svg = d3.select("#analysisMapSVG").append("svg")
+                svg.attr("width","100%")
+                svg.attr("height","2000px")
+                draw(scope.analysisMapInformation.res.data)
+
+                function draw(data){
+                    for(var i=0;i<data.length;i++){
+                        //先画阐述说明的分析结果
+                        paintFromData("construct",data[i].analysisData,data[i].position)
+                        //再画异议说明的分析结果
+                        paintFromData("dissentExplain",data[i].analysisDissentExplainData,data[i].position)
+                    }
+                }
+
+                function paintFromData(category,data,position){
+                        for(var i=0;i<data.length;i++){
+
+                        }
+                }
+
 
             },
             templateUrl:"/angularJSTemplate/public/analysisMapResult.html"
@@ -1893,7 +2100,7 @@
 
 
                 var RECTWIDTH = 450  //模块的长度
-                var RECTHEIGHT = 100  //模块的宽度
+                var RECTHEIGHT = 140  //模块的宽度
                 var LEFT = 50  //最开始模块距离左边的边距
                 var TOP = 50  //最开始模块距离顶端的边距
                 var SPACEX = 150 //左边模块和右边模块的横向间距
@@ -1957,7 +2164,7 @@
                 }
 
                 function appendRect(x,y,txt,position,type,dissent){
-
+                    if(!txt) return;
 
                     var foreignObject = svg.append("foreignObject")
                     foreignObject.attr("width",RECTWIDTH)
@@ -1979,7 +2186,7 @@
                     }else{
                         _div.attr("class","alert alert-success")
                     }
-                    _div.style("height",RECTHEIGHT+"px")
+                    _div.style("height",RECTHEIGHT*0.7+"px")
                     _div.style("width",RECTWIDTH+"px")
                     _div.style("overflow","auto")
                     _div.style("margin-bottom","1px")
@@ -2053,15 +2260,15 @@
         $scope.dissentData = []
 
         $scope.statementData = ""
-        //$scope.statementStatus = {name:"claim",i:0}
+        $scope.statementStatus = {name:"claim",i:0}
 
 
         $scope.conceptStatus = "analysis"
         $scope.conceptStatus = "statement"
 
-        $scope.dissentTxt = "aaa                                                                                      "  //在对质疑进行解释性说明的时候在左侧显示对那一段话有质疑
+        $scope.dissentTxt = "aaa"  //在对质疑进行解释性说明的时候在左侧显示对那一段话有质疑
 
-
+        $scope.totalNum = 1
 
     }
 

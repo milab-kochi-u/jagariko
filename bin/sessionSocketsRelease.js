@@ -36,7 +36,7 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
                     if(parseInt(_res[0].conPrepare) == 1 && parseInt(_res[0].proPrepare) == 1){
                         this.step(function(){
-                            mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{status:"start",preStatus:"wait",order:1}},this.hold(function(){
+                            mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{status:"start",preStatus:"wait",order:0}},this.hold(function(){
                                 socket.emit("prepareCompelete",{})
                                 socket.broadcast.emit("prepareCompelete",{})
                             }))
@@ -96,8 +96,8 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                     */
 
 
-
-                    if(_res[0].order < 3){
+                    /*
+                    if(_res[0].order < 1){
                         if(_res[0].status == "start" || _res[0].status == "lookup"){
                             _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
                         }else if(_res[0].status == "appeal"){
@@ -112,6 +112,35 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                             session.save()
                             return _update
                         }))
+                    }
+
+                    return _update
+                    */
+
+                    var totalNum = 1
+
+
+                    if(_res[0].status == "start"){
+                        _update = {$set:{status:"analysis",preStatus:_res[0].status}}
+                    }else if(_res[0].status == "lookup"){
+
+                        //检测是否结束
+
+                        if(_res[0].order < totalNum-1){
+                            //还没有结束
+                            _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
+                        }else{
+                            //这次阐述完后应该结束了
+                            _update = {$set:{status:"analysis",preStatus:_res[0].status,preFinish:true}}
+                            mongo.update("debateMembers",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{debateInvolve:false}},{multi: true},this.hold(function () {
+                                session.debateLogin.debateInvolve = false
+                                session.save()
+                                return _update
+                            }))
+                        }
+
+                    }else{
+                        _update = {$set:{status:"bunseki",preStatus:_res[0].status}}
                     }
 
                     return _update
@@ -168,16 +197,24 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
 
             var sendObj
             var order
-
+            var preFinish
             steps(function() {
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
                     order = _res[0].order
+                    preFinish = _res[0].preFinish
                     return  _res[0].status
                 }))
             },function(status){
 
                 if(status == "analysis"){
-                        var update = {$set:{preStatus:status,status:"check"}}
+                        if(preFinish){
+                            //如果时准结束阶段则在此次分析以后结束辩论
+                            var update = {$set:{preStatus:status,status:"finish",finish:true}}
+                        }else{
+                            //如果不是准结束结论,则继续process
+                            var update = {$set:{preStatus:status,status:"check"}}
+                        }
+
                 }else{
                         var update = {$set:{preStatus:status,status:"kentou"}}
                 }

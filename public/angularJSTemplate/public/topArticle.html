@@ -1,20 +1,27 @@
+
+
+
 <div id="topArticle" class="row" ng-if="LAN=='JP'">
-    <div class="row">
-        <div  class="panel panel-info">
-            <div class="panel-heading">
-
-            <span ng-click="topArticleChangeTab(0)">立論</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="row" >
 
 
-            <span ng-click="topArticleChangeTab(i+1)" ng-repeat="(i,val) in everyStatementData.dissentExplain">異議説明({{i+1}})&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-            <div class="panel-body" ng-show="topArticleChangeTabVal == 0" id="claimBody" >
-                <div class="alert alert-default" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>
+        <ul class="nav nav-tabs">
+            <li ng-click="topArticleChangeTab(0)" ng-class="selectedOrNot(0)" ng-if="everyStatementData.statementData" role="presentation"><a href="#">立論</a></li>
+            <li ng-click="topArticleChangeTab(i+1)" ng-class="selectedOrNot(i+1)" ng-repeat="(i,val) in everyStatementData.dissentExplain" role="presentation"><a href="#">異議説明{{i+1}}</a></li>
+        </ul>
+
+        <div  class="panel">
+
+            <div class="panel-body"  ng-show="topArticleChangeTabVal == 0" id="claimBody" >
+                <!--<div class="alert alert-default" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>-->
                 {{everyStatementData.statementData}}
             </div>
 
             <div class="panel-body" ng-show="topArticleChangeTabVal == (i+1)"  ng-repeat="(i,val) in everyStatementData.dissentExplain">
 
-                <div class="alert alert-success" role="alert">{{everyStatementData.dissentExplain[i].txt}}</div>
+
+
+                <div class="alert alert-success" role="alert" >{{everyStatementData.dissentExplain[i].txt}}</div>
                 <div class="alert alert-info" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>
 
             </div>
@@ -23,21 +30,27 @@
 </div>
 
 
-<div id="topArticle" class="row"  ng-if="LAN=='CN'">
+
+
+<div id="topArticle" class="row" ng-if="LAN=='CN'">
     <div class="row" >
-        <div  class="panel panel-info">
-            <div class="panel-heading">
-
-                <span ng-click="topArticleChangeTab(0)">阐述</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
-                <span ng-click="topArticleChangeTab(i+1)" ng-repeat="(i,val) in everyStatementData.dissentExplain">质疑的说明({{i+1}})&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+        <ul class="nav nav-tabs">
+            <li ng-click="topArticleChangeTab(0)" ng-class="selectedOrNot(0)" role="presentation"><a href="#">阐述</a></li>
+            <li ng-click="topArticleChangeTab(i+1)" ng-class="selectedOrNot(i+1)" ng-repeat="(i,val) in everyStatementData.dissentExplain" role="presentation"><a href="#">质疑的说明{{i+1}}</a></li>
+        </ul>
+
+        <div  class="panel">
+
             <div class="panel-body"  ng-show="topArticleChangeTabVal == 0" id="claimBody" >
                 <!--<div class="alert alert-default" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>-->
                 {{everyStatementData.statementData}}
             </div>
 
             <div class="panel-body" ng-show="topArticleChangeTabVal == (i+1)"  ng-repeat="(i,val) in everyStatementData.dissentExplain">
+
+
 
                 <div class="alert alert-success" role="alert" >{{everyStatementData.dissentExplain[i].txt}}</div>
                 <div class="alert alert-info" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>

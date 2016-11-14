@@ -1,12 +1,14 @@
 <top-article></top-article>
 
-<div>
+<div class="row">
     <info-and-analysis-map></info-and-analysis-map>
 </div>
 
 
 <div ng-if="debateInfo.position == 2">
-    <exam-analysis-result></exam-analysis-result>
+    <div class="row">
+        <exam-analysis-result></exam-analysis-result>
+    </div>
 </div>
 
 <div class="row" ng-if="LAN == 'JP'">
@@ -21,3 +23,5 @@
         <div class="alert alert-success" role="alert">分析结果已经发送,对方正在核对,稍稍等待</div>
     </div>
 </div>
+
+
