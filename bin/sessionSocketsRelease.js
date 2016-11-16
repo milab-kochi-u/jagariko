@@ -314,58 +314,7 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
             //    0 login
             //    1 entering
             //    2 debating
-/*
-            steps(function(){
 
-            },function(){
-                mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
-                    var pro = result[0].pro
-                    var con = result[0].con
-                    var status = result[0].status
-                    if(status == "wait"){
-                        //比赛还没有开始
-
-                        if((position == 1 && !con) || (position == 2 && !pro)){
-                            mongo.remove("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
-                                delete session.debateLogin.num
-                                delete session.debateLogin.position
-                                delete session.debateLogin.rNum
-                                session.save()
-
-                                mongo.update("debateMembers",{username:session.debateLogin.username,group:session.debateLogin.group},{$set:{debateInvolve:false},$unset:{num:1,rNum:1}},{},this.hold(function(){
-
-                                }))
-
-                            }))
-                        }else{
-                            mongo.update("debateMembers",{username:session.debateLogin.username,group:session.debateLogin.group},{$set:{debateInvolve:false},$unset:{num:1,rNum:1}},{},this.hold(function(){
-                                if(position==1){
-                                    var update = {$unset:{pro:1,proPrepare:1}}
-                                }else{
-                                    var update = {$unset:{con:1,conPrepare:1}}
-                                }
-
-                                mongo.update("debateStatus",{num:num,rNum:rNum},update,{},this.hold(function(result){
-                                    delete session.debateLogin.num
-                                    delete session.debateLogin.position
-                                    delete session.debateLogin.rNum
-                                    session.save()
-                                }))
-                            }))
-                        }
-
-
-                    }else{
-                        //比赛已经开始了
-
-
-                    }
-
-
-
-                }))
-            })()
-*/
         });
 
     })

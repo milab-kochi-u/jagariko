@@ -1,0 +1,46 @@
+<div class="row">
+    <p>
+        <h1>グループ管理ページ</h1>
+    </p>
+</div>
+<div class="row">
+
+    <table class="table">
+        <tr>
+            <td class="active">No</td>
+            <td class="success">グループ名</td>
+            <td class="warning">グループ説明</td>
+            <td class="danger">編集</td>
+            <td class="info" >削除</td>
+        </tr>
+
+        <tr ng-repeat="(i,val) in groupList">
+            <td class="active">{{i}}</td>
+            <td class="success">{{val.name}}</td>
+            <td class="warning">{{val.desc}}</td>
+            <td class="danger"><button class="btn btn-warning">編集</button></td>
+            <td class="info"><button class="btn btn-danger" ng-click="delete(val._id)">削除</buttonc></td>
+        </tr>
+    </table>
+
+        </tr>
+    </table>
+
+</div>
+<div class="row">
+    <form name="groupform">
+        <div class="form-group">
+            <label>グループ名 </label>
+            <input  class="form-control" name="name" ng-model="name"  placeholder="グループ名" required>
+        </div>
+        <div class="form-group">
+            <label for="">グループ説明</label>
+            <input class="form-control" ng-model="desc"  name="desc" id="" placeholder="グループ説明" required>
+        </div>
+    </form>
+        <button  class="btn btn-default" ng-click="_submit()">登録</button>
+
+    <div ng-show="groupform.name.$error.required">グループ名を入力してください</div>
+    <div ng-show="groupform.desc.$error.required">グループ説明名を入力してください</div>
+
+</div>

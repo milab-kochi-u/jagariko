@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <link rel="stylesheet" href="/admin/simple-sidebar.css">
+    <![endif]-->
+    <script src="/release/angular.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-route.min.js"></script>
+
+
+</head>
+<body ng-app="myApp">
+
+<div id="wrapper" ng-controller="myController">
+
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li class="sidebar-brand">
+                <a href="#">
+                    管理ページ
+                </a>
+            </li>
+            <li>
+                <a href="#" ng-click="changeTab('group')">グループ管理</a>
+            </li>
+            <li>
+                <a href="#" ng-click="changeTab('member')">メンバー管理</a>
+            </li>
+
+            <li>
+                <a href="#" ng-click="changeTab('theme')">テーマ管理</a>
+            </li>
+
+        </ul>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12">
+                    <group ng-if="changeTabVal == 'group'"></group>
+                    <member ng-if="changeTabVal == 'member'"></member>
+                    <theme ng-if="changeTabVal == 'theme'"></theme>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /#page-content-wrapper -->
+
+</div>
+<!-- /#wrapper -->
+
+
+<script>
+
+    var myApp = angular.module("myApp",[])
+    var myController = myApp.controller("myController",function($scope,myPost){
+                $scope.changeTabVal = "group"
+
+        $scope.changeTab = function(name){
+                $scope.changeTabVal = name
+        }
+
+
+        $scope.getGroupList = function(){
+            myPost.postData("/admin/getGroupList",{}).then(function(res){
+                $scope.groupList = res.data.data
+            })
+        }
+
+
+        $scope.getMembersList = function(){
+            myPost.postData("/admin/getMembersList",{}).then(function(res){
+                console.log(res.data)
+                $scope.membersList = res.data.data
+            })
+        }
+
+        $scope.getThemesList = function(){
+            myPost.postData("/admin/getThemesList",{}).then(function(res){
+                console.log(res.data)
+                $scope.themesList = res.data.data
+            })
+        }
+
+    })
+
+
+    myApp.factory("myPost",function($http){
+        return{
+            postData:function(url,data){
+                return $http.post(url,data).success(function(res){
+                    return res;
+                })
+            }
+        }
+    })
+
+
+
+    myApp.directive("group",function(myPost){
+        return {
+            scope:false,
+            link:function(scope){
+                scope._submit = function () {
+                    var name = scope.name
+                    var desc = scope.desc
+                    if(!name || !desc) return;
+
+                    myPost.postData("/admin/increaseGroup",{name:name,desc:desc}).then(function(res){
+                        console.log(res)
+                        scope.getGroupList()
+                    })
+                }
+
+                scope.delete = function(_id){
+                    myPost.postData("/admin/deleteGroup",{_id:_id}).then(function(res){
+                        if(res.error == 1) alert(res.msg)
+                        scope.getGroupList()
+                    })
+                }
+
+                scope.getGroupList()
+
+            },
+            templateUrl:"/angularJSTemplate/admin/group.html"
+        }
+    })
+
+    myApp.directive("member",function(myPost){
+        return {
+            scope:false,
+            link:function(scope,element){
+                scope.getMembersList()
+                scope._submit = function(){
+                    var name = scope.name
+                    var password = scope.name
+                    var group = scope.group
+
+                    if(!name || !group || !password){
+                        return;
+                    }
+
+                    myPost.postData("/admin/increaseMembers",{name:name,password:password,group:group}).then(function(res){
+                        scope.getMembersList()
+                    })
+
+                }
+
+
+
+                scope.delete = function(_id){
+                    myPost.postData("/admin/deleteMembers",{_id:_id}).then(function(res){
+                        if(res.error == 1) alert(res.msg)
+                        scope.getMembersList()
+                    })
+                }
+            },
+            templateUrl:"/angularJSTemplate/admin/member.html"
+        }
+    })
+
+
+    myApp.directive("theme",function(myPost){
+        return {
+            scope:false,
+            link:function(scope,element){
+                scope.getThemesList()
+
+
+                scope.editVal = 0
+                //表单处于添加状态
+
+                scope._submit = function(){
+                    var theme = scope.theme
+                    var desc = scope.desc
+                    var group = scope.group
+
+                    if(!theme || !group || !desc){
+                        return;
+                    }
+
+                    myPost.postData("/admin/increaseThemes",{theme:theme,desc:desc,group:group}).then(function(res){
+                        scope.getThemesList()
+                    })
+
+                }
+
+
+                scope._update = function(){
+                    var theme = scope.themeVal
+                    var desc = scope.descVal
+                    var group = scope.groupVal
+
+
+
+                    if(!theme || !group || !desc){
+                        return;
+                    }
+
+                    myPost.postData("/admin/updateThemes",{_id:scope.edit_id,theme:theme,desc:desc,group:group}).then(function(res){
+                        scope.getThemesList()
+                    })
+
+                }
+
+
+
+                scope.delete = function(_id){
+                    myPost.postData("/admin/deleteThemes",{_id:_id}).then(function(res){
+                        if(res.error == 1) alert(res.msg)
+                        scope.getThemesList()
+                    })
+                }
+
+
+
+                scope._edit = function(_id){
+
+                        myPost.postData("/admin/getThemes",{_id:_id}).then(function(res){
+
+                            if(res.data.error == 1) alert(res.msg)
+                            if(res.data.error == 0){
+                                scope.editVal = 1
+                                scope.themeVal = res.data.data.theme
+                                scope.groupVal = res.data.data.group
+                                scope.descVal = res.data.data.desc
+                                scope.edit_id = _id
+                                //表单处于编辑状态
+                            }
+
+                        })
+                }
+
+                scope.back = function(){
+                    scope.editVal = 0
+                }
+            },
+            templateUrl:"/angularJSTemplate/admin/theme.html"
+        }
+    })
+</script>
+</body>
+</html>
+

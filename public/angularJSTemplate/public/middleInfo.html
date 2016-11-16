@@ -1,11 +1,20 @@
 <div class="row" id="middleInfo" ng-if="LAN=='JP'">
     <div class="row">
         <div  class="panel panel-info">
-            <div class="panel-heading"><span>試合の情報</span></div>
+            <div class="panel-heading" style="height:40px;">
+                <div class="pull-left">
+                    <span>試合の情報</span>
+                </div>
+
+                <div class="pull-right">
+                    <a href="/release/group">戻る</a>
+                    <a href="/release/logout">ログアウト</a>
+                    <a ng-click="leave()">退室</a>
+                </div>
+            </div>
             <div class="panel-body">
 
                 <info-table></info-table>
-
                 <div class="row pull-right" ng-if="debateInfo.proPrepare != 1 || debateInfo.conPrepare != 1" style="margin:0 auto">
                     <button type="button" class="btn btn-default btn-lg" ng-click="prepare()">
                         <span ng-if="debateInfo.position == 1 && debateInfo.proPrepare !=1">準備</span>

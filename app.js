@@ -6,11 +6,10 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 
-var debate = require('./routes/debate');
-var _debate = require('./routes/_debate');
-var debateCN = require("./routes/debate_cn.js")
 var release = require("./routes/release.js")
 var releaseCN = require("./routes/releaseCN.js")
+var admin = require("./routes/admin.js")
+
 
 var ECT = require('ect'); // ECT 読み込み
 
@@ -55,12 +54,10 @@ app.use(session({ secret: 'secret', store: sessionStore }));
 app.cookieParser = cookieParser;
 app.sessionStore = sessionStore;
 
-
-app.use('/debate',debate);
-app.use('/_debate',_debate);
-app.use("/debateCN",debateCN)
 app.use("/release",release)
 app.use("/releaseCN",releaseCN)
+app.use("/admin",admin)
+
 
 
 // catch 404 and forward to error handler

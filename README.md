@@ -80,3 +80,19 @@ statementData //陈述意见时立論的主管变量
 dissentExplain  //异议说明时陈述时的主管明亮
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+https://startbootstrap.com/template-overviews/simple-sidebar/
+

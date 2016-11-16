@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/release/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="/release/bootstrap-theme.min.css" >
+    <![endif]-->
+    <script src="/release/angular.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/tmp/jquery-2.2.4.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="/release/bootstrap.min.js" ></script>
+    <script src="/release/ui-bootstrap-tpls-2.2.0.min.js"></script>
+    <title>groupNew</title>
+</head>
+<body ng-app="myApp">
+<div class="container"  ng-controller="myController">
+
+
+    <script type="text/ng-template" id="ruleConfirmCtrl.html">
+        <div class="modal-header">
+            <h3 class="modal-title" >{{title}}</h3>
+        </div>
+        <div class="modal-body" >
+
+            <div class="row" >
+               <div class="col-sm-offset-1 col-sm-3">立場</div>
+               <div class="col-sm-6">
+                   <label>
+                       <input type="radio" ng-if="positionDisabled == 1" disabled   ng-model="position" name="position"  value="1" >
+                       <input type="radio" ng-if="positionDisabled != 1"   ng-model="position" name="position"  value="1" >
+                        賛成側
+                   </label>
+
+                   <label>
+                       <input type="radio" ng-model="position" name="position" value="2" >
+                       反対側
+                   </label>
+               </div>
+           </div>
+
+                <hr/>
+
+            <div class="row">
+                <div class="col-sm-offset-1 col-sm-3">時間制限</div>
+                <div class="col-sm-6">
+                    <label>
+                        <input type="radio" ng-model="timeLimit" ng-if="timeLimitDisabled == 1" disabled name="timeLimit" value="1" >
+                        <input type="radio" ng-model="timeLimit" ng-if="timeLimitDisabled != 1"  name="timeLimit" value="1" >
+                        ある
+                    </label>
+
+                    <label>
+                        <input type="radio" ng-model="timeLimit" ng-if="timeLimitDisabled == 0" disabled  name="timeLimit" value="0" >
+                        <input type="radio" ng-model="timeLimit" ng-if="timeLimitDisabled != 0"   name="timeLimit" value="0" >
+                        なし
+                    </label>
+                </div>
+            </div>
+
+
+            <div class="row" ng-if="timeLimit=='1'">
+                <div class="col-sm-6 col-sm-offset-4">
+                    <select ng-model="timeLimitVal" class="form-control"  >
+                        <option value="1">1時間</option>
+                        <option value="2">2時間</option>
+                        <option value="3">3時間</option>
+                        <option value="4">4時間</option>
+                        <option value="5">1日</option>
+                    </select>
+                </div>
+
+                <div class="row col-sm-11 col-sm-offset-1" style="color:red">
+                    時間制限がある場合、時間制限いないに反応がない方は自動的に降参に判定される
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal-footer" ng-if="status == 'newRoom'">
+            <button class="btn btn-primary" type="button" ng-click="ok()">作る</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">締める</button>
+        </div>
+
+        <div class="modal-footer" ng-if="status == 'participate'">
+            <button class="btn btn-primary" type="button" ng-click="ok()">参加</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">締める</button>
+        </div>
+
+    </script>
+
+
+    <div class="row">
+
+
+        <div>
+
+            <label>
+                <input type="checkbox"> 全て
+            </label>
+
+            <label>
+                <input type="checkbox"> テーマ
+            </label>
+
+
+            <label>
+                <input type="checkbox"> 討論中
+            </label>
+
+            <label>
+                <input type="checkbox"> 終了
+            </label>
+
+            <label>
+                <input type="checkbox"> 自分
+            </label>
+
+        </div>
+
+
+        <div class="row col-sm-8">
+
+
+            <div style="height:800px;overflow:auto">
+
+                <div class="panel panel-default" ng-repeat="val in themes">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{val.theme}}</h3>
+                    </div>
+                    <div class="panel-body">
+
+                        <div style="height:60px">
+                            <div class="pull-left">
+
+                                <label>
+                                    <input type="checkbox"> 全て
+                                </label>
+
+                                <label>
+                                    <input type="checkbox"> テーマ
+                                </label>
+
+
+                                <label>
+                                    <input type="checkbox"> 討論中
+                                </label>
+
+
+
+                                <label>
+                                    <input type="checkbox"> 終了
+                                </label>
+
+                                <label>
+                                    <input type="checkbox"> 自分
+                                </label>
+
+
+                            </div>
+
+                            <div class="pull-right">
+                                <a  ng-click="openRoom(val.num,val.theme)" class="btn btn-info ">
+                                    <span class="glyphicon glyphicon-floppy-save"></span><br>新しいルームの作成
+                                </a>
+
+                            </div>
+                        </div>
+
+                        <hr/>
+
+                        <div>
+                            <p>討論中のルーム</p>
+                        </div>
+                        <div style="height:110px" ng-repeat="_val in val.debating">
+                            <table class="table table-condensed">
+                                <tr class="active"><td class="info">賛成側</td><td class="info">{{_val.pro}}</td> <td class="success">反対側</td><td class="success">{{_val.con}}</td> <td>总次数</td><td>1次</td><td>时间限制</td><td ng-show="_val.timeLimit == 1">ある</td></tr>
+                            </table>
+
+                            <div class="pull-right">
+                                <span  ng-if="_val.status == 'wait'">
+                                    <span ng-if="_val.pro != username && _val.con != username">
+                                    <a ng-if="_val.pro"  ng-click="participateRoom(_val.num,_val.rNum,2,_val.timeLimit)" class="btn btn-success ">
+                                        <span class="glyphicon glyphicon-floppy-save"></span><br>反対として参加
+                                    </a>
+
+                                    <a ng-if="_val.con"  ng-click="participateRoom(_val.num,_val.rNum,1,_val.timeLimit)" class="btn btn-success ">
+                                        <span class="glyphicon glyphicon-floppy-save"></span><br>賛成として参加
+                                    </a>
+
+                                    <a  ng-click="participateRoom(_val.num,_val.rNum,0)" class="btn btn-default ">
+                                        <span class="glyphicon glyphicon-floppy-save"></span><br>オブザーバーとして参加
+                                    </a>
+                                    </span>
+
+                                    <span ng-if="_val.pro == username || _val.con == username">
+                                        <a  ng-click="backToRoom(_val._id)" class="btn btn-default ">
+                                        <span class="glyphicon glyphicon-floppy-save">この討論に戻る</span><br>
+                                        </a>
+                                    </span>
+                                </span>
+
+                                <span  ng-if="_val.status != 'wait'">
+                                    <span ng-if="_val.pro != username && _val.con != username">
+                                        <a  ng-click="participateRoom(_val.num,_val.rNum,0)" class="btn btn-default ">
+                                            <span class="glyphicon glyphicon-floppy-save"></span><br>オブザーバーとして参加
+                                        </a>
+                                    </span>
+
+
+                                    <span ng-if="_val.pro == username || _val.con == username">
+                                        <a  ng-click="backToRoom(_val._id)" class="btn btn-default ">
+                                        <span class="glyphicon glyphicon-floppy-save">この討論に戻る</span><br>
+                                        </a>
+                                    </span>
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+
+
+
+
+                        <hr/>
+                        <div>
+                            <p>終了したルーム</p>
+                        </div>
+
+
+                        <div style="height:110px" ng-repeat="_val in val.finish">
+                            <table class="table table-condensed">
+                                <tr class="active"><td class="info">賛成側</td><td class="info">{{_val.pro}}</td> <td class="success">反対側</td><td class="success">{{_val.con}}</td> <td>总次数</td><td>1次</td><td>时间限制</td><td ng-show="val.config.timeLimit == 0">无</td><td ng-show="val.config.timeLimit!=0">dddd</td></tr>
+                            </table>
+
+                            <div class="pull-right">
+                                <a  ng-click="participateRoom(val.num,val.rNum,2)" class="btn btn-default ">
+                                    <span class="glyphicon glyphicon-floppy-save"></span><br>振り返る
+                                </a>
+
+                            </div>
+                        </div>
+
+
+
+
+
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+        </div>
+
+
+
+
+        <div class="row col-sm-4">
+
+
+
+            <div class="panel panel-default" >
+
+                <div class="panel-body">
+
+                    <div class="row">
+                        <p class="col-sm-12">{{username}}さん:おはようございます</p>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-sm-4">
+                            <img src="" alt="" width="80" height="80">
+                        </div>
+                        <div class="col-sm-4">
+                            <p>状態:討論中</p>
+                            <p>勝利:4</p>
+                            <p>負け:4</p>
+                        </div>
+
+                    </div>
+
+
+                    <hr/>
+                    <div class="row ">
+                        <p class="col-sm-12 " >また終わっていない討論</p>
+                    </div>
+
+
+                        <uib-accordion >
+                        <div uib-accordion-group ng-class="getPosition(val.pro,val.con)" ng-if="!val.finish" heading="{{val.title}}" ng-repeat="val in getCurrentSelfDebateInfoVal">
+                            <p>
+                            賛成側:{{val.pro}}
+                            反対側:{{val.con}}
+                            </p>
+
+                            <p>
+                            状態:{{val.status}}
+                            </p>
+                            <p>
+                            総回数:1回
+                            </p>
+                            <p>
+                            今の段階:{{val.order}}回
+                            </p>
+                            <p>
+                            時間制限:{{val.timeLimit}}
+                            </p>
+                            <p>
+                                <a ng-click="backToRoom(val._id)">ルームに戻る</a>
+                            </p>
+                        </div>
+                        </uib-accordion>
+
+                        <!--
+                        <table class="table">
+                            <tr ng-repeat="(i,val) in getCurrentSelfDebateInfoVal" ng-class="getPosition(val.pro,val.con)" >
+                                <td>{{val.title}}</td>
+                            </tr>
+                        </table>
+                        -->
+
+                    <hr/>
+                    <div class="row ">
+                        <p class="col-sm-12 " >終わっている討論</p>
+                    </div>
+
+
+                    <uib-accordion >
+                        <div uib-accordion-group ng-class="getPosition(val.pro,val.con)" ng-if="val.finish" heading="{{val.title}}" ng-repeat="val in getCurrentSelfDebateInfoVal">
+                            <p>
+                                賛成側:{{val.pro}}
+                                反対側:{{val.con}}
+                            </p>
+
+                            <p>
+                                状態:{{val.status}}
+                            </p>
+                            <p>
+                                総回数:1回
+                            </p>
+                            <p>
+                                今の段階:{{val.order}}回
+                            </p>
+                            <p>
+                                時間制限:{{val.timeLimit}}
+                            </p>
+                        </div>
+                    </uib-accordion>
+
+
+
+                    <div class="row">
+                        <p class="col-sm-12 " >
+                            <a class="pull-right" href="/release/logout">ログアウト</a>
+                        </p>
+
+                    </div>
+
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+
+
+<script>
+
+
+    var myApp = angular.module("myApp",['ui.bootstrap']);
+
+
+    myApp.factory("myPost",function($http){
+        return{
+            postData:function(url,data){
+                return $http.post(url,data).success(function(res){
+                    return res;
+                })
+            }
+        }
+    })
+
+    myApp.factory("getUserInformation",function($http,myPost,$q){
+        return{
+            get:function(){
+
+                var deferred = $q.defer();
+                myPost.postData("/release/getUserInformation").then(function(_res){
+
+                    if(_res.data){
+                        console.log(_res)
+                        var obj = {}
+                        obj.username = _res.data.data.username
+                        obj.debateInvolve = _res.data.data.debateInvolve
+                        obj.group = _res.data.data.group
+                        obj.num = _res.data.data.num
+                        obj.rNum = _res.data.data.rNum
+                        obj.status = _res.data.data.rNum
+                        obj.LAN = _res.data.data.LAN
+                        deferred.resolve({err:0,msg:"data acquired",obj:obj});
+                    }else{
+                        deferred.reject({err:1,msg:"data not acquired"});
+                    }
+
+                })
+
+                return deferred.promise;
+            }
+
+        }
+    })
+
+
+    myApp.controller("myController",function($scope,myPost,getUserInformation,$uibModal){
+
+        $scope.openRoom = function(num,title){
+            $uibModal.open({
+                controller: 'ruleConfirmCtrl',
+                templateUrl: 'ruleConfirmCtrl.html',
+                resolve: {
+                    items: function () {
+                        return {num:num,title:title,status:"newRoom"}
+                    }
+                }
+            })
+        }
+
+        $scope.participateRoom = function(num,rNum,position,timeLimit){
+            $uibModal.open({
+                controller: 'ruleConfirmCtrl',
+                templateUrl: 'ruleConfirmCtrl.html',
+                resolve: {
+                    items: function () {
+                        return {num:num,rNum:rNum,position:position,status:"participate",timeLimit:timeLimit}
+                    }
+                }
+            })
+
+        }
+
+
+
+        $scope.backToRoom = function(_id){
+            myPost.postData("/release/backToRoom",{_id:_id}).then(function(_res){
+                    if(_res.data.error == 1){
+                        alert(_res.data.msg)
+                    }else{
+                        if($scope.LAN == 'JP'){
+                            location = "/release/chat"
+                        }else{
+                            location = "/releaseCN/chat"
+                        }
+
+                    }
+            })
+        }
+
+        $scope.getPosition = function(pro,con){
+            if(pro == $scope.username){
+                return "panel-info"
+            }
+
+            if(con == $scope.username){
+                return "panel-success"
+            }
+        }
+
+        getUserInformation.get().then(function(msg){
+            $scope.LAN = msg.obj.LAN
+            $scope.group = msg.obj.group
+            $scope.username = msg.obj.username
+        })
+
+
+        myPost.postData("/release/getListInformation",{}).then(function(_res){
+            console.log(_res)
+            $scope.themes = _res.data
+        })
+
+
+        myPost.postData("/release/getCurrentSelfDebateInfo",{}).then(function(_res){
+            $scope.getCurrentSelfDebateInfoVal = _res.data.data
+        })
+
+    })
+
+
+
+    myApp.controller('ruleConfirmCtrl', function ($scope,$uibModalInstance,items,myPost) {
+
+        $scope.title = items.title
+        $scope.timeLimit = '0'
+        $scope.timeLimitVal = '2'
+        if(items.status ==  "newRoom"){
+            $scope.position = 1
+        }
+
+        if(items.status == "participate"){
+            $scope.position = items.position
+
+            if(items.position == 1){
+                //说明position=2的位置已经被人占据了,这个时候position=1是不能被选择的
+                $scope.positionDisabled = 2
+            }else{
+                $scope.positionDisabled = 1
+            }
+
+            $scope.timeLimit = items.timeLimit
+            if(parseInt(items.timeLimit) == 0){
+                //房主没有设时间限制,因此时间限制有的选项应该被禁掉
+                $scope.timeLimitDisabled = 1
+            }else{
+                $scope.timeLimitDisabled = 0
+            }
+
+
+
+
+        }
+
+        $scope.status = items.status
+        $scope.ok = function () {
+
+            if(items.status == "newRoom"){
+                myPost.postData("/release/createNewRoom",{title:items.title,num:parseInt(items.num),position:parseInt($scope.position),timeLimit:parseInt($scope.timeLimit),timeLimitVal:parseInt($scope.timeLimitVal)}).then(function(_res){
+                    if(parseInt(_res.data.err) == 0){
+                        if($scope.LAN == 'JP'){
+                            location = "/release/chat"
+                        }else{
+                            location = "/releaseCN/chat"
+                        }
+
+                    }else{
+
+                    }
+                })
+            }
+
+            if(items.status == "participate"){
+                myPost.postData("/release/participateRoom",{num:items.num,rNum:items.rNum,position:parseInt(items.position)}).then(function(_res){
+                    if(parseInt(_res.data.err) == 0){
+                        if($scope.LAN == 'JP'){
+                            location = "/release/chat"
+                        }else{
+                            location = "/releaseCN/chat"
+                        }
+                    }else{
+                        alert(_res.data.msg)
+                    }
+                })
+            }
+
+
+
+            //$uibModalInstance.close();
+        };
+
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+    });
+
+</script>
+</html>

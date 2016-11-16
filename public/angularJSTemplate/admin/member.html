@@ -1,0 +1,55 @@
+<div class="row">
+    <p>
+        <h1>メンバー管理ページ</h1>
+    </p>
+</div>
+<div class="row">
+
+    <table class="table">
+        <tr>
+            <td class="active">No</td>
+            <td class="success">名前</td>
+            <td class="warning">グループ</td>
+            <td class="danger">試合状態</td>
+            <td class="info" >削除</td>
+        </tr>
+
+        <tr ng-repeat="(i,val) in membersList">
+            <td class="active">{{i}}</td>
+            <td class="success">{{val.username}}</td>
+            <td class="warning">{{val.group}}</td>
+            <td class="danger"><button class="btn btn-warning"><span ng-if="val.debateInvolve">討論中</span><span ng-if="!val.debateInvolve">自由</span></button></td>
+            <td class="info"><button class="btn btn-danger" ng-click="delete(val._id)">削除</buttonc></td>
+        </tr>
+    </table>
+
+    </tr>
+    </table>
+
+</div>
+<div class="row">
+    <form name="groupform">
+        <div class="form-group">
+            <label>名前 </label>
+            <input  class="form-control" name="name" ng-model="name"  placeholder="名前" required>
+        </div>
+
+        <div class="form-group">
+            <label>パスワード </label>
+            <input  class="form-control" name="password" ng-model="password"  placeholder="パスワード" required>
+        </div>
+
+        <div class="form-group" required>
+            <label for="">所属グループ</label>
+            <select name="group" ng-model="group" class="form-control">
+                <option ng-repeat="val in groupList" value="{{val.name}}">{{val.name}}</option>
+            </select>
+        </div>
+    </form>
+    <button  class="btn btn-default" ng-click="_submit()">登録</button>
+
+    <div ng-show="groupform.name.$error.required">名前を入力してください</div>
+    <div ng-show="groupform.password.$error.required">パスワードを入力してください</div>
+    <div ng-show="groupform.group.$error.required">所属グループを入力してください</div>
+
+</div>

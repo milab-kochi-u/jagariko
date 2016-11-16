@@ -29,7 +29,6 @@
 <body ng-app="myApp" ng-init="LAN='JP'">
 
 <div  class="container" ng-controller="myController">
-    <my-navy></my-navy>
     <wait-debate ng-if="statusController.waitDebate"></wait-debate>
     <start-debate ng-if="statusController.startDebate"></start-debate>
     <analysis-debate ng-if="statusController.analysisDebate"></analysis-debate>
@@ -401,6 +400,7 @@
         }
 
 
+
     });
 
 
@@ -446,7 +446,7 @@
     })
 
 
-    myApp.directive("middleInfo",function(coreSocket){
+    myApp.directive("middleInfo",function(coreSocket,myPost){
         return{
             scope:false,
             link:function(scope,element){
@@ -454,6 +454,18 @@
                     coreSocket.emit("prepare",{})
                 }
 
+
+                scope.leave = function(){
+                    myPost.postData("/release/leaveRoom").then(function(res){
+                        if(res.data.err == 0){
+                            if(scope.LAN == 'JP'){
+                                location = "/release/group"
+                            }else{
+                                location = "/releaseCN/group"
+                            }
+                        }
+                    })
+                }
             },
             templateUrl:"/angularJSTemplate/public/middleInfo.html"
         }

@@ -15,8 +15,6 @@
 <div class="container" ng-app="myApp" ng-controller="myForm" >
 
 
-
-    <login-navy></login-navy>
     <div class="row">
     <form name="myForm" ng-show="LAN == 'JP'">
 
@@ -30,6 +28,24 @@
             <input type="password" ng-model="password" name="password" class="form-control" required placeholder="">
             <div class="help-block with-errors" ng-show="myForm.password.$error.required">パスワードを入力してください</div>
         </div>
+
+
+        <div class="form-group" >
+            <label for="">所属グループ</label>
+            <select name="group" ng-model="group" class="form-control" >
+                <option ng-repeat="val in groupList" required value="{{val.name}}">{{val.name}}</option>
+            </select>
+            <div class="help-block with-errors" ng-show="myForm.group.$error.required">所属グループを選んでください</div>
+        </div>
+
+
+        <div class="form-group">
+
+
+        </div>
+
+
+
 
         <button type="button" class="btn btn-default" ng-click="submit()" >送信</button>
     </form>
@@ -50,6 +66,14 @@
             <div class="help-block with-errors" ng-show="myForm.password.$error.required">请输入您的密码</div>
         </div>
 
+        <div class="form-group" >
+            <label for="">所属グループ</label>
+            <select name="group" ng-model="group" class="form-control" >
+                <option ng-repeat="val in groupList" required value="{{val.name}}">{{val.name}}</option>
+            </select>
+            <div class="help-block with-errors" ng-show="myForm.group.$error.required">所属グループを選んでください</div>
+        </div>
+
         <button type="button" class="btn btn-default" ng-click="submit()" >提交</button>
     </form>
     </div>
@@ -57,6 +81,8 @@
 
 
 </div>
+
+
 
 </body>
 
@@ -126,10 +152,11 @@
         }
     })
 
+
     angular.factory("myPost",function($http){
         return{
-            postData:function(data){
-                return $http.post("/releaseCN/loginPost",data).success(function(res){
+            postData:function(url,data){
+                return $http.post(url,data).success(function(res){
                     return res;
                 })
             }
@@ -146,8 +173,16 @@
         }
 
 
+        $scope.getGroupList = function(){
+            myPost.postData("/admin/getGroupList",{}).then(function(res){
+                $scope.groupList = res.data.data
+            })
+        }
+
+        $scope.getGroupList()
+
         $scope.submit = function(){
-            myPost.postData({username:$scope.username,password:$scope.password}).then(function(res){
+            myPost.postData("/release/loginPost",{username:$scope.username,password:$scope.password,group:$scope.group}).then(function(res){
                 if(parseInt(res.data.error) == 0){
                     $timeout(function(){
 

@@ -4,13 +4,12 @@
 <div id="topArticle" class="row" ng-if="LAN=='JP'">
     <div class="row" >
 
-
         <ul class="nav nav-tabs">
             <li ng-click="topArticleChangeTab(0)" ng-class="selectedOrNot(0)" ng-if="everyStatementData.statementData" role="presentation"><a href="#">立論</a></li>
             <li ng-click="topArticleChangeTab(i+1)" ng-class="selectedOrNot(i+1)" ng-repeat="(i,val) in everyStatementData.dissentExplain" role="presentation"><a href="#">異議説明{{i+1}}</a></li>
         </ul>
 
-        <div  class="panel">
+        <div  class="panel" ng-if="everyStatementData">
 
             <div class="panel-body"  ng-show="topArticleChangeTabVal == 0" id="claimBody" >
                 <!--<div class="alert alert-default" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>-->
@@ -31,7 +30,6 @@
 
 
 
-
 <div id="topArticle" class="row" ng-if="LAN=='CN'">
     <div class="row" >
 
@@ -41,7 +39,7 @@
             <li ng-click="topArticleChangeTab(i+1)" ng-class="selectedOrNot(i+1)" ng-repeat="(i,val) in everyStatementData.dissentExplain" role="presentation"><a href="#">质疑的说明{{i+1}}</a></li>
         </ul>
 
-        <div  class="panel">
+        <div  class="panel" ng-if="everyStatementData">
 
             <div class="panel-body"  ng-show="topArticleChangeTabVal == 0" id="claimBody" >
                 <!--<div class="alert alert-default" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>-->

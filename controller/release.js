@@ -6,6 +6,7 @@
 var mongo = require("../model/mongo.js");
 var tool = require("./tool.js");
 var steps = require('ocsteps');
+var mongodb = require("mongodb")
 
 
 
@@ -37,14 +38,20 @@ module.exports = {
         res.render("release/login.html")
     },
 
+    logoutController:function(req,res){
+        delete req.session.debateInfo
+        res.redirect("login")
+    },
+
     loginPostController:function(req,res){
 
         var _username = req.body.username;
         var _password = req.body.password;
+        var _group = req.body.group
 
         steps(
             function(){
-                mongo.find("debateMembers",{username:_username,password:_password},{},this.hold(function(result){
+                mongo.find("debateMembers",{username:_username,password:_password,group:_group},{},this.hold(function(result){
                     if(result.length<=0){res.end(JSON.stringify({error:1,msg:"username or password not correct"}));this.terminate();}
 
 
@@ -86,6 +93,7 @@ module.exports = {
            )()
     },
 
+
     groupController:function(req,res){
 
 
@@ -103,7 +111,48 @@ module.exports = {
             return;
         }
 
-        res.render("release/group.html")
+        res.render("release/groupNew.html")
+    },
+    getListInformationController:function(req,res){
+        var themes = []
+        var debateStatus = []
+
+        steps(function(){
+            mongo.find("themes",{group:req.session.debateLogin.group},{},this.hold(function(_res){
+                    themes = _res
+            }))
+        },function(){
+            mongo.find("debateStatus",{group:req.session.debateLogin.group},{},this.hold(function(_res){
+                debateStatus = _res
+            }))
+        },function(){
+
+
+            for(var i=0;i<themes.length;i++){
+                themes[i].debating = []
+                themes[i].finish = []
+                for(var j=0;j<debateStatus.length;j++){
+                    if(debateStatus[j].finish == false && themes[i].num == debateStatus[j].num){
+                       themes[i].debating.push(debateStatus[j])
+                    }
+
+                    if(debateStatus[j].finish == true && themes[i].num == debateStatus[j].num){
+                        themes[i].finish.push(debateStatus[j])
+                    }
+                }
+            }
+
+            res.end(JSON.stringify(themes))
+        })()
+    },
+    getCurrentSelfDebateInfoController:function(req,res){
+        var username = req.session.debateLogin.username
+        var group = req.session.debateLogin.group
+        steps(function(){
+            mongo.find("debateStatus",{$or:[{pro:username},{con:username}],group:group},{},function(result){
+                res.end(JSON.stringify({err:0,data:result}))
+            })
+        })()
     },
     getThemeListController:function(req,res){
         steps(function(){
@@ -130,12 +179,14 @@ module.exports = {
         var position = req.body.position
         var num = req.body.num
         var title = req.body.title
+        var timeLimit = req.body.timeLimit
+        var timeLimitVal = req.body.timeLimitVal
 
         var rNum = Math.round(Math.random()*10000)
         if(position == 1){
-            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:"wait",preStatus:null,group:req.session.debateLogin.group,order:0}
+            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:"wait",preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal}
         }else{
-            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:"wait",preStatus:null,group:req.session.debateLogin.group,order:0}
+            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:"wait",preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal}
         }
 
         req.session.debateLogin.position = position
@@ -159,13 +210,37 @@ module.exports = {
 
         if(position == 1){
             var _update = {pro:req.session.debateLogin.username}
-        }else{
+        }else if(position == 2){
             var _update = {con:req.session.debateLogin.username}
+        }else{
+            res.end(JSON.stringify({err:1,msg:"illegal position data"}))
+            return
         }
 
         req.session.debateLogin.position = position
 
-        steps(function(){
+        steps(
+            function(){
+                mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                    //检查参加的是不是自己创建的房间
+                    if(position == 1){
+                        if(req.session.debateLogin.username == result[0].con){
+                            res.end(JSON.stringify({err:1,msg:"this is already your room now"}))
+                            this.terminate()
+                        }
+                    }else if(position == 2){
+                        if(req.session.debateLogin.username == result[0].pro){
+                            res.end(JSON.stringify({err:1,msg:"this is already your room now"}))
+                            this.terminate()
+                        }
+                    }else{
+                        res.end(JSON.stringify({err:1,msg:"illegal position data"}))
+                        this.terminate()
+                    }
+
+                }))
+            },
+            function(){
             mongo.update("debateStatus",{num:num,rNum:rNum},{$set:_update},this.hold(function(result){
                 req.session.debateLogin.num = num
                 req.session.debateLogin.rNum = rNum
@@ -228,4 +303,69 @@ module.exports = {
             res.end(JSON.stringify(_res))
         })
     },
+
+    backToRoomController:function(req,res){
+        var _id = req.body._id
+        if(!_id) return;
+
+        var objectId = new mongodb.ObjectID(_id)
+        var num,rNum
+        var username = req.session.debateLogin.username
+
+        steps(function(){
+            mongo.find("debateStatus",{_id:objectId},{},this.hold(function(result){
+               if(result.length == 0){
+                   res.end(JSON.stringify({err:1,msg:"no data find"}))
+                   this.terminate()
+               }else{
+
+                    if(username == result[0].pro){
+                        req.session.debateLogin.position = 1
+                    }
+
+
+                   if(username == result[0].con){
+                       req.session.debateLogin.position = 2
+                   }
+
+                    num = result[0].num
+                    rNum = result[0].rNum
+                    req.session.debateLogin.num = num
+                    req.session.debateLogin.rNum = rNum
+                    res.end(JSON.stringify({err:0,data:{num:num,rNum:rNum}}))
+               }
+            }))
+        },function(){
+
+        })()
+    },
+    leaveRoomController:function(req,res){
+        var num = req.session.debateLogin.num
+        var rNum = req.session.debateLogin.rNum
+        var position = req.session.debateLogin.position
+        var deleteRoom = false
+        steps(function(){
+            mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                if(result.length == 0) return;
+
+                if(result[0].status == "wait"){
+                   if(position == 1){
+                       if(!result[0].con) deleteRoom = true  //如果你是正方,且反方还没有人占据,那么可以删除这个房间
+                   }else if(position == 2){
+                        if(!result[0].pro) deleteRoom = true //如果你是反方,且正方的位置还没有人占据,那么可以删除这个房间
+                   }else{
+
+                   }
+                }
+            }))
+        },function(){
+            if(!deleteRoom) return;
+
+            mongo.remove("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+            }))
+        },function(){
+            res.end(JSON.stringify({err:0,data:{}}))
+
+        })()
+    }
 }

@@ -48,6 +48,8 @@ var checkCookie = function(req,res,next){
 }
 
 
+
+
 var checkSession = function(req,res,next){
     if(!req.session.debateLogin){
         return;
@@ -77,7 +79,7 @@ router.get('/',releaseController.indexController);
 
 
 router.get('/login',releaseController.loginController,addPathIntoSession);
-
+router.get('/logout',releaseController.logoutController)
 
 router.get("/group",checkCookie,addPathIntoSession);
 router.get('/group',releaseController.groupController)
@@ -86,7 +88,15 @@ router.get('/chat',checkCookie,addPathIntoSession)
 router.get('/chat',releaseController.chatController)
 
 
+
+
+
+
+
 router.post('/loginPost',releaseController.loginPostController);
+
+
+
 router.post('/getThemeList',checkSession)
 router.post('/getThemeList',releaseController.getThemeListController)
 router.post('/getDebatingList',checkSession)
@@ -102,6 +112,8 @@ router.post('/participateRoom',checkSession)
 router.post('/participateRoom',releaseController.participateRoomController)
 
 
+router.post('/leaveRoom',checkSession)
+router.post('/leaveRoom',releaseController.leaveRoomController)
 
 
 //api
@@ -118,6 +130,21 @@ router.post("/getDebateStatementMapInformation",releaseController.getDebateState
 
 router.post("/getDebateAnalysisMapInformation",checkSession)
 router.post("/getDebateAnalysisMapInformation",releaseController.getDebateAnalysisMapInformationController)
+
+router.post("/getListInformation",checkSession)
+router.post("/getListInformation",releaseController.getListInformationController)
+
+router.post("/getCurrentSelfDebateInfo",checkSession)
+router.post("/getCurrentSelfDebateInfo",releaseController.getCurrentSelfDebateInfoController)
+
+
+router.post("/backToRoom",checkSession)
+router.post("/backToRoom",releaseController.backToRoomController)
+
+
+
+
+
 
 module.exports = router;
 

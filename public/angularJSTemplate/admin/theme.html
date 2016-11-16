@@ -1,0 +1,88 @@
+<div class="row">
+    <p>
+        <h1>テーマ管理</h1>
+    </p>
+</div>
+<div class="row">
+
+    <table class="table">
+        <tr>
+            <td class="active">No</td>
+            <td class="success">テーマ</td>
+            <td class="warning">グループ</td>
+            <td class="danger">編集</td>
+            <td class="info" >削除</td>
+        </tr>
+
+        <tr ng-repeat="(i,val) in themesList">
+            <td class="active">{{i}}</td>
+            <td class="success">{{val.theme}}</td>
+            <td class="warning">{{val.group}}</td>
+            <td class="danger"><button class="btn btn-warning" ng-click="_edit(val._id)">編集</button></td>
+            <td class="info"><button class="btn btn-danger" ng-click="delete(val._id)">削除</buttonc></td>
+        </tr>
+    </table>
+
+    </tr>
+    </table>
+
+</div>
+
+<div class="row" ng-show="editVal == 0">
+    <form name="groupform">
+        <div class="form-group">
+            <label>テーマ</label>
+            <input  class="form-control" name="theme" ng-model="theme"  placeholder="テーマ" required>
+        </div>
+
+        <div class="form-group">
+            <label>テーマ説明 </label>
+            <input  class="form-control" name="desc" ng-model="desc"  placeholder="テーマ説明" required>
+        </div>
+
+        <div class="form-group" required>
+            <label for="">所属グループ</label>
+            <select name="group" ng-model="group" class="form-control">
+                <option ng-repeat="val in groupList" value="{{val.name}}">{{val.name}}</option>
+            </select>
+        </div>
+    </form>
+    <button  class="btn btn-default" ng-click="_submit()">登録</button>
+
+    <div ng-show="groupform.theme.$error.required">テーマを入力してください</div>
+    <div ng-show="groupform.desc.$error.required">テーマ説明を入力してください</div>
+    <div ng-show="groupform.group.$error.required">所属グループを入力してください</div>
+
+</div>
+
+
+
+<div class="row" ng-show="editVal == 1">
+    <div class="">
+        <button class="btn btn-info" ng-click="back()">戻る</button>
+    </div>
+    <form name="groupform">
+        <div class="form-group">
+            <label>テーマ</label>
+            <input  class="form-control" name="themeVal" ng-model="themeVal"  placeholder="テーマ" required>
+        </div>
+
+        <div class="form-group">
+            <label>テーマ説明 </label>
+            <input  class="form-control" name="descVal" ng-model="descVal"  placeholder="テーマ説明" required>
+        </div>
+
+        <div class="form-group" required>
+            <label for="">所属グループ</label>
+            <select name="groupVal" ng-model="groupVal" class="form-control">
+                <option ng-repeat="val in groupList" value="{{val.name}}">{{val.name}}</option>
+            </select>
+        </div>
+    </form>
+    <button  class="btn btn-default" ng-click="_update()">登録</button>
+
+    <div ng-show="groupform.themeVal.$error.required">テーマを入力してください</div>
+    <div ng-show="groupform.descVal.$error.required">テーマ説明を入力してください</div>
+    <div ng-show="groupform.groupVal.$error.required">所属グループを入力してください</div>
+
+</div>
