@@ -1,18 +1,58 @@
-<top-article></top-article>
 
 <div>
     <info-and-analysis-map></info-and-analysis-map>
 </div>
 
 
-<div ng-if="debateInfo.position == 1">
-    <exam-analysis-result></exam-analysis-result>
+<div>
+
+    <div class="row" ng-show="LAN=='JP'">
+        <div  class="panel panel-info">
+            <div class="panel-body" >
+                <div class="row col-sm-4">
+                    <concept></concept>
+                </div>
+
+                <div class="row col-sm-1"></div>
+
+                <div class="row col-sm-7" ng-if="debateInfo.position ==1">
+                        <exam-analysis-result></exam-analysis-result>
+                </div>
+
+
+                <div class="row col-sm-7" ng-if="debateInfo.position ==2">
+                    <div  class="panel panel-info" >
+                        <div class="panel-heading">
+                           相手はあなたが正しく分析しているかを確認しています
+                        </div>
+                        <div class="panel-body">
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
+
+
+
+<!--
 <div ng-if="LAN=='JP'">
 <div class="row" ng-if="debateInfo.position == 2">
-    <div class="alert alert-success" role="alert">分析結果を送りました,相手に検討されています、しばらく相手の返事をお待ちください</div>
+    <div class="alert alert-success" role="alert">分析結果を送りました,あなたの分析結果を相手が確認しています、しばらく相手の返事をお待ちください</div>
 </div>
+
+
+    <div class="row" ng-if="debateInfo.position==1">
+        <div class="alert alert-info" role="alert">正しく分析されているか確認してください</div>
+    </div>
+
+
 </div>
 
 
@@ -21,5 +61,6 @@
         <div class="alert alert-success" role="alert">分析结果已经发送,对方正在核对,稍稍等待</div>
     </div>
 </div>
+-->
 
 

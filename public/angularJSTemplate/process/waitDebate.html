@@ -1,7 +1,53 @@
-<top-article></top-article>
-<middle-info></middle-info>
+
+<div>
+    <info-and-analysis-map></info-and-analysis-map>
+</div>
+
+
+<div>
+    <div class="row">
+<div class="row" style="height: 350px;overflow:auto;">
+    <div  class="panel panel-info">
+        <div class="panel-body" >
+
+            <div class="row col-sm-7" style="height: 330px;overflow:auto;">
+
+                <div  class="panel panel-info" >
+                    <div class="panel-heading">
+                        <span>お互いに準備してください</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row pull-right" ng-if="debateInfo.proPrepare != 1 || debateInfo.conPrepare != 1" style="margin:0 auto">
+                            <button type="button" class="btn btn-default btn-lg" ng-click="prepare()">
+                                <span ng-if="debateInfo.position == 1 && debateInfo.proPrepare !=1">準備</span>
+                                <span ng-if="debateInfo.position == 1 && debateInfo.proPrepare ==1">準備済み</span>
+
+                                <span ng-if="debateInfo.position == 2 && debateInfo.conPrepare !=1">準備</span>
+                                <span ng-if="debateInfo.position == 2 && debateInfo.conPrepare ==1">準備済み</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+            <div class="row col-sm-1" style="height: 330px;overflow:auto;"></div>
+            <div class="row col-sm-4">
+                <concept></concept>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+
+<!--
 <div class="row">
 <div class="alert alert-info row" role="alert" ng-if="LAN=='JP'">お互いに準備してください</div>
 
 <div class="alert alert-info row" role="alert" ng-if="LAN=='CN'">双方请准备</div>
 </div>
+-->

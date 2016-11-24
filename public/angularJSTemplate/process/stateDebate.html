@@ -1,3 +1,4 @@
+<!--
 <div ng-show="debateInfo.position == 2">
     <info-and-statement-map></info-and-statement-map>
     <input-text-area></input-text-area>
@@ -6,4 +7,47 @@
 <div ng-show="debateInfo.position == 1">
     <middle-info></middle-info>
     <div class="alert alert-info" role="alert">反対の立論をお待ちください</div>
+</div>
+-->
+
+
+
+
+
+
+<div>
+    <info-and-analysis-map></info-and-analysis-map>
+</div>
+
+
+
+
+<div class="row"  style="height: 350px;overflow:auto;">
+    <div  class="panel panel-info">
+        <div class="panel-body" >
+            <div class="row col-sm-4">
+                <concept></concept>
+            </div>
+
+            <div class="row col-sm-1" style="height: 330px;overflow:auto;"></div>
+
+            <div class="row col-sm-7" style="height: 330px;overflow:auto;">
+
+                <div  class="panel panel-info" >
+                    <div class="panel-heading">
+                        <span ng-if="debateInfo.position == 1">相手の反駁をお待ちください</span>
+                        <span ng-if="debateInfo.position == 2">反駁してください</span>
+                    </div>
+                    <div class="panel-body">
+                        <div ng-show="debateInfo.position == 2">
+                            <input-text-area></input-text-area>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
 </div>

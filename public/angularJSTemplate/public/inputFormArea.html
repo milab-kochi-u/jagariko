@@ -1,15 +1,4 @@
-
-<div class="row" ng-show="LAN=='JP'">
-    <div  class="panel panel-info">
-        <div class="panel-body" >
-            <div class="row col-sm-4">
-                <concept></concept>
-            </div>
-
-            <div class="row col-sm-1"></div>
-
-            <div class="row col-sm-7">
-                <div  class="panel panel-info">
+<div  class="panel panel-info" ng-show="LAN == 'JP'">
                     <div class="panel-heading"><span style="cursor:pointer" ng-click="changeInputTab()">入力</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="cursor:pointer"  ng-click="changeInputTab()">再投稿のお願い</span></div>
                     <div class="panel-body" id="inputBody" ng-show="inputFormAreachangeInputTabVal == 1">
                         <div  ng-if="inputStatus.name == 'claim' && inputStatus.i == 0">
@@ -18,14 +7,14 @@
                                 <a href="#" class="alert-link">
 
                                     <label  ng-if="analysisObject.target == 'construct'">
-                                        立論を分析してください
+                                        相手の意見を主張,根拠,論拠に分析してください
                                     </label>
 
                                     <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        異議説明({{(analysisObject.i+1)}}) を分析してください
+                                        相手の異議説明({{(analysisObject.i+1)}})を主張,根拠,論拠に分析してください
                                     </label>
                                     |
-                                    相手の結論に主張を見つかりませんか
+                                    相手の意見に主張を見つかりませんか
                                 </a>
                             </div>
 
@@ -47,7 +36,7 @@
                                         異議説明({{(analysisObject.i+1)}}) を分析してください
                                     </label>
                                     |
-                                    相手の結論に主張を見つかりませんか</a>
+                                    相手の意見に主張を見つかりませんか</a>
                             </div>
 
                             <div class=" col-sm-5">
@@ -70,7 +59,7 @@
                                         異議説明({{(analysisObject.i+1)}}) を分析してください
                                     </label>
                                     |
-                                    相手の結論に根拠を見つかりませんか
+                                    相手の意見に根拠を見つかりませんか
                                     </a>
                             </div>
                             <div class=" col-sm-3">
@@ -158,7 +147,7 @@
 
 
 
-                            <textarea class="form-control" rows="7" ng-model="contents" ></textarea>
+                            <textarea class="form-control" rows="7" ng-model="_contents" ></textarea>
                             <p>
                                 <span ng-if="data1Success==0">入植必須</span>
                                 <button type="button" class="btn btn-default pull-right" ng-click="output()" >次へ</button>
@@ -193,27 +182,12 @@
                     </div>
                 </div>
 
-            </div>
-        </div>
-    </div>
-</div>
 
 
 
 
 
-
-<div class="row" ng-show="LAN=='CN'">
-    <div  class="panel panel-info">
-        <div class="panel-body" >
-            <div class="row col-sm-4">
-                <concept></concept>
-            </div>
-
-            <div class="row col-sm-1"></div>
-
-            <div class="row col-sm-7">
-                <div  class="panel panel-info">
+                <div  class="panel panel-info" ng-show="LAN == 'CN'">
                     <div class="panel-heading"><span style="cursor:pointer" ng-click="changeInputTab()">输入</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="cursor:pointer"  ng-click="changeInputTab()">请求对方再次陈述说明</span></div>
                     <div class="panel-body" id="inputBody" ng-show="inputFormAreachangeInputTabVal == 1">
                         <div  ng-if="inputStatus.name == 'claim' && inputStatus.i == 0">
@@ -361,7 +335,7 @@
 
 
 
-                            <textarea class="form-control" rows="7" ng-model="contents" ></textarea>
+                            <textarea class="form-control" rows="7" ng-model="_contents" ></textarea>
                             <p>
                                 <span ng-if="data1Success==0">输入必须项</span>
                                 <button type="button" class="btn btn-default pull-right" ng-click="output()" >下一步</button>
@@ -396,8 +370,4 @@
                     </div>
                 </div>
 
-            </div>
-        </div>
-    </div>
-</div>
 

@@ -2,43 +2,57 @@
  * Created by xuzhongwei on 2016/11/02.
  */
 
-var sessionSockets = function(sessionSockets,steps,mongo) {
+
+
+var connectionList = {}; //存储当前连接信息
+
+
+
+var sessionSockets = function(sessionSockets,steps,mongo,io) {
 
     sessionSockets.of("/release").on("connection", function (err, socket, session) {
 
         console.log("connection of release")
+        console.log(socket.id)
+
+
+        // 房间用户名单
+        var roomInfo = {};
+
+        var roomID = socket.id
 
 
         socket.on("prepare",function(msg){
+
             var _update
             steps(function(){
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
                     if(parseInt(session.debateLogin.position) == 1){
                         if(_res[0].proPrepare == 1){
-                            _update = {proPrepare:0}
+                            _update = {proPrepare:0,time:Date.parse(new Date())}
                         }else{
-                            _update = {proPrepare:1}
+                            _update = {proPrepare:1,time:Date.parse(new Date())}
                         }
                     }else{
                         if(_res[0].conPrepare == 1){
-                            _update = {conPrepare:0}
+                            _update = {conPrepare:0,time:Date.parse(new Date())}
                         }else{
-                            _update = {conPrepare:1}
+                            _update = {conPrepare:1,time:Date.parse(new Date())}
                         }
                     }
                 }))
             },function(){
                 mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:_update},this.hold(function(){
                     socket.emit("prepared",_update)
-                    socket.broadcast.emit("prepared",_update)
+                    socket.to(session.debateLogin.rNum).broadcast.emit("prepared",_update)
                 }))
             },function(){
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
                     if(parseInt(_res[0].conPrepare) == 1 && parseInt(_res[0].proPrepare) == 1){
                         this.step(function(){
-                            mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{status:"start",preStatus:"wait",order:0}},this.hold(function(){
+                            mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{status:"start",preStatus:"wait",order:0,time:Date.parse(new Date())}},this.hold(function(){
                                 socket.emit("prepareCompelete",{})
-                                socket.broadcast.emit("prepareCompelete",{})
+                                socket.to(session.debateLogin.rNum).broadcast.emit("prepareCompelete",{})
                             }))
                         })
                     }
@@ -55,13 +69,32 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
             var loginInfo = session.debateLogin
             delete loginInfo['password']
 
+
+            console.log(msg.username)
+            var user = msg.username;
+
+            // 将用户昵称加入房间名单中
+            if (!roomInfo[roomID]) {
+                roomInfo[roomID] = [];
+            }
+            roomInfo[roomID].push(user);
+
+
+
+
+            socket.join(session.debateLogin.rNum)
+
             socket.emit("enterRoom",{})
-            socket.broadcast.emit("enterRoom",{})
+            socket.to(session.debateLogin.rNum).broadcast.emit("enterRoom",{})
+
+
+            socket.emit('sys', user + '加入了房间', roomInfo[roomID]);
+            socket.to(session.debateLogin.rNum).broadcast.emit('sys', user + '加入了房间', roomInfo[roomID]);
+            console.log(user + '加入了' + roomID);
 
         })
 
         socket.on("giveStatement",function(msg){
-
             var order
             steps(function(){
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
@@ -70,68 +103,33 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
 
                     order = _res[0].order
 
-                    /*
-                    if(parseInt(_res[0].status)=="last"){
-
-                        if(_res[0].order < 2){
-
-
-                            if(_res[0].status == "start" || _res[0].status == "lookup"){
-                                _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
-                            }else{
-                                _update = {$set:{status:"bunseki",preStatus:_res[0].status}}
-                            }
-
-                        }else{
-
-                        }
-
-                    }else{
-                        if(_res[0].status == "start" || _res[0].status == "lookup"){
-                            _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
-                        }else{
-                            _update = {$set:{status:"bunseki",preStatus:_res[0].status}}
-                        }
-                    }
-                    */
-
-
-                    /*
-                    if(_res[0].order < 1){
-                        if(_res[0].status == "start" || _res[0].status == "lookup"){
-                            _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
-                        }else if(_res[0].status == "appeal"){
-                            _update = {$set:{status:"bunseki",preStatus:_res[0].status}}
-                        }else{
-
-                        }
-                    }else{
-                        _update = {$set:{status:"finish",preStatus:_res[0].status,finish:true}}
-                        mongo.update("debateMembers",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{debateInvolve:false}},{multi: true},this.hold(function () {
-                            session.debateLogin.debateInvolve = false
-                            session.save()
-                            return _update
-                        }))
-                    }
-
-                    return _update
-                    */
-
                     var totalNum = 1
 
 
                     if(_res[0].status == "start"){
-                        _update = {$set:{status:"analysis",preStatus:_res[0].status}}
+                        _update = {$set:{status:"analysis",preStatus:_res[0].status,time:Date.parse(new Date())}}
                     }else if(_res[0].status == "lookup"){
 
                         //检测是否结束
 
                         if(_res[0].order < totalNum-1){
                             //还没有结束
-                            _update = {$set:{status:"analysis",preStatus:_res[0].status},$inc:{order:1}}
+                            _update = {$set:{status:"analysis",preStatus:_res[0].status,time:Date.parse(new Date())},$inc:{order:1}}
                         }else{
-                            //这次阐述完后应该结束了
-                            _update = {$set:{status:"analysis",preStatus:_res[0].status,preFinish:true}}
+
+
+
+
+                            if(!msg.statementData && msg.dissentData.length == 0){
+                                //说明在准结束的lookup阶段,什么異議都没有选择,直接点了下一步,那么下一步也没有立論了所以直接结束了
+                                _update = {$set:{status:"finish",preStatus:_res[0].status,preFinish:true,finish:true,time:Date.parse(new Date())}}
+                            }else{
+                                //说明在准结束的lookup阶段,选择了異議,点击下一步以后需要对異議的部分做解释说明
+                                //这次阐述完后应该结束了
+                                _update = {$set:{status:"analysis",preStatus:_res[0].status,preFinish:true,time:Date.parse(new Date())}}
+                            }
+
+
                             mongo.update("debateMembers",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{debateInvolve:false}},{multi: true},this.hold(function () {
                                 session.debateLogin.debateInvolve = false
                                 session.save()
@@ -140,7 +138,7 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                         }
 
                     }else{
-                        _update = {$set:{status:"bunseki",preStatus:_res[0].status}}
+                        _update = {$set:{status:"bunseki",preStatus:_res[0].status,time:Date.parse(new Date())}}
                     }
 
                     return _update
@@ -151,7 +149,6 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
 
                 }))
             },function(){
-
                 /*
                  $scope.dissentData = [{type:"claim",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",reply:"",i:0,j:0},
                  {type:"claim",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",reply:"",i:0,j:2},
@@ -181,7 +178,7 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
 
                 mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyStatement:sendObj}},{},this.hold(function(_res){
                     socket.emit("receiveStatement",{sendObj:sendObj})
-                    socket.broadcast.emit("receiveStatement",{sendObj:sendObj})
+                    socket.to(session.debateLogin.rNum).broadcast.emit("receiveStatement",{sendObj:sendObj})
                     return sendObj
                 }))
             },function(sendObj){
@@ -207,16 +204,16 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
             },function(status){
 
                 if(status == "analysis"){
-                        if(preFinish){
+                        //if(preFinish){
                             //如果时准结束阶段则在此次分析以后结束辩论
-                            var update = {$set:{preStatus:status,status:"finish",finish:true}}
-                        }else{
+                        //    var update = {$set:{preStatus:status,status:"finish",finish:true,time:Date.parse(new Date())}}
+                        //}else{
                             //如果不是准结束结论,则继续process
-                            var update = {$set:{preStatus:status,status:"check"}}
-                        }
+                            var update = {$set:{preStatus:status,status:"check",time:Date.parse(new Date())}}
+                        //}
 
                 }else{
-                        var update = {$set:{preStatus:status,status:"kentou"}}
+                        var update = {$set:{preStatus:status,status:"kentou",time:Date.parse(new Date())}}
                 }
 
 
@@ -230,7 +227,7 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                 sendObj.order = order
 
                 socket.emit("receiveAnalysis",{})
-                socket.broadcast.emit("receiveAnalysis",{})
+                socket.to(session.debateLogin.rNum).broadcast.emit("receiveAnalysis",{})
             },function(){
                 mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyAnalysisData:sendObj}},this.hold(function(){
 
@@ -245,19 +242,27 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
             var pro
             var con
             var everyAnalysisData
+            var preFinish
 
             steps(function() {
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
                     pro = _res[0].pro
                     con = _res[0].con
                     everyAnalysisData = _res[0].everyAnalysisData
+                    preFinish = _res[0].preFinish
                     return  _res[0].status
                 }))
             },function(status){
                 if(status == "check"){
-                    var update = {$set:{preStatus:status,status:"appeal"}}
+
+                    if(preFinish){
+                        var update = {$set:{preStatus:status,status:"finish",finish:true,time:Date.parse(new Date())}}
+                    }else{
+                        var update = {$set:{preStatus:status,status:"appeal",time:Date.parse(new Date())}}
+                    }
+
                 }else if(status == "kentou"){
-                    var update = {$set:{preStatus:status,status:"lookup"}}
+                    var update = {$set:{preStatus:status,status:"lookup",time:Date.parse(new Date())}}
                 }else{
 
                 }
@@ -267,7 +272,7 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
                 }))
             },function(){
                 socket.emit("confirmAnalysisResultFinish",{})
-                socket.broadcast.emit("confirmAnalysisResultFinish",{})
+                socket.to(session.debateLogin.rNum).broadcast.emit("confirmAnalysisResultFinish",{})
             },function(){
                 everyAnalysisData.rNum = session.debateLogin.rNum
                 everyAnalysisData.num = session.debateLogin.num
@@ -281,9 +286,8 @@ var sessionSockets = function(sessionSockets,steps,mongo) {
 
 
         socket.on("selectDissent",function(msg){
-
             socket.emit("selectDissentFinish",msg)
-            socket.broadcast.emit("selectDissentFinish",msg)
+            socket.to(session.debateLogin.rNum).broadcast.emit("selectDissentFinish",msg)
 
         })
 

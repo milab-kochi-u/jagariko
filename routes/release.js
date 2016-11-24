@@ -141,6 +141,10 @@ router.post("/getCurrentSelfDebateInfo",releaseController.getCurrentSelfDebateIn
 router.post("/backToRoom",checkSession)
 router.post("/backToRoom",releaseController.backToRoomController)
 
+router.post("/rate",checkSession)
+router.post("/rate",releaseController.rateController)
+
+
 
 
 

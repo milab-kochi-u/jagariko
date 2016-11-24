@@ -1,21 +1,60 @@
-<top-article></top-article>
-
+<!--
 <div ng-if="debateInfo.position==2">
 <info-and-analysis-map></info-and-analysis-map>
 <input-form-area></input-form-area>
-
 </div>
+
+
+
+
+
 
 <div class="row" ng-if="LAN=='JP'">
 <div class="row" ng-if="debateInfo.position==1">
-    <div class="alert alert-info" role="alert">相手が分析しています,結果をお待ちください</div>
+    <div class="alert alert-info" role="alert">あなたの意見を相手が分析しています,結果をお待ちください</div>
 </div>
 </div>
-
 
 <div class="row" ng-if="LAN=='CN'">
     <div class="row" ng-if="debateInfo.position==1">
         <div class="alert alert-info" role="alert">对方正在分析您的阐述说明,请稍等</div>
     </div>
 </div>
+-->
 
+    <div style="height:50%" class="row">
+        <info-and-analysis-map></info-and-analysis-map>
+    </div>
+
+    <div class="row" style="height: 50%">
+        <div class="row">
+        <div style="height: 50%;" class="row">
+            <div  class="panel panel-info">
+                <div class="panel-body " >
+                    <div class="col-sm-4 row">
+                        <concept></concept>
+                    </div>
+
+                    <div class="col-sm-8 " style="height: 330px;overflow:auto;">
+
+
+                        <div ng-if="debateInfo.position==2">
+                            <input-form-area></input-form-area>
+                        </div>
+
+                        <div  class="panel panel-info" ng-if="debateInfo.position==1">
+                            <div class="panel-heading">
+                                <span>相手の分析結果をお待ちください</span>
+                            </div>
+                            <div class="panel-body" id="inputBody">
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>

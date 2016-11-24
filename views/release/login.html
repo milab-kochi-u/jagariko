@@ -10,6 +10,9 @@
     <![endif]-->
     <script src="/release/angular.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+
+    <script src="/release/ui-bootstrap-tpls-2.2.0.min.js"></script>
+
 </head>
 <body>
 <div class="container" ng-app="myApp" ng-controller="myForm" >
@@ -80,8 +83,26 @@
 
 
 
-</div>
 
+    <div class="row">
+        <div style="height: 305px">
+            <div uib-carousel active="active" interval="myInterval" no-wrap="noWrapSlides">
+                <div uib-slide ng-repeat="slide in slides track by slide.id" index="slide.id">
+                    <img ng-src="{{slide.image}}" style="margin:auto;">
+                    <div class="carousel-caption">
+                        <h4>Slide {{slide.id}}</h4>
+                        <p>{{slide.text}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    </div>
 
 
 </body>
@@ -142,10 +163,11 @@
 
 
 
+    var myApp = angular.module("myApp",['ui.bootstrap']);
 
-    var angular = angular.module("myApp",[])
 
-    angular.directive("loginNavy",function(){
+
+    myApp.directive("loginNavy",function(){
         return {
             scope:false,
             templateUrl:"/angularJSTemplate/navy.html"
@@ -153,7 +175,7 @@
     })
 
 
-    angular.factory("myPost",function($http){
+    myApp.factory("myPost",function($http){
         return{
             postData:function(url,data){
                 return $http.post(url,data).success(function(res){
@@ -164,7 +186,16 @@
     })
 
 
-    angular.controller("myForm",function($scope,$window,$timeout,myPost){
+    myApp.controller("myForm",function($scope,$window,$timeout,myPost){
+
+
+
+        $scope.myInterval = 5000;
+        $scope.noWrapSlides = false;
+        $scope.active = 0;
+        var slides = $scope.slides = [{id:1,text:555}];
+        var currIndex = 0;
+
 
         if(/CN/.test(location.pathname)){
             $scope.LAN = "CN"

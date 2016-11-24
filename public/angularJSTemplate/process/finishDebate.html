@@ -1,1 +1,231 @@
-<info-and-statement-analysis-map></info-and-statement-analysis-map>
+<div>
+    <info-and-analysis-map></info-and-analysis-map>
+</div>
+
+
+
+<div>
+    <div class="row">
+        <div class="row" style="height: 350px;overflow:auto;">
+            <div  class="panel panel-info">
+                <div class="panel-body" >
+                    <div class="row col-sm-7" style="height: 330px;overflow:auto;">
+
+                        <div  class="panel panel-info" >
+                            <div class="panel-heading">
+                                <span>自己評価をしてください</span>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row" style="margin:0 auto" >
+                                    <div class="btn-group" role="group" ng-show="rateable == 1">
+                                        <button type="button" ng-click="determines(0)" class="btn btn-default">勝つ</button>
+                                        <button type="button" ng-click="determines(1)" class="btn btn-default">引き分け</button>
+                                        <button type="button" ng-click="determines(2)" class="btn btn-default">負け</button>
+                                    </div>
+
+
+                                <div class="row">
+                                    <div class="row col-sm-5 col-sm-offset-1"  ng-show="!rateable && debateInfo.proRate">
+                                        <span class="label label-info" >肯定側の自己評価</span>
+
+
+                                        <span ng-show="debateInfo.proRate == 0">勝つ</span>
+                                        <span ng-show="debateInfo.proRate == 1">引き分け</span>
+                                        <span ng-show="debateInfo.proRate == 2">負け</span>
+
+
+                                    </div>
+
+                                    <div class="row col-sm-5 col-sm-offset-1" ng-show="!rateable && debateInfo.conRate">
+                                        <span class="label label label-success" >否定側の自己評価</span>
+
+                                        <span ng-show="debateInfo.conRate == 0">勝つ</span>
+                                        <span ng-show="debateInfo.conRate == 1">引き分け</span>
+                                        <span ng-show="debateInfo.conRate == 2">負け</span>
+                                    </div>
+                                </div>
+
+
+                                </div>
+
+                                <br/>
+
+
+
+                                <div>
+
+                                    <table class="table">
+
+                                        <tr class="default">
+                                            <td class="active">Pro自己判定</td>
+                                            <td class="active">Con自己判定</td>
+                                            <td class="active">勝敗結果</td>
+                                        </tr>
+                                        <tr ng-class="{'info':gameResult.order == 0,'':gameResult.order != 0}">
+                                            <td class="active">勝ち</td>
+                                            <td class="active">負け</td>
+                                            <td class="active">肯定側の勝ち</td>
+                                        </tr>
+
+                                        <tr ng-class="{'info':gameResult.order == 1,'':gameResult.order != 1}">
+                                            <td class="active">負け</td>
+                                            <td class="active">勝ち</td>
+                                            <td class="active">否定側の勝ち</td>
+                                        </tr>
+
+                                        <tr ng-class="{'info':gameResult.order == 2,'':gameResult.order != 2}">
+                                            <td class="active">引き分け</td>
+                                            <td class="active">引き分け</td>
+                                            <td class="active">引き分け</td>
+                                        </tr>
+
+
+                                        <tr ng-class="{'info':gameResult.order == 3,'':gameResult.order != 3}">
+                                            <td class="active">勝ち</td>
+                                            <td class="active">勝ち／引き分け</td>
+                                            <td class="active" rowspan="3" align="center" valign="middle">
+                                                <br/><br/>
+                                                未決着
+                                            </td>
+                                        </tr>
+
+                                        <tr ng-class="{'info':gameResult.order == 3,'':gameResult.order != 3}">
+                                            <td class="active">負け</td>
+                                            <td class="active">負け／引き分け</td>
+                                        </tr>
+
+                                        <tr ng-class="{'info':gameResult.order == 3,'':gameResult.order != 3}">
+                                            <td class="active">引き分け</td>
+                                            <td class="active">勝ち／負け</td>
+                                        </tr>
+
+                                    </table>
+
+                                </div>
+
+
+
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                    <div class="row col-sm-1" style="height: 330px;overflow:auto;"></div>
+                    <div class="row col-sm-4">
+                        <concept></concept>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--
+<div class="row">
+
+
+    <div class="row col-sm-7">
+
+        <div class="row col-sm-offset-1">
+            <h4>自己評価</h4>
+            <span  uib-rating ng-model="rate" max="max" read-only="!rateable" on-hover="hoveringOver(value)" on-leave="overStar = null" titles="['one','two','three']" aria-labelledby="default-rating"></span>
+           <span class="label" ng-class="{'label-info': debateInfo.position==1, 'label-success': debateInfo.position == 2}" >
+               {{100 * (rate / max)}}%
+           </span>
+            <pre style="margin:15px 0;">自己評価結果: <b>{{rate}}</b> </b></pre>
+            <div ng-if="rateable">
+                <button type="button" class="btn btn-sm btn-danger" ng-click="rate = 0" ng-disabled="isReadonly">リセット</button>
+                <button type="button" class="btn btn-sm btn-default" ng-click="determine()">決まり</button>
+            </div>
+            <hr />
+        </div>
+
+
+        <div class="row col-sm-offset-1" ng-show="oppositeRate">
+            <h4>相手の自己評価</h4>
+            <span  uib-rating ng-model="oppositeRate" max="max" read-only="!rateable" on-hover="hoveringOver(value)" on-leave="overStar = null" titles="['one','two','three']" aria-labelledby="default-rating"></span>
+           <span class="label" ng-class="{'label-info': debateInfo.position==1, 'label-success': debateInfo.position == 2}" >
+               {{100 * (oppositeRate / max)}}%
+           </span>
+            <pre style="margin:15px 0;">相手の自己評価: <b>{{oppositeRate}}</b> </b></pre>
+            <hr />
+        </div>
+    </div>
+
+
+    <div class="row col-sm-4">
+        <div class="row col-sm-offset-2">
+            <h4>勝負の結果</h4>
+            <h4>
+                <span class="label label-info" ng-show="gameResult.res == 'wait'">自己評価中</span>
+                    <span class="label label-info" ng-show="gameResult.res == 'win'">
+                        勝利:{{gameResult.target}}
+                    </span>
+                    <span class="label label-info" ng-show="gameResult.res == 'draw'">
+                        引き分け</span>
+                    <span class="label label-info" ng-show="gameResult.res == 'still'">
+                        未決着
+                    </span>
+            </h4>
+            <div class="row">
+
+                <table class="table">
+
+                    <tr class="default">
+                        <td class="active">Pro自己判定</td>
+                        <td class="active">Con自己判定</td>
+                        <td class="active">勝敗結果</td>
+                    </tr>
+                    <tr ng-class="{'info':gameResult.order == 0,'':gameResult.order != 0}">
+                        <td class="active">勝ち</td>
+                        <td class="active">負け</td>
+                        <td class="active">肯定側の勝ち</td>
+                    </tr>
+
+                    <tr ng-class="{'info':gameResult.order == 1,'':gameResult.order != 1}">
+                        <td class="active">負け</td>
+                        <td class="active">勝ち</td>
+                        <td class="active">否定側の勝ち</td>
+                    </tr>
+
+                    <tr ng-class="{'info':gameResult.order == 2,'':gameResult.order != 2}">
+                        <td class="active">引き分け</td>
+                        <td class="active">引き分け</td>
+                        <td class="active">引き分け</td>
+                    </tr>
+
+
+                    <tr ng-class="{'info':gameResult.order == 3,'':gameResult.order != 3}">
+                        <td class="active">勝ち</td>
+                        <td class="active">勝ち／引き分け</td>
+                        <td class="active" rowspan="3" align="center" valign="middle">
+                            <br/><br/>
+                            未決着
+                        </td>
+                    </tr>
+
+                    <tr ng-class="{'info':gameResult.order == 3,'':gameResult.order != 3}">
+                        <td class="active">負け</td>
+                        <td class="active">負け／引き分け</td>
+                    </tr>
+
+                    <tr ng-class="{'info':gameResult.order == 3,'':gameResult.order != 3}">
+                        <td class="active">引き分け</td>
+                        <td class="active">勝ち／負け</td>
+                    </tr>
+
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+-->

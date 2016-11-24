@@ -126,8 +126,6 @@ module.exports = {
                 debateStatus = _res
             }))
         },function(){
-
-
             for(var i=0;i<themes.length;i++){
                 themes[i].debating = []
                 themes[i].finish = []
@@ -204,7 +202,7 @@ module.exports = {
         })()
     },
     participateRoomController:function(req,res){
-        var position = req.body.position
+        var position = parseInt(req.body.position)
         var num = req.body.num
         var rNum = req.body.rNum
 
@@ -212,6 +210,9 @@ module.exports = {
             var _update = {pro:req.session.debateLogin.username}
         }else if(position == 2){
             var _update = {con:req.session.debateLogin.username}
+        }else if(position ==0){
+            //オブザーバーとして参加
+            var _update = {observer:req.session.debateLogin.username}
         }else{
             res.end(JSON.stringify({err:1,msg:"illegal position data"}))
             return
@@ -221,24 +222,28 @@ module.exports = {
 
         steps(
             function(){
-                mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
-                    //检查参加的是不是自己创建的房间
-                    if(position == 1){
-                        if(req.session.debateLogin.username == result[0].con){
-                            res.end(JSON.stringify({err:1,msg:"this is already your room now"}))
+                if(position > 0){
+                    //オブザーバーではない場合には
+                    mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                        //检查参加的是不是自己创建的房间
+                        if(position == 1){
+                            if(req.session.debateLogin.username == result[0].con){
+                                res.end(JSON.stringify({err:1,msg:"this is already your room now"}))
+                                this.terminate()
+                            }
+                        }else if(position == 2){
+                            if(req.session.debateLogin.username == result[0].pro){
+                                res.end(JSON.stringify({err:1,msg:"this is already your room now"}))
+                                this.terminate()
+                            }
+                        }else{
+                            res.end(JSON.stringify({err:1,msg:"illegal position data"}))
                             this.terminate()
                         }
-                    }else if(position == 2){
-                        if(req.session.debateLogin.username == result[0].pro){
-                            res.end(JSON.stringify({err:1,msg:"this is already your room now"}))
-                            this.terminate()
-                        }
-                    }else{
-                        res.end(JSON.stringify({err:1,msg:"illegal position data"}))
-                        this.terminate()
-                    }
 
-                }))
+                    }))
+                }
+
             },
             function(){
             mongo.update("debateStatus",{num:num,rNum:rNum},{$set:_update},this.hold(function(result){
@@ -248,7 +253,14 @@ module.exports = {
                 res.end(JSON.stringify({err:0,msg:"successfully"}))
             }))
         },function(){
-            mongo.update("debateMembers",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},{$set:{debateInvolve:true,num:num,rNum:rNum}},{},function(){
+                if(position > 0){
+                    //オブザーバーではない場合
+                    var update = {$set:{debateInvolve:true,num:num,rNum:rNum}}
+                }else{
+                    //オブザーバーの場合
+                    var update = {$set:{num:num,rNum:rNum}}
+                }
+            mongo.update("debateMembers",{username:req.session.debateLogin.username,group:req.session.debateLogin.group},update,{},function(){
 
             })
         })()
@@ -365,7 +377,39 @@ module.exports = {
             }))
         },function(){
             res.end(JSON.stringify({err:0,data:{}}))
+        })()
+    },
+    rateController:function(req,res){
+        var num = req.session.debateLogin.num
+        var rNum = req.session.debateLogin.rNum
+        var position = req.session.debateLogin.position
+        var rate = req.body.rate
+        var _update
+        console.log(req.body)
+        steps(function(){
+            mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                if(result.length == 0) return;
 
+                if(result[0].status == "finish"){
+                    if(position == 1){
+                        if(!result[0].proRate){
+                            //如果你是正方,且还没有对自己做评价,那么接下来对自己做评价
+                            _update = {$set:{proRate:rate}}
+                        }
+                    }else if(position == 2){
+                        if(!result[0].conRate){
+                            //如果你是反方,且还没有对自己做评价,那么接下来对自己做评价
+                            _update = {$set:{conRate:rate}}
+                        }
+                    }else{
+                        this.terminate()
+                    }
+                }
+            }))
+        },function(){
+            mongo.update("debateStatus",{num:num,rNum:rNum},_update,{},this.hold(function(_result){
+                res.end(JSON.stringify({err:0,data:{}}))
+            }))
         })()
     }
 }

@@ -1,16 +1,53 @@
-<top-article></top-article>
-
 <div>
     <info-and-analysis-map></info-and-analysis-map>
 </div>
 
+
+
+<div class="row" ng-show="LAN=='JP'" style="height: 350px;overflow:auto;">
+    <div  class="panel panel-info">
+        <div class="panel-body" >
+            <div class="row col-sm-4">
+                <concept></concept>
+            </div>
+
+            <div class="row col-sm-1" style="height: 330px;overflow:auto;"></div>
+
+            <div class="row col-sm-7" style="height: 330px;overflow:auto;">
+
+                <div  class="panel panel-info" >
+                    <div class="panel-heading">
+                        <span ng-if="debateInfo.position == 2">相手の反駁をお待ちください</span>
+                        <span ng-if="debateInfo.position == 1">異議がある部分を選んでください</span>
+
+                    </div>
+                    <div class="panel-body">
+                        <analysis-result></analysis-result>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<!--
 <div class="row" ng-if="LAN=='JP'">
 <div class="row" ng-if="debateInfo.position == 2">
-    <div class="alert alert-info" role="alert">分析結果を同意しました,しばらく相手の動きをお待ちください</div>
+    <div class="alert alert-info" role="alert">正しく分析されていると確認しました,しばらく相手の動きをお待ちください</div>
 </div>
 
 <div class="row" ng-if="debateInfo.position == 1">
-    <div class="alert alert-success" role="alert">分析結果が同意されました,続いては分析結果の中に異議がある部分を探して説明してください,また自分のいけんがある場合も自分の立論を立ててください</div>
+    <div class="alert alert-success" role="alert">あなたの意見を相手が分析しました,続いては分析結果の中に異議がある部分を探して説明してください,また自分のいけんがある場合も自分の立論を立ててください</div>
 </div>
 </div>
 
@@ -26,3 +63,4 @@
     </div>
 
 </div>
+-->

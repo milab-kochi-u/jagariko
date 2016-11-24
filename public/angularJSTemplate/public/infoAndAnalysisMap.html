@@ -1,21 +1,55 @@
-<div class="row"  ng-if="LAN=='JP'">
-    <div  class="panel panel-info row">
-        <div class="panel-heading"><span ng-click="infoAndAnalysisMap(1)">試合の情報</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span ng-click="infoAndAnalysisMap(2)">分析の結果</span></div>
-        <div class="panel-body" style="height: {{infoAndAnalysisMapBodyHeight}}px">
-            <info-table ng-show="infoAndAnalysisMapVal == 1"></info-table>
-            <analysis-result  ng-show="infoAndAnalysisMapVal == 2"></analysis-result>
+<div class="row" style="height: 50%;" >
+    <div class="row">
+    <div  class="panel panel-info ">
+        <div class="panel-heading" style="height:40px;">
+            <div class="pull-left">
+                <span>
+                    論題:{{debateInfo.title}}
+                </span>
+            </div>
+
+            <div class="pull-right">
+                <a href="/release/group">戻る</a>
+                <a href="/release/logout">ログアウト</a>
+                <a ng-click="leave()">退室</a>
+            </div>
         </div>
+        <div class="panel-body">
+
+
+            <div class="row col-sm-4" style="height: 330px;overflow:auto;" >
+                <div class="row">
+                    <ul class="nav nav-tabs">
+                        <li role="presentation" ng-click="changeTab(0)"><a href="#">討論情報</a></li>
+                    </ul>
+                    <info-table></info-table>
+                </div>
+            </div>
+
+
+            <div class="row col-sm-8" style="height: 330px;overflow:auto;">
+                <ul class="nav nav-tabs">
+                    <li role="presentation" ng-click="changeTab(0)"><a href="#">マップ</a></li>
+                    <li role="presentation" ng-click="changeTab(1)"><a href="#">ログ</a></li>
+                    <li role="presentation" ng-click="changeTab(2)"><a href="#">入力情報</a></li>
+                    <li role="presentation" ng-click="changeTab(3)"><a href="#">主張情報</a></li>
+                    <li role="presentation" ng-click="changeTab(4)"><a href="#">入力情報</a></li>
+                </ul>
+
+                <div class="panel">
+                    <div ng-show="changeTabVal==0"><analysis-map-result2></analysis-map-result2></div>
+                    <div ng-show="changeTabVal==1"><statement-map-result></statement-map-result></div>
+                    <div ng-show="changeTabVal==2"><analysis-result></analysis-result></div>
+                    <div ng-show="changeTabVal==3"><top-article></top-article></div>
+                    <div ng-show="changeTabVal==4"><statement-result></statement-result></div>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
     </div>
 </div>
 
 
-
-<div class="row" ng-if="LAN=='CN'">
-    <div  class="panel panel-info row">
-        <div class="panel-heading"><span ng-click="infoAndAnalysisMap(1)">辩论信息</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span ng-click="infoAndAnalysisMap(2)">分析结果</span></div>
-        <div class="panel-body" style="height: {{infoAndAnalysisMapBodyHeight}}px">
-            <info-table ng-show="infoAndAnalysisMapVal == 1"></info-table>
-            <analysis-result  ng-show="infoAndAnalysisMapVal == 2"></analysis-result>
-        </div>
-    </div>
-</div>

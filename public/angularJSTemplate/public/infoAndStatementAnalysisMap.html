@@ -1,18 +1,33 @@
 <div ng-if="LAN == 'JP'">
-<div class="row">
-    <div  class="panel panel-info">
+<div class="row" style="height:850px;">
+    <div  class="panel panel-info" style="height:80%;overflow: auto">
         <div class="panel-heading">
             <span ng-click="infoAndStatementAnalysisMapTab(1)">試合の情報</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span ng-click="infoAndStatementAnalysisMapTab(2)">分析の結果マップ</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <span ng-click="infoAndStatementAnalysisMapTab(3)">立論の結果マップ</span></div>
-        <div class="panel-body" style="height: 400px">
+            <span ng-click="infoAndStatementAnalysisMapTab(3)">立論の結果マップ</span>
+
+            <div class="pull-right">
+                <a href="/release/group">戻る</a>
+                <a href="/release/logout">ログアウト</a>
+                <a ng-click="leave()">退室</a>
+            </div>
+
+
+        </div>
+        <div class="panel-body" style="height: 80%">
             <info-table ng-show="infoAndStatementAnalysisMapTabVal == 1"></info-table>
             <analysis-map-result  ng-show="infoAndStatementAnalysisMapTabVal == 2"></analysis-map-result>
             <statement-map-result  ng-show="infoAndStatementAnalysisMapTabVal == 3"></statement-map-result>
         </div>
     </div>
 </div>
+
+
+
+
 </div>
+
+
 
 
 
@@ -23,7 +38,16 @@
             <div class="panel-heading">
                 <span ng-click="infoAndStatementAnalysisMapTab(1)">辩论的信息</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <span ng-click="infoAndStatementAnalysisMapTab(2)">分析结果逻辑图(正在开发)</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span ng-click="infoAndStatementAnalysisMapTab(3)">阐述结果逻辑图(正在开发)</span></div>
+                <span ng-click="infoAndStatementAnalysisMapTab(3)">阐述结果逻辑图(正在开发)</span>
+
+                <div class="pull-right">
+                    <a href="/release/group">返回主页</a>
+                    <a href="/release/logout">登出</a>
+                    <a ng-click="leave()">退室</a>
+                </div>
+
+
+            </div>
             <div class="panel-body" style="height: 400px">
                 <info-table ng-show="infoAndStatementAnalysisMapTabVal == 1"></info-table>
                 <analysis-map-result  ng-show="infoAndStatementAnalysisMapTabVal == 2"></analysis-map-result>
