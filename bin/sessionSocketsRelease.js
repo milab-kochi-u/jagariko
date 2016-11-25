@@ -229,7 +229,11 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                 socket.emit("receiveAnalysis",{})
                 socket.to(session.debateLogin.rNum).broadcast.emit("receiveAnalysis",{})
             },function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyAnalysisData:sendObj}},this.hold(function(){
+                console.log({num:session.debateLogin.num,rNum:session.debateLogin.rNum})
+                console.log({everyAnalysisData:sendObj})
+                console.log(sendObj.analysisData.analysisResult)
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyAnalysisData:sendObj}},this.hold(function(res){
+
 
                 }))
             })()

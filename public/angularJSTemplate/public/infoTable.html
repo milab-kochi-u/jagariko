@@ -1,5 +1,4 @@
-<div class="row" ng-if="LAN=='JP'">
-<table class="table" style="width: 92%;margin:0 auto">
+<table class="table" style="width: 90%;margin:0 auto">
 
 
 
@@ -97,13 +96,13 @@
         </td>
     </tr>
 
-    <tr ng-class="{'warning':debateInfo.status == 'analysis'}">
+    <tr ng-class="{'warning':debateInfo.status == 'analysis' && !debateInfo.preFinish}">
         <td colspan="4">
             <span>賛成側が意見を述べました,反対側は賛成側の意見を分析しています</span>
         </td>
     </tr>
 
-    <tr ng-class="{'warning':debateInfo.status == 'check'}">
+    <tr ng-class="{'warning':debateInfo.status == 'check'  && !debateInfo.preFinish}">
         <td colspan="4">
             <span>反対側は分析結果をだしました、賛成側は分析結果を検討しています</span>
         </td>
@@ -145,6 +144,19 @@
         </td>
     </tr>
 
+    <tr ng-class="{'warning':debateInfo.status == 'analysis' && debateInfo.preFinish}">
+        <td colspan="4">
+            <span>賛成側が意見を述べました,反対側は賛成側の意見を分析しています</span>
+        </td>
+    </tr>
+
+
+    <tr ng-class="{'warning':debateInfo.status == 'check'  && debateInfo.preFinish}">
+        <td colspan="4">
+            <span>反対側は分析結果をだしました、賛成側は分析結果を検討しています</span>
+        </td>
+    </tr>
+
 
     <tr ng-class="{'warning':debateInfo.status == 'finish'}">
         <td colspan="4">
@@ -167,7 +179,6 @@
 
 </table>
 
-</div>
 
 
 

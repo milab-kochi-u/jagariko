@@ -1,4 +1,4 @@
-<div ng-if="LAN=='JP'">
+<div ng-if="LAN=='JP'" style="height: 100%">
 <div  ng-if="conceptStatus=='analysis'">
 <div  class="panel panel-info" ng-if="inputStatus.name == 'claim' || inputStatus.name == 'newClaim'">
     <div class="panel-heading">主張</div>
@@ -99,6 +99,53 @@
 
 
 </div>
+
+
+    <div ng-if="conceptStatus=='judgeMent'" style="height: 100%">
+
+        <div  class="panel panel-info" style="height: 100%">
+            <div class="panel-heading">勝敗判定能力得点 (Jポイント) の導入
+            </div>
+            <div class="panel-body" id="inputExampleBody">
+                <p>討論の勝敗判定を 客観的にどれくらい正しく評価できるかを ポイント化したもの
+                </p>
+                <p>
+                <p>自己評価や他者の討論の勝敗判定で， 自分の判定が確定された判定と合致したかどうかで変動する
+                </p>
+                <ul>
+                    <li>判定が外れる → Jポイントが下がる
+                    </li>
+                    <li>判定が当たる → Jポイントが上がる</li>
+                </ul>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div ng-if="conceptStatus=='noberu'" style="height: 100%">
+
+        <div  class="panel panel-info" style="height: 100%">
+            <div class="panel-heading">勝敗判定能力得点 (Jポイント) の導入
+            </div>
+            <div class="panel-body" id="inputExampleBody">
+                <p>討論の勝敗判定を 客観的にどれくらい正しく評価できるかを ポイント化したもの
+                </p>
+                <p>
+                <p>自己評価や他者の討論の勝敗判定で， 自分の判定が確定された判定と合致したかどうかで変動する
+                </p>
+                <ul>
+                    <li>判定が外れる → Jポイントが下がる
+                    </li>
+                    <li>判定が当たる → Jポイントが上がる</li>
+                </ul>
+                </p>
+            </div>
+        </div>
+
+    </div>
 
 
 

@@ -1,4 +1,4 @@
-<div class="row" style="height: 50%;" >
+<div class="row" style="" >
     <div class="row">
     <div  class="panel panel-info ">
         <div class="panel-heading" style="height:40px;">
@@ -14,37 +14,36 @@
                 <a ng-click="leave()">退室</a>
             </div>
         </div>
-        <div class="panel-body">
+        <div class="panel-body" style="padding: 12px;">
 
 
-            <div class="row col-sm-4" style="height: 330px;overflow:auto;" >
+            <div class="row col-sm-4">
                 <div class="row">
                     <ul class="nav nav-tabs">
                         <li role="presentation" ng-click="changeTab(0)"><a href="#">討論情報</a></li>
                     </ul>
+                    <div class="row" style="height: 220px;overflow: auto">
                     <info-table></info-table>
+                    </div>
                 </div>
             </div>
 
-
-            <div class="row col-sm-8" style="height: 330px;overflow:auto;">
-                <ul class="nav nav-tabs">
+            <div class="row col-sm-8">
+                <ul class="nav nav-tabs" style="">
                     <li role="presentation" ng-click="changeTab(0)"><a href="#">マップ</a></li>
                     <li role="presentation" ng-click="changeTab(1)"><a href="#">ログ</a></li>
-                    <li role="presentation" ng-click="changeTab(2)"><a href="#">入力情報</a></li>
                     <li role="presentation" ng-click="changeTab(3)"><a href="#">主張情報</a></li>
-                    <li role="presentation" ng-click="changeTab(4)"><a href="#">入力情報</a></li>
+                    <li role="presentation" ng-click="changeTab(5)"><a href="#">テスト用マップ</a></li>
                 </ul>
 
-                <div class="panel">
+                <div class="panel" style="height:220px;overflow:auto">
                     <div ng-show="changeTabVal==0"><analysis-map-result2></analysis-map-result2></div>
                     <div ng-show="changeTabVal==1"><statement-map-result></statement-map-result></div>
-                    <div ng-show="changeTabVal==2"><analysis-result></analysis-result></div>
+
                     <div ng-show="changeTabVal==3"><top-article></top-article></div>
-                    <div ng-show="changeTabVal==4"><statement-result></statement-result></div>
+                    <div ng-show="changeTabVal==5"><analysis-map-result3></analysis-map-result3></div>
                 </div>
             </div>
-
 
 
         </div>

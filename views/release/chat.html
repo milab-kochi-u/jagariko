@@ -25,6 +25,75 @@
     <script src="/release/ui-bootstrap-tpls-2.2.0.min.js"></script>
 
     <script src="/_debate/d3/d3.js"></script>
+
+
+    <style>
+
+
+
+        .balloon {
+            background-color:#fff;
+            border:1px solid #000;
+            border-radius:5px;
+            position:relative;
+        }
+
+        .__balloon:before {
+            border:10px solid transparent;
+            border-left-color:#fff;
+            border-right-width:0;
+            right:-9px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+            z-index:1;
+        }
+
+        .__balloon:after {
+            border:10px solid transparent;
+            border-left-color:#000;
+            border-right-width:0;
+            right:-10px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+        }
+
+
+
+        ._balloon:before {
+            border:10px solid transparent;
+            border-right-color:#fff;
+            border-left-width:0;
+            left:-9px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+            z-index:1;
+        }
+
+        ._balloon:after {
+            border:10px solid transparent;
+            border-right-color:#000;
+            border-left-width:0;
+            left:-10px;
+            content:"";
+            display:block;
+            top:15px;
+            position:absolute;
+            width:0;
+        }
+
+
+
+
+    </style>
 </head>
 <body ng-app="myApp" ng-init="LAN='JP'">
 
@@ -505,12 +574,14 @@
 
 
 
-    myApp.directive("startDebate",function(){
+    myApp.directive("startDebate",function(coreSocket){
         return{
             scope:false,
 
             link:function(scope,element){
-
+                scope.submit = function(){
+                    coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
+                }
             },
             templateUrl:"/angularJSTemplate/process/startDebate.html"
         }
@@ -562,12 +633,14 @@
     })
 
 
-    myApp.directive("stateDebate",function(){
+    myApp.directive("stateDebate",function(coreSocket){
         return{
             scope:false,
 
             link:function(scope,element){
-
+                scope.submit = function(){
+                    coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
+                }
             },
             templateUrl:"/angularJSTemplate/process/stateDebate.html"
         }
@@ -611,7 +684,7 @@
         }
     })
 
-    myApp.directive("noberuDebate",function(){
+    myApp.directive("noberuDebate",function(coreSocket){
         return{
             scope:false,
 
@@ -619,6 +692,10 @@
                     if(scope.debateInfo.order == scope.totalNum-1){
                         //说明现在这个阶段不能立論了,因为快要结束了
                         scope.lastStatement = 1
+                    }
+
+                    scope.submit = function(){
+                        coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
                     }
             },
             templateUrl:"/angularJSTemplate/process/noberuDebate.html"
@@ -629,6 +706,9 @@
         return{
             scope:false,
             link:function(scope,element){
+
+
+                scope.conceptStatus = "judgeMent"
                 var statementMapInformation = scope.getDebateStatementMapInformation()
                 var analysisMapInformation =  scope.getDebateAnalysisMapInformation()
                 statementMapInformation.then(function(msg){
@@ -1045,9 +1125,17 @@
                     foreignObject.attr("class","draw")
 
                     if(($scope.debateInfo.status == 'appeal' && $scope.debateInfo.position == 2) || ($scope.debateInfo.status == 'lookup' && $scope.debateInfo.position == 1)){
+
+
                         var bordered = foreignObject.attr("bordered") || 1
 
                             foreignObject.on("click",function(){
+
+
+                                if(conf[3] == "claim"){
+                                    //规定主张不能被质疑
+                                    return false;
+                                }
 
                                 if(bordered %2 == 1){
                                     this.style.border = "4px solid yellow"
@@ -1073,6 +1161,10 @@
                                     var _type =  conf[3]
                                     var indexToAnalysis,indexToStatement //statement's index <--> analysis random(_index) <----> statements' random(__index) statement中異議説明连analysis中的random,然后再通过analysis中的index找到最初对哪个statement质疑的
                                     var dissentExplainI = conf[4]
+
+
+
+
 
                                     if(_category == "construct"){
                                         indexToStatement = $scope.analysisData.indexToStatement
@@ -1369,7 +1461,6 @@
         return {
             scope:false,
             controller:function($scope,$rootScope,coreSocket){
-                $scope.inputFormAreachangeInputTabVal = 1
 
                 $scope.conceptStatus = "analysis"   //concept directive controller
 
@@ -1431,13 +1522,10 @@
 
                 }
 
-                //入力再投稿のお願い
-                $scope.inputFormAreachangeInputTab = function(){
-                    $scope.inputFormAreachangeInputTabVal = ($scope.inputFormAreachangeInputTabVal+1)%2
-                }
 
 
                 $scope.output = function(){
+
 
                     if(!$scope._contents){
                         $scope.data1Success = 0
@@ -1462,6 +1550,8 @@
                     }else{
 
                     }
+
+                    //画图
 
                     $rootScope.$broadcast('click',{});
                     checkIfOriginalDataExists()
@@ -1504,9 +1594,10 @@
                             $scope.analysisObject = {target:"dissentExplain",i:0}
                             checkIfOriginalDataExists()
                         }else{
-                            console.log("send")
-                            coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
-                            print()
+                            //console.log("send")
+                            //coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
+                            //print()
+                            $scope.analysisObject.target = "preview"
                         }
                     } else if($scope.analysisObject.target == "dissentExplain"){
                         $scope.inputStatus.name = "claim"
@@ -1516,15 +1607,27 @@
                             $scope.analysisObject.i = parseInt($scope.analysisObject.i) + 1
                             checkIfOriginalDataExists()
                         }else{
-                            console.log("send")
-                            coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
-                            print()
+                            //console.log("send")
+                            //coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
+                            //print()
+                            $scope.analysisObject.target = "preview"
                         }
                     }else{
 
                     }
 
 
+                }
+
+
+                $scope.submit = function(){
+                   // coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
+
+
+
+                    console.log("sfffffssssss")
+                    console.log($scope.analysisData)
+                      coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
                 }
 
                 $scope.noEvidence = function(){
@@ -1809,7 +1912,7 @@
 
 
 
-    myApp.directive("inputTextArea",function(coreSocket,$compile) {
+    myApp.directive("inputTextArea",function(coreSocket,$compile,$rootScope) {
         return {
             scope: false,
             link:function(scope, element, attrs){
@@ -1839,6 +1942,15 @@
                         clearDraw()
                         draw()
                     },800)
+
+
+
+
+                    scope.$on('drawStatementResult',function(event, data){
+                        clearDraw()
+                        draw()
+
+                    });
 
 
                     if(scope.dissentData.length > 0){
@@ -1877,7 +1989,11 @@
 
                                     if(scope.lastStatement == 1){
                                             //如果到了准结束的阶段,那么发送
-                                            submit()
+
+                                        scope.statementStatus.name = "preview"
+                                        scope.conceptStatus = "noberu"
+                                        $rootScope.$broadcast('drawStatementResult');
+                                        //submit()
                                     }else{
                                             //如果还没有到准结束的阶段那么阐述立論
                                             scope.dissentTxt = ""
@@ -1888,7 +2004,11 @@
 
                                 }
                         }else{
-                            submit()
+
+                            scope.statementStatus.name = "preview"
+                            scope.conceptStatus = "noberu"
+                            $rootScope.$broadcast('drawStatementResult');
+                            //submit()
                         }
 
 
@@ -2649,6 +2769,10 @@
 
 
 
+
+
+
+
     myApp.directive("analysisMapResult2",function(){
         return {
             scope:false,
@@ -2665,7 +2789,9 @@
                 var TOP = 35
 
                 var CLAIMWIDTH = (_width-2*LEFT)*0.4  //占据除去两个边距后5分之4的位置
+                var POPUPRECTWIDTH = CLAIMWIDTH
                 var CLAIMHEIGHT = 100;
+                var POPUPRECTHEIGHT = CLAIMHEIGHT
                 var CLAIMXINTERVAL = (_width-2*LEFT)*0.2 //间距占据除去两个编剧后5分之1的位置
                 var CLAIMYINTERVAL = 100
                 var SUPPORTYINTERVAL = 20
@@ -2922,9 +3048,6 @@
                 }
 
 
-                console.log(scope.mapData)
-                console.log(66666666666666666)
-                console.log(scope.mapDissentData)
 
 
 
@@ -3065,7 +3188,6 @@
 
 
 
-
                             drawLine(position)
                             //每循环一个claim画一次主线条
 
@@ -3127,6 +3249,12 @@
                     var button = div.append("button")
                     button.attr("class","btn btn-default")
                     button.text("論拠")
+                    var _id = "warrant"+Math.round(Math.random()*10000)
+                    button.attr("id",_id)
+                    document.getElementById(_id).onclick = function(){
+                        popUp(text,x,y,position)
+                    }
+
                     if(dissentArr){
                         button.append("span").attr("class","glyphicon glyphicon-star")
                     }
@@ -3152,6 +3280,62 @@
 
 
 
+                function popUp(text,x,y,position){
+
+                    d3.selectAll(".balloon").remove()
+
+                    var rect = svg.append("foreignObject")
+
+                    rect.attr("x",x)
+                    rect.attr("y",y)
+                    rect.attr("width",POPUPRECTWIDTH)
+                    rect.attr("height",POPUPRECTHEIGHT)
+
+
+                    var div = rect.append('xhtml:div')
+                    div.style("width",POPUPRECTWIDTH)
+                    div.style("height",POPUPRECTHEIGHT)
+                    div = div.append("div")
+
+
+                    div.attr("class","row col-sm-12 balloon")
+
+                    if(position == 1){
+                        rect.attr("x",x+WARRANTWIDTH + 30)
+                        div.classed("_balloon", true);
+                    }else{
+                        rect.attr("x",x-WARRANTHEIGHT)
+                        div.classed("__balloon", true);
+                    }
+
+                    div.style("width",POPUPRECTWIDTH+"px")
+                    div.style("background-color","#fff")
+
+
+                    var sdiv = div.append("div")
+                    sdiv.attr("class","row")
+
+                    var title = sdiv.append("div")
+                    title.attr("class","col-sm-10")
+
+                    var remove = sdiv.append("div")
+                    remove.attr("class","col-sm-6")
+                    remove = remove.append("span")
+                    remove.attr("class","glyphicon glyphicon-remove")
+                    remove.attr("aria-hidden","true")
+                    remove.style("cursor","pointer")
+
+                    remove.on("click",function(){
+                        rect.remove()
+                    })
+
+
+                    var content = sdiv.append("div")
+                    content.attr("class","col-sm-11")
+                    content.html(text)
+
+                }
+
                 function appendEvidence(text,position,dissentArr,eRandom,i,j,k){
                     if(!text) return;
 
@@ -3171,6 +3355,14 @@
                     var button = div.append("button")
                     button.attr("class","btn btn-default")
                     button.text("根拠")
+
+
+                    var _id = "evidence"+Math.round(Math.random()*10000)
+                    button.attr("id",_id)
+                    document.getElementById(_id).onclick = function(){
+                        popUp(text,x,y,position)
+                    }
+
 
                     if(dissentArr){
                         button.append("span").attr("class","glyphicon glyphicon-star")
@@ -3199,7 +3391,7 @@
                     return {x:x+10,y:y}
                 }
 
-                function appendRect(platform,x,y,type,text,position){
+                function appendRect(platform,x,y,type,text,position,_text){
                     if(!text)  return
                     var svg = platform
                     var foreignObject = svg.append("foreignObject")
@@ -3214,6 +3406,13 @@
                     var button = div.append("button")
                     button.attr("class","btn btn-danger")
                     button.text(text)
+
+                    var _id = type + Math.round(Math.random()*10000)
+                    button.attr("id",_id)
+
+                    document.getElementById(_id).onmouseover = function(){
+                        popUp(_text,x,y,position)
+                    }
                 }
 
                 function addDissentIfExists(obj,position,coordinateE,coordinateW){
@@ -3276,7 +3475,7 @@
                         var endMainLineX = startMainLineX
                         var endMainLineY
 
-                        appendRect(platform,x+30,y,"claim","主張",position)
+                        appendRect(platform,x+30,y,"claim","主張",position,obj[i].claim)
                         if(position == 1){
                             LASTYPRO = LASTYPRO + EVIDENCEHEIGHT + SUPPORTANDSUPPORTYINTERVAL
                         }else{
@@ -3294,7 +3493,7 @@
                             if(_obj.evidence){
                                 var _x = x+4*EVIDENCEWIDTH
 
-                                appendRect(platform,_x,y,"evidence","根拠",position)
+                                appendRect(platform,_x,y,"evidence","根拠",position,obj[i].support[j].evidence)
 
                                 //主体线和evidence模块的连线
                                 painLine(platform,startMainLineX,_x,y+EVIDENCEHEIGHT/2,y+EVIDENCEHEIGHT/2,"#e2e2e2")
@@ -3303,7 +3502,7 @@
 
                             if(_obj.warrant){
                                 var _x = x+2*EVIDENCEWIDTH
-                                appendRect(platform,_x,y,"warrant","論拠",position)
+                                appendRect(platform,_x,y,"warrant","論拠",position,obj[i].support[j].warrant)
                             }
 
                             if(_obj.warrant || _obj.evidence){
@@ -3317,7 +3516,7 @@
 
 
 
-                                addDissentIfExists(_obj,position,{x:_x,y:y},{x:_x,y:y})
+                                //addDissentIfExists(_obj,position,{x:_x,y:y},{x:_x,y:y})
                             }
                         }
 
@@ -3337,6 +3536,299 @@
 
             },
             templateUrl:"/angularJSTemplate/public/_analysisMapResult.html"
+        }
+    })
+
+
+
+
+    myApp.directive("analysisMapResult3",function() {
+        return {
+            scope: false,
+            link: function (scope, element) {
+
+
+
+                var _width = document.getElementById("testAnalysisMapSVG").offsetWidth //实际svg的宽度
+                var svg = d3.select("#analysisMapSVG").append("svg")
+                svg.attr("width","1200px")
+                svg.attr("height","2000px")
+                svg.style("background","#bdf")
+
+                var LEFT = _width*0.05
+                var TOP = 35
+
+                var CLAIMWIDTH = (_width-2*LEFT)*0.4  //占据除去两个边距后5分之4的位置
+                var CLAIMHEIGHT = 100;
+                var CLAIMXINTERVAL = (_width-2*LEFT)*0.2 //间距占据除去两个编剧后5分之1的位置
+                var CLAIMYINTERVAL = 100  //轮次内的主张之间的垂直间隙
+
+                var CLAIMTURNYINTERVAL = 150  //不同轮次内的主张和主张之间的垂直间隙
+                var SUPPORTYINTERVAL = 20
+                var CLAIMANDSUPPORTYINTERVAL = 20  //主张和support的纵距离
+                var SUPPORTANDSUPPORTYINTERVAL = 20  //support和support之间的纵距离
+                var SUPPORTELEMENTANDDISSENTEXPLAINELEMENTYINTERVAL = 30  //被质疑的evidence或者warrant距离下面的解释说明的主张的距离
+
+                var ELEMENTWIDTH = CLAIMWIDTH/5  //占据5分之1的的位置
+                var ELEMENTHEIGHT = ELEMENTWIDTH*0.7
+
+
+                var CLAIMXPRO = LEFT
+                var CLAIMXCON = LEFT + CLAIMWIDTH + CLAIMXINTERVAL
+
+
+                var LASTY = ["",TOP,TOP] //一个数组的第二项和第三项分别存储正方和反方的升降机标尺数据
+
+                var ELEMENTXINTERVAL = CLAIMWIDTH/5
+
+                var MAINLINEXPRO = CLAIMXPRO + ELEMENTWIDTH/3  //左侧主线条的起点横坐标
+                var MAINLINEXCON = CLAIMXCON + ELEMENTWIDTH/3  //右侧主线条的起点横坐标
+
+                var MAINLINESTARTYPRO,MAINLINELASTYPRO //左侧主线条的起点和终点纵坐标
+                var MAINLINESTARTYCON,MAINLINELASTYCON //右侧主线条的起点和终点纵坐标
+
+
+                scope.mapData = {pro:[],con:[]}
+                scope.mapDissentData = []
+                dealWithData()
+                function dealWithData() {
+                    //先把主张的分析结果合一块儿
+                    for (var i = 0; i < scope.analysisMapInformation.res.data.length; i++) {
+                        var analysisResult = scope.analysisMapInformation.res.data[i].analysisData.analysisResult
+                        var analysisDissentExplainData = scope.analysisMapInformation.res.data[i].analysisDissentExplainData
+
+                        if (analysisDissentExplainData.length > 0) scope.mapDissentData.push(analysisDissentExplainData)
+                        var position = scope.analysisMapInformation.res.data[i].position
+
+                        if (position == 1) {
+                            scope.mapData.pro.push(analysisResult)
+                        } else {
+                            scope.mapData.con.push(analysisResult)
+                        }
+                    }
+
+
+                    digui()
+                    //最难的递归啦
+
+                    function digui() {
+                        //递归处理质疑的质疑
+
+                        for (var i = 0; i < scope.mapDissentData.length; i++) {
+                            for (var j = 0; j < scope.mapDissentData[i].length; j++) {
+
+                                var indexToAnalysis = scope.mapDissentData[i][j].indexToAnalysis
+
+                                var _slightestOrNot = slightestOrNot(scope.mapDissentData[i][j].analysisResult)
+
+                                if (_slightestOrNot) {
+                                    var _findRandomByIndexToAnalysis = findRandomByIndexToAnalysis(indexToAnalysis)
+
+                                    if (_findRandomByIndexToAnalysis) {
+                                        //删掉队列中的scope.mapDissentData[i][j] 放入相应的子元素下面
+                                        var _copy = scope.mapDissentData[i][j].analysisResult
+                                        scope.mapDissentData[i].splice(j, 1)
+                                        var _type = _findRandomByIndexToAnalysis.type
+                                        var _i = _findRandomByIndexToAnalysis.i
+                                        var _j = _findRandomByIndexToAnalysis.j
+                                        var _k = _findRandomByIndexToAnalysis.k
+                                        var _m = _findRandomByIndexToAnalysis.m
+
+                                        if (_type == "warrant") {
+                                            scope.mapDissentData[_i][_j].analysisResult[_k].support[_m].wDissent = _copy
+                                        }
+
+                                        if (_type == "evidence") {
+                                            scope.mapDissentData[_i][_j].analysisResult[_k].support[_m].eDissent = _copy
+                                        }
+
+
+                                        digui()
+                                    }
+                                }
+
+                                //alert(findRandomByIndexToAnalysis(indexToAnalysis,i,j))
+
+
+                            }
+                        }
+
+                        return false;
+
+                    }
+
+
+                    function slightestOrNot(arr) {
+                        for (var i = 0; i < arr.length; i++) {
+                            for (var j = 0; j < arr[i].support.length; j++) {
+
+                                if (findIndexToAnalysisByRandom(arr[i].support[j].wrandom)) {
+                                    return false
+                                }
+
+                                if (findIndexToAnalysisByRandom(arr[i].support[j].erandom)) {
+                                    return false
+                                }
+
+
+                            }
+                        }
+
+                        return true
+                    }
+
+
+                    function findIndexToAnalysisByRandom(random) {
+
+                        for (var i = 0; i < scope.mapDissentData.length; i++) {
+                            for (var j = 0; j < scope.mapDissentData[i].length; j++) {
+
+                                for (var k = 0; k < scope.mapDissentData[i][j].analysisResult.length; k++) {
+                                    var indexToAnalysis = scope.mapDissentData[i][j].indexToAnalysis
+                                    if (indexToAnalysis == random) {
+                                        return true
+                                    }
+                                }
+
+
+                            }
+                        }
+
+                        return false;
+                    }
+
+
+                    function findRandomByIndexToAnalysis(indexToAnalysis) {
+
+
+                        for (var i = 0; i < scope.mapDissentData.length; i++) {
+                            for (var j = 0; j < scope.mapDissentData[i].length; j++) {
+
+                                for (var k = 0; k < scope.mapDissentData[i][j].analysisResult.length; k++) {
+
+                                    for (var m = 0; m < scope.mapDissentData[i][j].analysisResult[k].support.length; m++) {
+                                        var wrandom = scope.mapDissentData[i][j].analysisResult[k].support[m].wrandom
+                                        var erandom = scope.mapDissentData[i][j].analysisResult[k].support[m].erandom
+
+                                        if (indexToAnalysis == wrandom) {
+                                            return {type: "warrant", i: i, j: j, k: k, m: m}
+                                        }
+
+                                        if (indexToAnalysis == erandom) {
+                                            return {type: "evidence", i: i, j: j, k: k, m: m}
+                                        }
+
+                                    }
+                                }
+
+
+                            }
+                        }
+
+                        return false;
+                    }
+
+
+                    //再处理刚刚合一块儿的主张结果,对其中每个元素做检查,看是否有对他的质疑解释
+
+
+                    for (var i = 0; i < scope.mapData.pro.length; i++) {
+                        for (var j = 0; j < scope.mapData.pro[i].length; j++) {
+                            var res = findDissentAnalysisResult(scope.mapData.pro[i][j].random)
+                            if (res) {
+                                scope.mapData.pro[i][j].cDissent = res
+                            }
+
+                            for (var k = 0; k < scope.mapData.pro[i][j].support.length; k++) {
+                                var res1 = findDissentAnalysisResult(scope.mapData.pro[i][j].support[k].wrandom)
+                                if (res1) {
+                                    scope.mapData.pro[i][j].support[k].wDissent = res1
+                                    //初始情况不显示
+                                    scope.mapData.pro[i][j].support[k].wDissentShow = 0
+                                }
+                                var res2 = findDissentAnalysisResult(scope.mapData.pro[i][j].support[k].erandom)
+                                if (res2) {
+                                    scope.mapData.pro[i][j].support[k].eDissent = res2
+                                    //初始情况不显示
+                                    scope.mapData.pro[i][j].support[k].eDissentShow = 0
+                                }
+                            }
+                        }
+                    }
+
+
+
+                    function findDissentAnalysisResult(random){
+                        for(var i=0;i<scope.mapDissentData.length;i++){
+                            for(var j=0;j<scope.mapDissentData[i].length;j++){
+                                if(random == scope.mapDissentData[i][j].indexToAnalysis){
+                                    return scope.mapDissentData[i][j].analysisResult
+                                }
+                            }
+                        }
+                        return false
+                    }
+
+
+                    console.log(scope.mapData)
+                    console.log(66666666666666666)
+                    console.log(scope.mapDissentData)
+
+                    //主体思想是嵌套循环数据,分为左右两个区域
+                    starDraw(scope.mapData.pro,1)
+                    starDraw(scope.mapData.con,2)
+
+
+                    function starDraw(data,position){
+
+                        for(var i=0;i<data.length;i++){
+
+                            //第i轮的主张
+
+                            for(var j=0;j<data[i].length;j++){
+
+                                if(!data[i][j].claim) return;
+
+                                appendElement(CLAIMXPRO,LASTY[position],"主張")
+
+                                //如果该轮次内还有下一个主张,把升降机下降到下一个主张的高度
+                                if(data[i+1]){
+                                    LASTY[position] = LASTY[position] + ELEMENTHEIGHT + CLAIMYINTERVAL
+                                }else{
+                                    //如果次主张下的第一个support有数据的话,那么把升降机下降至support数据的高度
+                                    if(!data[i][j].support[0].evidence){
+                                       LASTY[position] = LASTY[position] + ELEMENTHEIGHT + CLAIMANDSUPPORTYINTERVAL
+                                    }
+
+                                }
+                            }
+
+                        }
+
+                    }
+
+
+                    function appendElement(x,y,text){
+                        if(!text)  return
+                        var foreignObject = svg.append("foreignObject")
+                        foreignObject.attr("class","mapData")
+                        foreignObject.attr("width",ELEMENTWIDTH)
+                        foreignObject.attr("height",ELEMENTHEIGHT)
+
+                        foreignObject.attr("x",x)
+                        foreignObject.attr("y",y)
+                        var div = foreignObject.append('xhtml:div')
+
+                        var button = div.append("button")
+                        button.attr("class","btn btn-danger")
+                        button.text(text)
+
+                    }
+
+                }
+
+            },
+            templateUrl:"/angularJSTemplate/public/__analysisMapResult.html"
         }
     })
 

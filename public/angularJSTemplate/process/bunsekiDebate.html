@@ -13,40 +13,39 @@
     </div>
 </div>
 -->
+<div>
+    <info-and-analysis-map></info-and-analysis-map>
+</div>
 
-    <div style="height: 50%">
-        <info-and-analysis-map></info-and-analysis-map>
-    </div>
-    <div style="height: 50%;" class="row">
-        <div class="row">
-        <div  class="panel panel-info">
-            <div class="panel-body" >
-                <div class="row col-sm-4">
-                    <concept></concept>
-                </div>
-                <div class="row col-sm-1" style="height: 330px;overflow:auto;"></div>
-
-                <div class="row col-sm-7" style="height: 330px;overflow:auto;">
+    <div class="row">
+        <div style="height: 50%;" class="row">
+            <div  class="panel panel-info">
+                <div class="panel-body " >
 
 
-                    <div ng-show="debateInfo.position==1">
-                        <input-form-area></input-form-area>
-                    </div>
+                    <div class="col-sm-8 " style="height: 330px;overflow:auto;">
 
-                    <div  class="panel panel-info" ng-if="debateInfo.position==2">
-                        <div class="panel-heading">
-                            <span>相手の分析結果をお待ちください</span>
+
+                        <div ng-show="debateInfo.position==1">
+                            <input-form-area></input-form-area>
                         </div>
-                        <div class="panel-body" id="inputBody">
+
+                        <div  class="panel panel-info" ng-show="debateInfo.position==2">
+                            <div class="panel-heading">
+                                <span>相手の分析結果をお待ちください</span>
+                            </div>
+                            <div class="panel-body" id="inputBody">
+                            </div>
                         </div>
+
+
+
                     </div>
-
-
-
+                    <div class="col-sm-4 row">
+                        <concept></concept>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
     </div>
 

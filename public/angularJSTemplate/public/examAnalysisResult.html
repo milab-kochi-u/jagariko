@@ -3,35 +3,30 @@
 
 
 
+<div>
 
-                <div  class="panel panel-info" >
-                    <div class="panel-heading">
-                        正しく分析されているか確認してください
-                    </div>
-                    <div class="panel-body">
-                        <div class="radio">
+                        <div>
+
+
+                        <div class="radio col-sm-8">
                             <label><input type="radio" value="1" ng-model="examAnalysisResultTabVal">分析結果に同意する</label>
                             <label><input type="radio" value="2" ng-model="examAnalysisResultTabVal">分析結果に同意しない</label>
                         </div>
 
 
-                        <div class="form-group" ng-show="examAnalysisResultTabVal == 2">
+                        <div class="form-group col-sm-8" ng-show="examAnalysisResultTabVal == 2">
                             <input type="text" class="form-control" placeholder="私の想像したものとずれている">
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-sm-4">
                             <button type="button" class="btn btn-default" ng-click="submit()">送信</button>
                         </div>
-                    </div>
 
-
-                </div>
-
+                        </div>
 
 
 
-
-
+</div>
 
 
 
