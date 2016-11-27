@@ -9,6 +9,9 @@ var connectionList = {}; //存储当前连接信息
 
 
 var sessionSockets = function(sessionSockets,steps,mongo,io) {
+    // 房间用户名单
+    var roomInfo = {};
+
 
     sessionSockets.of("/release").on("connection", function (err, socket, session) {
 
@@ -16,8 +19,7 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
         console.log(socket.id)
 
 
-        // 房间用户名单
-        var roomInfo = {};
+
 
         var roomID = socket.id
 
@@ -70,16 +72,21 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
             delete loginInfo['password']
 
 
-            console.log(msg.username)
             var user = msg.username;
 
+
             // 将用户昵称加入房间名单中
-            if (!roomInfo[roomID]) {
-                roomInfo[roomID] = [];
+
+            var roomId = "debate" + session.debateLogin.rNum
+
+            console.log(roomInfo)
+
+            if (!roomInfo[roomId]) {
+                roomInfo[roomId] = [];
             }
-            roomInfo[roomID].push(user);
+            roomInfo[roomId].push({username:session.debateLogin.username});
 
-
+            console.log(roomInfo)
 
 
             socket.join(session.debateLogin.rNum)
@@ -296,7 +303,16 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
         })
 
 
+
+        //对方正在输入
+
+        socket.on("textInputing",function(msg){
+            socket.to(session.debateLogin.rNum).broadcast.emit("textInputing",msg)
+        })
+
+
         socket.on('disconnect', function(msg){
+
             if(!session){
                 return;
             }
@@ -304,6 +320,18 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
             if(!session.debateLogin){
                 return;
             }
+
+            var roomId = "debate" + session.debateLogin.rNum
+
+            for(var i=0;i<roomInfo[roomId].length;i++){
+                if(roomInfo[roomId][i].username == session.debateLogin.username){
+                    delete roomInfo[roomId].splice(i,1)
+                }
+            }
+
+
+            console.log(roomInfo)
+
             console.log("room debate has been out of connection")
             console.log(msg)
             if(!session){

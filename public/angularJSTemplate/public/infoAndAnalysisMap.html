@@ -32,16 +32,11 @@
                 <ul class="nav nav-tabs" style="">
                     <li role="presentation" ng-click="changeTab(0)"><a href="#">マップ</a></li>
                     <li role="presentation" ng-click="changeTab(1)"><a href="#">ログ</a></li>
-                    <li role="presentation" ng-click="changeTab(3)"><a href="#">主張情報</a></li>
-                    <li role="presentation" ng-click="changeTab(5)"><a href="#">テスト用マップ</a></li>
                 </ul>
 
-                <div class="panel" style="height:220px;overflow:auto">
-                    <div ng-show="changeTabVal==0"><analysis-map-result2></analysis-map-result2></div>
+                <div class="panel" style="height:220px;overflow:auto" id="navyMap">
+                    <div ng-show="changeTabVal==0"><analysis-map-result3></analysis-map-result3></div>
                     <div ng-show="changeTabVal==1"><statement-map-result></statement-map-result></div>
-
-                    <div ng-show="changeTabVal==3"><top-article></top-article></div>
-                    <div ng-show="changeTabVal==5"><analysis-map-result3></analysis-map-result3></div>
                 </div>
             </div>
 

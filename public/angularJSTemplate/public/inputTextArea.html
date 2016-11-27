@@ -100,7 +100,6 @@
 </div>
 -->
 
-
 <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'dissent'"  role="alert">
     <a href="#" class="alert-link">まず異議の部分を説明してください</a>
     <p>異議:</p>
@@ -119,7 +118,8 @@
 <label ng-show="statementStatus.name == 'claim'" >立論:</label>
 
 
-<textarea class="form-control" rows="7" ng-show="statementStatus.name == 'dissent' || statementStatus.name == 'claim'" ng-model="statement" ></textarea>
+
+<textarea class="form-control" rows="7" ng-show="statementStatus.name == 'dissent' || statementStatus.name == 'claim'" ng-model="statement" ng-change="inputing()" ></textarea>
 <p>
     <span ng-if="data2Success==0">入力項目が必須</span>
     <button type="button" class="btn btn-default pull-right" ng-show="statementStatus.name == 'dissent'" ng-click="output2()" >次へ</button>
