@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>group page</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css" >
     <![endif]-->
     <!--<script src="/release/angular.min.js"></script>-->
 
@@ -98,7 +98,6 @@
 <body ng-app="myApp" ng-init="LAN='JP'">
 
 <div  class="container" ng-controller="myController" >
-
     <wait-debate ng-if="statusController.waitDebate"></wait-debate>
     <start-debate ng-if="statusController.startDebate"></start-debate>
     <analysis-debate ng-if="statusController.analysisDebate"></analysis-debate>
@@ -110,6 +109,17 @@
     <lookup-debate ng-if="statusController.lookupDebate"></lookup-debate>
     <noberu-debate ng-if="statusController.noberuDebate"></noberu-debate>
     <finish-debate ng-if="statusController.finishDebate"></finish-debate>
+
+    <!-- no analysis function -->
+
+    <!--noAnalysisStart-->
+    <!--noAnalysisFuncAppealAndState-->
+    <!--noAnalysisFuncLookupAndNoberu-->
+
+    <no-analysis-start-debate ng-if="statusController.noAnalysisStartDebate"></no-analysis-start-debate>
+    <no-analysis-func-appeal-and-state-debate ng-if="statusController.noAnalysisFuncAppealAndStateDebate"></no-analysis-func-appeal-and-state-debate>
+    <no-analysis-finish-debate ng-if="statusController.noAnalysisFinishDebate"></no-analysis-finish-debate>
+
 
 </div>
 </body>
@@ -143,8 +153,6 @@
         };
     });
 
-
-
     myApp.factory("myPost",function($http){
         return{
             postData:function(url,data){
@@ -155,6 +163,44 @@
         }
     })
 
+    myApp.factory("getDebateStatementMapInformation",function(myPost,$q){
+        return{
+            getDebateStatementMapInformation:function(){
+                var deferred = $q.defer();
+                myPost.postData("/release/getDebateStatementMapInformation").then(function(_res){
+                    console.log("getDebateStatementMapInformation")
+                    console.log(_res)
+                    if(_res.data){
+                        deferred.resolve({err:0,msg:"data acquired",res:_res});
+                    }else{
+                        deferred.reject({err:1,msg:"data not acquired",res:_res});
+                    }
+                })
+                return deferred.promise;
+            }
+        }
+    })
+
+    myApp.factory("getDebateAnalysisMapInformation",function(myPost,$q) {
+        return{
+            getDebateAnalysisMapInformation:function(){
+
+                var deferred = $q.defer();
+
+                myPost.postData("/release/getDebateAnalysisMapInformation").then(function(_res){
+                    console.log("getDebateAnalysisMapInformation")
+                    console.log(_res)
+                    if(_res.data){
+                        deferred.resolve({err:0,msg:"data acquired",res:_res});
+                    }else{
+                        deferred.reject({err:1,msg:"data not acquired",res:_res});
+                    }
+
+                })
+                return deferred.promise;
+            }
+        }
+    })
 
     myApp.controller("myController",function($scope,myPost,coreSocket,$q){
 
@@ -162,13 +208,13 @@
 
             initData($scope)
 
-
-
             var promise = getDebateInformation()
-            promise.then(function(msg){
-                checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
-            })
 
+            //promise.then(function(msg){
+                //checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+            //})
+
+            //进入房间
             var promise = getUserInformation()
             promise.then(function(msg){
                 coreSocket.emit("enterRoom",{username:$scope.username})
@@ -178,75 +224,126 @@
 
         init()
 
-        $scope.$watch("debateInfo.status",checkStatus)
-
-
+        //$scope.$watch("debateInfo.status",checkStatus)
 
         coreSocket.on("enterRoom",function(_res){
             var promise = getDebateInformation()
+
+            promise.then(function(msg){
+                checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+            })
+
         })
 
 
-        coreSocket.on('sys', function (sysMsg, users) {
+        coreSocket.on('refreshOnline', function (msg) {
             //alert(sysMsg)
+            var onlineInfo = msg.onlineInfo
+            console.log(11111111111)
+            console.log(onlineInfo)
+
+            var pro = $scope.debateInfo.pro
+            var con = $scope.debateInfo.con
+            var proOnline = false
+            var conOnline = false
+
+            for(var i=0;i<onlineInfo.length;i++){
+                    if(onlineInfo[i].username == pro) proOnline = true
+                    if(onlineInfo[i].username == con) conOnline = true
+            }
+
+            $scope.proOnline = proOnline
+            $scope.conOnline = conOnline
+
         });
-
-
-        coreSocket.on("prepared",function(_res){
-            var promise = getDebateInformation()
-        })
-
-        coreSocket.on("prepareCompelete",function(_res){
-            var promise = getDebateInformation()
-        })
 
         coreSocket.on("receiveStatement",function(_res){
             console.log("receive statement....")
             console.log(_res)
             var promise = getDebateInformation()
 
+            promise.then(function(msg){
+                checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+            })
         })
 
 
         coreSocket.on("receiveAnalysis",function(_res){
             console.log("receive result of analysis result")
             var promise = getDebateInformation()
+
+            promise.then(function(msg){
+                checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+            })
+
         })
 
         coreSocket.on("confirmAnalysisResultFinish",function(_res){
             console.log("result of analysis has been approved")
             var promise = getDebateInformation()
+
+            promise.then(function(msg){
+                checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+            })
         })
+
+
+
+        coreSocket.on("refuseAnalysisResultFinish",function(_res){
+            console.log("result of analysis has been approved")
+            var promise = getDebateInformation()
+
+            promise.then(function(msg){
+                checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+            })
+        })
+
+
+
 
         coreSocket.on("selectDissentFinish",function(msg){
             var promise = getDebateInformation()
-            if($scope.debateInfo.status == "appeal"){
-                console.log("con select dissent and prepare to do state")
-                $scope.debateInfo.status = "state"
-                $scope.debateInfo.preStatus = "appeal"
-            }else if($scope.debateInfo.status == "lookup"){
-                console.log("pro select dissent and prepare to do state")
-                $scope.debateInfo.status = "noberu"
-                $scope.debateInfo.preStatus = "lookup"
-            }else{
 
+
+            promise.then(function(_msg){
+
+
+                if($scope.debateInfo.status == "appeal"){
+                    console.log("con select dissent and prepare to do state")
+                    $scope.debateInfo.status = "state"
+                    $scope.debateInfo.preStatus = "appeal"
+                }else if($scope.debateInfo.status == "lookup"){
+                    console.log("pro select dissent and prepare to do state")
+                    $scope.debateInfo.status = "noberu"
+                    $scope.debateInfo.preStatus = "lookup"
+                }else{
+
+                }
+
+                checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+                console.log($scope.dissentData)
+                $scope.dissentData = msg.dissentData
+                $scope.statementStatus = msg.statementStatus
+                $scope.statementData = msg.statementData
+
+
+            })
+
+        })
+
+
+
+        coreSocket.on("sendCyousi",function(msg){
+            var cyousiVal = msg.cyousiVal
+            var position = msg.position
+
+            if(position == 1){
+                $scope.proCyousi = cyousiVal
+            }else{
+                $scope.conCyousi = cyousiVal
             }
 
-            console.log($scope.dissentData)
-            $scope.dissentData = msg.dissentData
-            $scope.statementStatus = msg.statementStatus
-
-            $scope.statementData = msg.statementData
-
         })
-
-
-
-        coreSocket.on("textInputing",function(_res){
-            $scope.textInputingContent = _res.content
-        })
-
-
 
 
 
@@ -255,16 +352,11 @@
             var deferred = $q.defer();
 
             myPost.postData("/release/getDebateInformation").then(function(_res){
-                console.log("get debate information")
-                console.log(_res)
-
                 if(_res.data.err == 1){
                     window.location = "/release/login"
                 }
 
-
                 if(_res.data){
-
                     $scope.debateInfo.title = _res.data.title
                     $scope.debateInfo.pro = _res.data.pro
                     $scope.debateInfo.con = _res.data.con
@@ -282,12 +374,23 @@
                     $scope.debateInfo.path = _res.data.path
 
                     $scope.everyStatementData = _res.data.everyStatement
-                    if($scope.everyStatementData) generateAnalysisResult($scope.everyStatementData)
+                    $scope.debateInfo.analysisFunc = _res.data.analysisFunc
+                    $scope.debateInfo.mapFunc = _res.data.mapFunc
+
+                    if($scope.debateInfo.analysisFunc == 1){
+                        //如果有分析功能的话那么处理分析数据的框架
+                        if($scope.everyStatementData) {
+                            generateAnalysisResult($scope.everyStatementData)
+                        }
+                    }
+
+
                     $scope.requestStatementMessage = _res.data.requestStatementMessage
                     $scope.refuseAnalysisResultReason = _res.data.refuseAnalysisResultReason
                     $scope.everyAnalysisData = _res.data.everyAnalysisData
 
 
+                    //如果该状态不是分析状态,那么就拿实际的分析数据,否则就拿空的分析数据供填写使用
                     if($scope.debateInfo.status != 'analysis' && $scope.debateInfo.status != 'bunseki'){
                         if(_res.data.everyAnalysisData){
                             $scope.analysisData = _res.data.everyAnalysisData.analysisData
@@ -296,11 +399,20 @@
                     }
 
 
+                    //这里如果是分析状态但是是属于被回退的分析状态,那么还是拿实际的分析结果数据供preview使用
+                    if(($scope.debateInfo.status == 'analysis' && $scope.debateInfo.preStatus == 'check') || ($scope.debateInfo.status == 'bunseki' && $scope.debateInfo.preStatus == 'kentou')){
+                        if(_res.data.everyAnalysisData){
+                            $scope.analysisData = _res.data.everyAnalysisData.analysisData
+                            $scope.analysisDissentExplainData = _res.data.everyAnalysisData.analysisDissentExplainData
+                        }
+                    }
 
                     $scope.debateInfo.order =  _res.data.order
                     $scope.debateInfo.preFinish =  _res.data.preFinish
                     $scope.debateInfo.proRate = parseInt(_res.data.proRate)
                     $scope.debateInfo.conRate = parseInt(_res.data.conRate)
+
+
                     deferred.resolve({err:0,msg:"data acquired"});
                 }else{
                     deferred.reject({err:1,msg:"data not acquired"});
@@ -309,62 +421,11 @@
             })
 
 
-            var statementMapInformation = getDebateStatementMapInformation()
-            var analysisMapInformation =  getDebateAnalysisMapInformation()
-            statementMapInformation.then(function(msg){
-                $scope.statementMapInformation = msg
-            })
-
-            analysisMapInformation.then(function(msg){
-                $scope.analysisMapInformation = msg
-            })
-
-
             return deferred.promise;
         }
 
-
-        function getDebateStatementMapInformation(){
-
-            var deferred = $q.defer();
-
-            myPost.postData("/release/getDebateStatementMapInformation").then(function(_res){
-                console.log("getDebateStatementMapInformation")
-                console.log(_res)
-                if(_res.data){
-                    deferred.resolve({err:0,msg:"data acquired",res:_res});
-                }else{
-                    deferred.reject({err:1,msg:"data not acquired",res:_res});
-                }
-
-            })
-            return deferred.promise;
-        }
-
-        $scope.getDebateStatementMapInformation = getDebateStatementMapInformation
-
-        function getDebateAnalysisMapInformation(){
-
-            var deferred = $q.defer();
-
-            myPost.postData("/release/getDebateAnalysisMapInformation").then(function(_res){
-                console.log("getDebateAnalysisMapInformation")
-                console.log(_res)
-                if(_res.data){
-                    $scope.debateInfo.order =  _res.data.order
-                    deferred.resolve({err:0,msg:"data acquired",res:_res});
-                }else{
-                    deferred.reject({err:1,msg:"data not acquired",res:_res});
-                }
-
-            })
-            return deferred.promise;
-        }
-
-        $scope.getDebateAnalysisMapInformation = getDebateAnalysisMapInformation
 
         function generateAnalysisResult(everyStatementData){
-
 
             $scope.analysisData = {txt:everyStatementData.statementData,analysisResult:[
                 {claim:"",support:[
@@ -374,8 +435,6 @@
 
 
             $scope.analysisDissentExplainData = []
-
-
             for(var i=0;i<everyStatementData.dissentExplain.length;i++){
                 $scope.analysisDissentExplainData.push({txt:everyStatementData.dissentExplain[i].reply,analysisResult:[
                     {claim:"",support:[
@@ -423,57 +482,88 @@
 
 
         function checkStatus(status,preStatus){
-                if(status == "wait"){
-                    changeStatusController(["waitDebate"])
+                if($scope.debateInfo.analysisFunc == 1){
+                    changeStatusWithAnalysisFunc(status,preStatus)
+                }else{
+                    changeStatusWithOutAnalysisFunc(status,preStatus)
                 }
-
-                if(status == "start" && preStatus == "wait"){
-                    changeStatusController(["startDebate"])
-                }
-
-                if(status == "analysis" && preStatus == "start"){
-                    changeStatusController(["analysisDebate"])
-                }
-
-                if(status == "check" && preStatus == "analysis"){
-                    changeStatusController(["checkDebate"])
-                }
-
-                if(status == "appeal" && preStatus == "check"){
-                    changeStatusController(["appealDebate"])
-                }
-
-                    if(status == "state" && preStatus == "appeal"){
-                        changeStatusController(["stateDebate"])
-                    }
-
-                    // status "state" will not inserted into database
+        }
 
 
-                if(status == "bunseki" && preStatus == "appeal"){
-                    changeStatusController(["bunsekiDebate"])
-                }
+        function changeStatusWithAnalysisFunc(status,preStatus){
+            if(status == "start" && !preStatus){
+                changeStatusController(["startDebate"])
+            }
 
-                if(status == "kentou" && preStatus == "bunseki"){
-                    changeStatusController(["kentouDebate"])
-                }
-
-                if(status == "lookup" && preStatus == "kentou"){
-                    changeStatusController(["lookupDebate"])
-                }
-
-                    if(status == "noberu" && preStatus == "lookup"){
-                        changeStatusController(["noberuDebate"])
-                    }
-
-                if(status == "analysis" && preStatus == "lookup"){
-                    changeStatusController(["analysisDebate"])
-                }
+            if(status == "analysis" && preStatus == "start"){
+                changeStatusController(["analysisDebate"])
+            }
 
 
-                if(status == "finish"){
-                    changeStatusController(["finishDebate"])
-                }
+            if(status == "analysis" && preStatus == "check"){
+                changeStatusController(["analysisDebate"])
+            }
+
+            if(status == "check" && preStatus == "analysis"){
+                changeStatusController(["checkDebate"])
+            }
+
+            if(status == "appeal" && preStatus == "check"){
+                changeStatusController(["appealDebate"])
+            }
+
+            if(status == "state" && preStatus == "appeal"){
+                changeStatusController(["stateDebate"])
+            }
+
+            // status "state" will not inserted into database
+
+
+            if(status == "bunseki" && preStatus == "appeal"){
+                changeStatusController(["bunsekiDebate"])
+            }
+
+
+
+            if(status == "bunseki" && preStatus == "kentou"){
+                changeStatusController(["bunsekiDebate"])
+            }
+
+            if(status == "kentou" && preStatus == "bunseki"){
+                changeStatusController(["kentouDebate"])
+            }
+
+            if(status == "lookup" && preStatus == "kentou"){
+                changeStatusController(["lookupDebate"])
+            }
+
+            if(status == "noberu" && preStatus == "lookup"){
+                changeStatusController(["noberuDebate"])
+            }
+
+            if(status == "analysis" && preStatus == "lookup"){
+                changeStatusController(["analysisDebate"])
+            }
+
+
+            if(status == "finish"){
+                changeStatusController(["finishDebate"])
+            }
+        }
+
+
+        function changeStatusWithOutAnalysisFunc(status,preStatus){
+            if(status == "noAnalysisStart"){
+                changeStatusController(["noAnalysisStartDebate"])
+            }
+
+            if(preStatus == "noAnalysisStart" && status == "noAnalysisFuncAppealAndState"){
+                changeStatusController(["noAnalysisFuncAppealAndStateDebate"])
+            }
+
+            if(status == "noAnalysisfinish"){
+                changeStatusController(["noAnalysisFinishDebate"])
+            }
 
         }
 
@@ -539,32 +629,6 @@
     })
 
 
-    myApp.directive("middleInfo",function(coreSocket,myPost){
-        return{
-            scope:false,
-            link:function(scope,element){
-                scope.prepare = function(){
-                    coreSocket.emit("prepare",{})
-                }
-
-
-                scope.leave = function(){
-                    myPost.postData("/release/leaveRoom").then(function(res){
-                        if(res.data.err == 0){
-                            if(scope.LAN == 'JP'){
-                                location = "/release/group"
-                            }else{
-                                location = "/releaseCN/group"
-                            }
-                        }
-                    })
-                }
-            },
-            templateUrl:"/angularJSTemplate/public/middleInfo.html"
-        }
-    })
-
-
     // process directive
     myApp.directive("waitDebate",function(coreSocket){
         return{
@@ -599,14 +663,18 @@
             scope:false,
 
             link:function(scope,element){
-                if(scope.debateInfo.preFinish){
-                    //如果是属于准结束阶段,那么这个时候只有分析異議説明的份儿
-                    scope.analysisObject = {target:"dissentExplain",i:0}
+                //有两个状态process指令用到了这个inputformArea的指令,一个是analysisDebate另外一个是bunsekiDebate
+                if(scope.debateInfo.preStatus == 'check' || scope.debateInfo.preStatus == 'kentou'){
+                    scope.analysisObject = {target:"preview",i:0}
                 }else{
-                    //如果不是准结束的阶段,那么这个时候要分析立論
-                    scope.analysisObject = {target:"construct",i:0}
+                    if(scope.debateInfo.preFinish){
+                        //如果是属于准结束阶段,那么这个时候只有分析異議説明的份儿
+                        scope.analysisObject = {target:"dissentExplain",i:0}
+                    }else{
+                        //如果不是准结束的阶段,那么这个时候要分析立論
+                        scope.analysisObject = {target:"construct",i:0}
+                    }
                 }
-
             },
             templateUrl:"/angularJSTemplate/process/analysisDebate.html"
         }
@@ -619,7 +687,7 @@
             scope:false,
 
             link:function(scope,element){
-
+                scope.conceptStatus = "check"
             },
             templateUrl:"/angularJSTemplate/process/checkDebate.html"
         }
@@ -657,9 +725,13 @@
     myApp.directive("bunsekiDebate",function(){
         return{
             scope:false,
-            controller:function($scope){
-                $scope.analysisObject = {target:"construct",i:0}
-
+            link:function(scope){
+                //有两个状态process指令用到了这个inputformArea的指令,一个是analysisDebate另外一个是bunsekiDebate
+                if(scope.debateInfo.preStatus == 'check' || scope.debateInfo.preStatus == 'kentou'){
+                    scope.analysisObject = {target:"preview",i:0}
+                }else{
+                    scope.analysisObject = {target:"construct",i:0}
+                }
             },
             templateUrl:"/angularJSTemplate/process/bunsekiDebate.html"
         }
@@ -671,7 +743,7 @@
             scope:false,
 
             link:function(scope,element){
-
+                scope.conceptStatus = "kentou"
             },
             templateUrl:"/angularJSTemplate/process/kentouDebate.html"
         }
@@ -693,7 +765,6 @@
     myApp.directive("noberuDebate",function(coreSocket){
         return{
             scope:false,
-
             link:function(scope,element){
                     if(scope.debateInfo.order == scope.totalNum-1){
                         //说明现在这个阶段不能立論了,因为快要结束了
@@ -713,18 +784,7 @@
             scope:false,
             link:function(scope,element){
 
-
                 scope.conceptStatus = "judgeMent"
-                var statementMapInformation = scope.getDebateStatementMapInformation()
-                var analysisMapInformation =  scope.getDebateAnalysisMapInformation()
-                statementMapInformation.then(function(msg){
-                    scope.statementMapInformation = msg
-                })
-
-                analysisMapInformation.then(function(msg){
-                    scope.analysisMapInformation = msg
-                })
-
 
                 if(scope.debateInfo.position == 1){
                     if(scope.debateInfo.proRate){
@@ -760,123 +820,6 @@
 
                 }
 
-
-
-                /*
-                scope.rate = 7;
-                scope.overStar = 7
-                scope.max = 10;
-                scope.isReadonly = false;
-                scope.percent = 100 * (scope.rate / scope.max);
-                scope.rateable = false
-
-
-                if(scope.debateInfo.position == 1){
-                    //自分の自己評価
-                    if(scope.debateInfo.proRate){
-                        scope.rateable = false
-                        scope.rate = scope.debateInfo.proRate
-                    }else{
-                        scope.rateable = true
-                    }
-
-                    //相手の自己評価
-                    if(scope.debateInfo.conRate){
-                        scope.oppositeRate = scope.debateInfo.conRate
-                    }else{
-                        scope.oppositeRate = false
-                    }
-
-                    //勝負の判断
-
-                    scope.gameResult = gameResult(scope.debateInfo.proRate,scope.debateInfo.conRate)
-
-
-                }else if(scope.debateInfo.position == 2){
-                    //自分の自己評価
-                    if(scope.debateInfo.conRate){
-                        scope.rateable = false
-                        scope.rate = scope.debateInfo.conRate
-                    }else{
-                        scope.rateable = true
-                    }
-
-
-                    //相手の自己評価
-                    if(scope.debateInfo.proRate){
-                        scope.oppositeRate = scope.debateInfo.proRate
-                    }else{
-                        scope.oppositeRate = false
-                    }
-
-                    scope.gameResult = gameResult(scope.debateInfo.proRate,scope.debateInfo.conRate)
-                }else if(scope.debateInfo.position == 0){
-
-                }else{
-
-                }
-
-
-                function gameResult(proRate,conRate){
-
-                    if(!proRate || !conRate){
-                        return {res:"wait"}
-                    }
-
-
-                    if(proRate > 5 && conRate < 5){
-                        return {res:"win",target:"pro",order:0}
-                    }
-
-                    if(proRate < 5 && conRate > 5){
-                        return {res:"win",target:"con",order:1}
-                    }
-
-                    if(proRate == 5 && conRate == 5){
-                        return {res:"draw",target:"",order:2}
-                    }
-
-                    if(proRate > 5 && conRate >= 5){
-                        return {res:"still",target:"",order:3}
-                    }
-
-                    if(proRate < 5 && conRate <= 5){
-                        return {res:"still",target:"",order:4}
-                    }
-
-
-                    if(proRate = 5 && conRate != 5){
-                        return {res:"still",target:"",order:5}
-                    }
-
-
-                }
-
-
-                scope.hoveringOver = function(value) {
-                    scope.overStar = value;
-                    scope.percent = 100 * (scope.overStar / scope.max);
-                };
-
-                scope.determine = function(){
-                    myPost.postData("/release/rate",{rate:scope.overStar}).then(function(_res){
-                        if(_res.data.err == 0){
-                            scope.isReadonly = true;
-                            scope.rateable = false
-                        }
-                    })
-                }
-
-                scope.ratingStates = [
-                    {stateOn: 'glyphicon-ok-sign', stateOff: 'glyphicon-ok-circle'},
-                    {stateOn: 'glyphicon-star', stateOff: 'glyphicon-star-empty'},
-                    {stateOn: 'glyphicon-heart', stateOff: 'glyphicon-ban-circle'},
-                    {stateOn: 'glyphicon-heart'},
-                    {stateOff: 'glyphicon-off'}
-                ];
-
-                */
-
             },
             templateUrl:"/angularJSTemplate/process/finishDebate.html"
         }
@@ -884,11 +827,245 @@
 
     // end of process directive
 
-    myApp.directive("statementResult",function() {
+    myApp.directive("statementResult",function($compile) {
         return {
             scope: false,
-            link: function (scope) {
+            link: function (scope,element) {
 
+
+                var TOP = 15   //最先画的方块距离顶端的距离
+                var LEFT = 80   //最先画的方块距离左边的距离
+                var DISSENTWIDTH = 250 //异议方块的长度
+                var DISSENTHEIGHT = 260//异议方块的高度
+                var DISSENTANDEXPLAINSPACE = 250 //异议方块距离右边的赛解释说明方块的横向距离
+                var DISSENTSPACEY = 80 //异议方块之间间隔的距离
+                var EXPLAINWIDTH = 460
+                var EXPLAINHEIGHT = 260
+                var DISSENTANDLINESPACEY = 90 //异议方块距离下面虚线的纵向距离
+                var DOTTEDLINEX = 40//虚线的左边位移
+                var DOTTEDWIDTH = 360 //虚线的长度
+                var DOTTEDSPACEWIDTH = 300 //虚线间隔的长度
+                var DOTTEDLINEANDCONSTRUCTSPACE = 50 //虚线距离下面方块的纵向距离
+                var CONSTRUCTX = LEFT //结论方块距离左侧的位移
+                var CONSTRUCTWIDTH = 960 //结论方块的长度
+                var CONSTRUCTHEIGHT = 260 //结论方块的高度
+
+                var LASTX = 0
+                var LASTY = 0
+                var svg
+
+                var svg = d3.select(element.find("svg")[0])
+                clearDraw()
+                draw()
+
+                scope.$on('drawStatementResult',function(event, data){
+                    clearDraw()
+                    draw()
+                });
+
+
+                function draw(){
+                    LASTX = LEFT
+                    LASTY = TOP
+                    for(var i = 0;i<scope.dissentData.length;i++){
+                        if(i>0) LASTY += DISSENTSPACEY
+                        appendRect(scope.dissentData[i].txt,1,LASTX,LASTY,DISSENTWIDTH,DISSENTHEIGHT,"dissent"+i)
+                        if(scope.dissentData[i].reply){
+
+
+                            drawArrow(LASTX+DISSENTWIDTH,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE,LASTY+DISSENTHEIGHT/2,LASTY+DISSENTHEIGHT/2)
+
+
+                            if(scope.LAN == 'JP'){
+                                drawText("この異議の説明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
+                            }else{
+                                drawText("这里是对质疑的说明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
+                            }
+
+
+
+
+
+                            appendRect(scope.dissentData[i].reply,0,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE+5,LASTY,EXPLAINWIDTH,EXPLAINHEIGHT,"explain"+i)
+                        }else{
+                            drawPointer(LASTX+DISSENTWIDTH,LASTY+DISSENTHEIGHT/4,200,200)
+                        }
+
+                        LASTY += DISSENTHEIGHT
+                    }
+
+
+                    LASTY += DISSENTANDLINESPACEY
+
+
+
+                    //如果为非准结束阶段,那么是允许立論的,否则不允许立論
+
+                    if(scope.lastStatement != 1){
+
+
+                        drawDottedLine(DOTTEDLINEX,LASTY,DOTTEDLINEX+DOTTEDWIDTH,LASTY)
+
+                        if(scope.LAN == 'JP'){
+                            drawText("ここから立論の部分",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+                        }else{
+                            drawText("以下是原始阐述说明",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+                        }
+
+                        drawDottedLine(DOTTEDLINEX+DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY,DOTTEDLINEX+2*DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY)
+
+                        appendRect(scope.statementData,0,CONSTRUCTX,LASTY+DOTTEDLINEANDCONSTRUCTSPACE,CONSTRUCTWIDTH,CONSTRUCTHEIGHT,"constructClaim")
+                        if(scope.statementData){
+                            d3.select("#constructClaim").style("display","block")
+                        }else{
+                            d3.select("#constructClaim").style("display","none")
+                        }
+                    }
+
+
+                }
+
+
+                function clearDraw(){
+                    svg.selectAll(".draw").remove()
+                    LASTX = 0
+                    LASTY = 0
+                }
+
+                function drawDottedLine(x1,y1,x2,y2){
+                    var line = svg.insert("line")
+                            .attr("x1",x1)
+                            .attr("y1",y1)
+                            .attr("x2",x2)
+                            .attr("y2",y2)
+                            .attr("stroke","#000")
+                            .attr("stroke-width",3)
+                            .attr("class","arrow draw")
+                            .attr("stroke-dasharray","4,10")
+                }
+
+                function drawPointer(x,y,width,height){
+                    var foreignObject = svg.append("foreignObject")
+                            .attr("width",width)
+                            .attr("height",height)
+                            .attr("x",x)
+                            .attr("y",y)
+                            .attr("class","draw")
+
+                    var div = foreignObject.append('xhtml:div')
+                    var image = div.append("img")
+
+                    image.attr("src", "/leftPointer.png")
+                            .attr("width", "100")
+                            .attr("height", "100");
+
+                    if(scope.LAN == 'JP'){
+                        drawText("左の異議を説明してください",x+100,y+100/2,20)
+                    }else{
+                        drawText("请对左侧您选择的质疑做阐述说明",x+100,y+100/2,20)
+                    }
+
+                }
+
+                function drawArrow(x1,x2,y1,y2){
+                    var line = svg.insert("line",":first-child")
+                            .attr("x1",x1)
+                            .attr("y1",y1)
+                            .attr("x2",x2)
+                            .attr("y2",y2)
+                            .attr("stroke","#9acfea")
+                            .attr("stroke-width",3)
+                            .attr("class","arrow draw")
+                            .attr("marker-end","url(#arrow)")
+                }
+
+                function drawText(txt,x,y,font){
+                    var text = svg.insert("text")
+                    text.text(txt)
+                    text.attr("x",x)
+                            .attr("y",y)
+                            .attr("font-size",font)
+                            .attr("fill","#8a6d3b")
+                            .attr("class","draw")
+                }
+
+                function appendRect(txt,dissent,x,y,w,h,id){
+                    var foreignObject = svg.append("foreignObject")
+                    foreignObject.attr("width",w)
+                    foreignObject.attr("height",h)
+
+                    foreignObject.attr("x",x)
+                    foreignObject.attr("y",y)
+                    foreignObject.attr("id",id)
+                    foreignObject.attr("class","draw")
+
+
+                    var _div = foreignObject.append('xhtml:div')
+                    var div = _div.append("div")
+                    div.attr("class","alert alert-warning  row")
+                    div.attr("role","alert")
+                    div.attr("style","height: "+ h*0.6 +"px; overflow: auto;margin-bottom:1px")
+
+
+                    var p = div.append("p")
+                    p.html(txt)
+
+
+
+                    if(id != 'constructClaim' && dissent == 1){
+                        //如果是左边的被质疑的模块
+                        var div = _div.append("div")
+                        var button = _div.append("button")
+                        if(scope.LAN == 'JP'){
+                            button.html("異議あり")
+                        }else{
+                            button.html("被质疑")
+                        }
+
+                        button.attr("type","button")
+                        button.attr("class","btn btn-danger pull-right")
+                    }
+
+
+                    if(id != 'constructClaim' && dissent == 0){
+                        //如果是右侧异议解释模块
+                        var div = _div.append("div")
+                        div.attr("class","row")
+                        var divId = "btn"+Math.round(Math.random()*10000)
+                        div.attr("id",divId)
+
+                        var num = parseInt(/explain(\d)/.exec(id)[1])
+
+                        if(scope.LAN == 'JP'){
+                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">編集</button>'
+                        }else{
+                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">修改</button>'
+                        }
+
+
+                        angular.element(document.getElementById(divId)).append($compile(html)(scope));
+                    }
+
+
+                    if(id == 'constructClaim'){
+                        //如果是原始阐述的部分的话
+                        var div = _div.append("div")
+                        div.attr("class","row")
+                        var divId = "btn"+Math.round(Math.random()*10000)
+                        div.attr("id",divId)
+
+
+                        if(scope.LAN == 'JP'){
+                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'claim\',' + num + ')">編集</button>'
+                        }else{
+                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'claim\',' + num + ')">修改</button>'
+                        }
+
+
+                        angular.element(document.getElementById(divId)).append($compile(html)(scope));
+                    }
+
+                }
             },
             templateUrl:"/angularJSTemplate/public/statementResult.html"
         }
@@ -923,14 +1100,16 @@
                 var DOTTEDLINESPACE = 350
                 var DOTTEDLINEMARGINLEFT = 30
 
-                var svg = d3.select("#mainSVG").append("svg")
+                //var svg = d3.select("#mainSVG").append("svg")
+                var svg = d3.select($element.find("svg")[0])
                 svg.attr("width","1200px")
-                svg.attr("height","3000px")
-                svg.attr("id","mainSVG"+Math.round(Math.random()*1000))
+                svg.attr("height","6000px")
+                //svg.attr("id","mainSVG"+Math.round(Math.random()*1000))
                 $scope.addDissentArr = {}
 
 
-
+                console.log("ssssssssss")
+                console.log($scope.analysisData)
 
                 function init(){
                     clearDraw()
@@ -1372,8 +1551,11 @@
                             //而且在这里没有质疑那么直接提交空的異議説明和空的立論
                             $scope.lastStatement = 1
                             coreSocket.emit("giveStatement",{dissentData:$scope.dissentData,statementData:$scope.statementData})
+                        }else{
+
                         }
                     }else{
+
                         $scope.statementStatus = {name:"dissent",i:0}
                     }
 
@@ -1396,19 +1578,10 @@
 
                     coreSocket.emit("selectDissent",{dissentData:$scope.dissentData,statementStatus:$scope.statementStatus,statementData:$scope.statementData})
 
-                    /*
-                     $scope.dissentData = [{type:"construct",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",reply:"",i:0,j:0},
-                     {type:"dissentExplain",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",reply:"",i:0,j:2},
-                     {type:"dissentExplain",txt:"Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。",reply:"",i:0,j:2},
-                     ]
-
-                     */
                 }
 
 
-
                 $scope.edit = function(category,i,j,type,dissentExplainI){
-
                     if(category == "construct"){
                         $scope.inputStatus.i = i
                         $scope.inputStatus.j = j
@@ -1442,7 +1615,6 @@
                     var j = $scope.inputStatus.j
 
                     if(status == "claim"){
-
                         $scope._contents = data[i].claim
                     }else if(status == "evidence"){
                         $scope._contents = data[i].support[j].evidence
@@ -1462,14 +1634,63 @@
         }
     })
 
+// no analysis function process
 
-    myApp.directive("inputFormArea",function(){
+    myApp.directive("noAnalysisStartDebate",function(coreSocket){
         return {
             scope:false,
-            controller:function($scope,$rootScope,coreSocket){
+            link:function(scope,element){
+                scope.submit = function(){
+                    coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
+                }
+            },
+            templateUrl:"/angularJSTemplate/process/noAnalysisStartDebate.html"
+        }
+    })
 
+
+    myApp.directive("noAnalysisFuncAppealAndStateDebate",function(coreSocket){
+        return {
+            scope:false,
+            link:function(scope){
+                scope.submit = function(){
+                    coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
+                }
+            },
+            templateUrl:"/angularJSTemplate/process/noAnalysisFuncAppealAndStateDebate.html"
+        }
+    })
+
+
+    myApp.directive("noAnalysisFinishDebate",function(coreSocket){
+        return {
+            scope:false,
+            link:function(scope){
+
+            },
+            templateUrl:"/angularJSTemplate/process/noAnalysisfinishDebate.html"
+        }
+    })
+
+
+
+
+
+// no analysis function process finish
+
+
+
+    myApp.directive("inputFormArea",function(coreSocket,$rootScope){
+        return {
+            scope:false,
+            link:function($scope){
                 $scope.conceptStatus = "analysis"   //concept directive controller
+
                 $scope.topArticleChangeTabVal = 0
+
+
+
+                transportInputInfo("FormInputing")
 
                 $scope.$watch("analysisObject.target",function(val,preVal){
                     //从 construct变成dissentExplain
@@ -1558,10 +1779,20 @@
 
                     }
 
+                    //让滚动条到最底端
+                    $("#ak47").animate({scrollTop: 1000}, "slow")
+
+
+                    //$("body").animate({scrollTop: $target.offset().top}, "slow");
                     //画图
 
                     $rootScope.$broadcast('click',{});
                     checkIfOriginalDataExists()
+
+
+
+                    //将目前的表单输入信息传输给对方
+                    transportInputInfo("FormInputing")
                 }
 
 
@@ -1632,9 +1863,11 @@
 
 
 
-                    console.log("sfffffssssss")
+                    console.log("cccccccccc")
                     console.log($scope.analysisData)
-                      coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
+                    console.log("nnnnnnnnnnnnn")
+                    console.log($scope.analysisDissentExplainData)
+                    coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
                 }
 
                 $scope.noEvidence = function(){
@@ -1811,6 +2044,12 @@
 
                     }
 
+
+                    //让滚动条到最底端
+                    $("#ak47").animate({scrollTop: 1000}, "slow")
+
+
+
                 }
 
                 $scope.setNewEvidence = function(){
@@ -1863,13 +2102,18 @@
                     }else{
 
                     }
+
+
+
+                    //让滚动条到最底端
+                    $("#ak47").animate({scrollTop: 1000}, "slow")
+
+
                 }
 
 
                 $scope.noFirstClaim = function(){
                     //非第一个claim被点击没有claim
-
-
                     if($scope.analysisObject.target == "construct"){
                         var i = $scope.inputStatus.i
 
@@ -1904,10 +2148,43 @@
                     //重新画图
                     $rootScope.$broadcast('click',{});
 
-
-
-
                 }
+
+                $scope.inputing = function(){
+                    transportInputInfo("FormInputing")
+                }
+
+                $scope.focus = function(){
+                    transportInputInfo("FormStartInputing")
+                }
+
+                $scope.blur = function(){
+                    transportInputInfo("FormLeaveInputing")
+                }
+
+                function transportInputInfo(event){
+
+
+                    coreSocket.emit(event,{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData,analysisObject:$scope.analysisObject,inputStatus:$scope.inputStatus,topArticleChangeTabVal:$scope.topArticleChangeTabVal})
+                }
+
+                $scope.formStartInputingVal = 0
+                coreSocket.on("FormInputing",function(_res){
+                    //opposite开头的变量告诉你对方现在正在干什么
+                    $scope.opposite_analysisData = _res.analysisData
+                    $scope.opposite_analysisDissentExplainData = _res.analysisDissentExplainData
+                    $scope.opposite_analysisObject = _res.analysisObject
+                    $scope.opposite_topArticleChangeTabVal = _res.topArticleChangeTabVal
+                    $scope.opposite_inputStatus = _res.inputStatus
+                })
+
+                coreSocket.on("FormStartInputing",function(_res){
+                    $scope.formStartInputingVal = 1
+                })
+
+                coreSocket.on("FormLeaveInputing",function(_res){
+                    $scope.formStartInputingVal = 0
+                })
 
 
                 $scope.dataSucessOfRequestTwice = 1
@@ -1924,6 +2201,25 @@
         }
     })
 
+    myApp.directive("oppositeInputInfo",function(){
+        return{
+            scope:false,
+            link:function(scope,element,attrs){
+
+            },
+            templateUrl:"/angularJSTemplate/public/oppositeInputInfo.html"
+        }
+    })
+
+    myApp.directive("oppositeStatementInfo",function(){
+        return{
+            scope:false,
+            link:function(scope,element,attrs){
+
+            },
+            templateUrl:"/angularJSTemplate/public/oppositeStatementInfo.html"
+        }
+    })
 
 
     myApp.directive("inputTextArea",function(coreSocket,$compile,$rootScope) {
@@ -1951,22 +2247,54 @@
                     var LASTX = 0
                     var LASTY = 0
                     var svg
+
+                    /*
                     setTimeout(function(){
                         svg = d3.select("#_mainSVG")
                         clearDraw()
                         draw()
                     },800)
+                    */
 
 
                     scope.inputing = function(){
-                        coreSocket.emit("textInputing",{content:scope.statement})
+                        transportStatementInfo("textInputing")
                     }
 
-                    scope.$on('drawStatementResult',function(event, data){
-                        clearDraw()
-                        draw()
 
-                    });
+                    scope.focus = function(){
+                        transportStatementInfo("textStartInputing")
+                    }
+
+                    scope.blur = function(){
+                        transportStatementInfo("textLeaveInputing")
+                    }
+
+                    function transportStatementInfo(event){
+                        coreSocket.emit(event,{content:scope.statement,statementData:scope.statementData,dissentData:scope.dissentData})
+                    }
+
+                    scope.textStartInputingVal = 0
+
+                    coreSocket.on("textInputing",function(_res){
+                        //opposite开头的代表对方正在输入的信息
+                        scope.opposite_textInputingContent = _res.content
+                        scope.opposite_statementData = _res.statementData
+                        scope.opposite_dissentData = _res.dissentData
+                    })
+
+                    coreSocket.on("textStartInputing",function(_res){
+                        scope.textStartInputingVal = 1
+                    })
+
+
+                    coreSocket.on("textLeaveInputing",function(_res){
+                        scope.textStartInputingVal = 0
+                    })
+
+                    scope.textStartInputingVal = 0
+
+
 
 
                     if(scope.dissentData.length > 0){
@@ -1976,7 +2304,6 @@
                     scope.conceptStatus = "statement"   //concept directive controller
 
                     scope.output2 = function(){
-
                         if(!scope.statement){
                             scope.data2Success = 0
                             return;
@@ -2008,6 +2335,7 @@
 
                                         scope.statementStatus.name = "preview"
                                         scope.conceptStatus = "noberu"
+                                        transportStatementInfo("textInputing")
                                         $rootScope.$broadcast('drawStatementResult');
                                         //submit()
 
@@ -2026,6 +2354,7 @@
 
                             scope.statementStatus.name = "preview"
                             scope.conceptStatus = "noberu"
+                            transportStatementInfo("textInputing")
                             $rootScope.$broadcast('drawStatementResult');
                             //submit()
 
@@ -2033,14 +2362,10 @@
                             //清空输入框
                         }
 
-                        clearDraw()
-                        draw()
 
-                        if(scope.statementStatus.name == "dissent"){
-                            scrollTop("dissent"+i,1000,(parseInt(document.getElementById("dissent"+(i)).getAttribute("y")) - 10))
-                        }else{
-                            scrollTop("constructClaim",1000,(parseInt(document.getElementById("constructClaim").getAttribute("y")))-DISSENTANDLINESPACEY)
-                        }
+
+                        transportStatementInfo("textInputing")
+                        //传递到目前为止的输入信息
                     }
 
 
@@ -2070,6 +2395,8 @@
 
 
                     function submit(){
+                        alert(2)
+                        return;
                         coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
                     }
 
@@ -2115,7 +2442,6 @@
                             //如果为非准结束阶段,那么是允许立論的,否则不允许立論
 
                             if(scope.lastStatement != 1){
-
 
                                 drawDottedLine(DOTTEDLINEX,LASTY,DOTTEDLINEX+DOTTEDWIDTH,LASTY)
 
@@ -2259,23 +2585,6 @@
                             angular.element(document.getElementById(divId)).append($compile(html)(scope));
 
 
-                            /*
-                            var button = div.append("button")
-                            if(scope.LAN == 'JP'){
-                                var span = button.html("span")
-                                span.text("編集")
-                            }else{
-                                var span = button.html("span")
-                                span.text("修改")
-                            }
-
-
-                            button.attr("class","btn btn-default pull-right")
-
-                            span.bind("click",function(){
-                                scope.edit2("dissent",parseInt(/explain(\d)/.exec(id)[1]))
-                            })
-                            */
                         }
 
 
@@ -2310,7 +2619,6 @@
             link:function(scope,element){
                 scope.examAnalysisResultTabVal = 1
 
-
                 scope.submit = function(){
                     if(scope.examAnalysisResultTabVal == 1){
                         approval()
@@ -2324,7 +2632,7 @@
                 }
 
                 var refuse = function(){
-                        alert("refuse")
+                    coreSocket.emit("refuseAnalysisResult",{comment:scope.examAnalysisResultComment})
                 }
             },
             templateUrl:"/angularJSTemplate/public/examAnalysisResult.html"
@@ -2367,15 +2675,34 @@
         }
     })
 
-
-    myApp.directive("infoAndAnalysisMap",function(){
-        return {
+    myApp.directive("info",function($rootScope){
+        return{
             scope:false,
-            link:function(scope,element){
+            link:function(scope){
 
-                scope.changeTabVal = 0
-                scope.changeTab = function(n){
-                    scope.changeTabVal = n
+                scope.expandVal = 1
+                //最初状态是开启左边框栏的
+
+                scope.verticalExpandVal = 1
+                //最初状态是开启下方的输入栏的
+
+
+                scope.topInfoHeight = 220
+
+                scope.expand = function(){
+                    scope.expandVal = (scope.expandVal + 1 ) %2
+                   // $rootScope.$broadcast('reDrawMap',{});
+                }
+
+                scope.verticalExpand = function(){
+                    scope.verticalExpandVal = (scope.verticalExpandVal + 1) % 2
+                    if(scope.verticalExpandVal == 0){
+                        scope.topInfoHeight = scope.topInfoHeight + 300
+                    }else{
+                        scope.topInfoHeight = 220
+                    }
+
+
                 }
 
                 scope.leave = function(){
@@ -2389,8 +2716,58 @@
                         }
                     })
                 }
+            },
+            templateUrl:"/angularJSTemplate/public/info.html"
+        }
+    })
+
+    myApp.directive("infoAndAnalysisMap",function($rootScope){
+        return {
+            scope:false,
+            link:function(scope,element,attr){
+                scope.changeTabVal = 0
+                scope.changeTab = function(n){
+                    scope.changeTabVal = n
+                }
+
+                scope.expandVal = 1
+                //最初状态是开启左边框栏的
+
+                scope.verticalExpandVal = 1
+                //最初状态是开启下方的输入栏的
 
 
+                scope.topInfoHeight = 220
+
+                scope.expand = function(){
+                    scope.expandVal = (scope.expandVal + 1 ) %2
+                    $rootScope.$broadcast('reDrawMap',{});
+                }
+
+                scope.verticalExpand = function(){
+                    scope.verticalExpandVal = (scope.verticalExpandVal + 1) % 2
+                    if(scope.verticalExpandVal == 0){
+                        scope.topInfoHeight = scope.topInfoHeight + 300
+                    }else{
+                        scope.topInfoHeight = 220
+                    }
+
+
+                    $rootScope.$broadcast('reDrawMap',{});
+
+                }
+
+                scope.leave = function(){
+                    myPost.postData("/release/leaveRoom").then(function(res){
+                        if(res.data.err == 0){
+                            if(scope.LAN == 'JP'){
+                                location = "/release/group"
+                            }else{
+                                location = "/releaseCN/group"
+                            }
+                        }
+                    })
+                }
             },
             templateUrl:"/angularJSTemplate/public/infoAndAnalysisMap.html"
         }
@@ -2423,1197 +2800,133 @@
     })
 
 
-    myApp.directive("analysisMapResult",function(){
-        return {
-            scope:false,
-            link:function(scope,element){
-                var svg = d3.select("#analysisMapSVG").append("svg")
-                svg.attr("width","100%")
-                svg.attr("height","2000px")
 
-                var _width = document.getElementById("analysisMapSVG").offsetWidth //实际svg的宽度
 
-                var LEFT = _width*0.05
-                var TOP = 35
 
-                var PROX1 = _width/7
-                var PROX2 = _width/7*2
-                var PROX3 = _width/7*3
-
-                var CONX1 = _width/7*4
-                var CONX2 = _width/7*5
-                var CONX3 = _width/7*6
-
-                var R = _width/7/3/2
-
-                var PROLASTX,PROLASTY
-                var CONLASTX,CONLASTY
-
-                var PROLASTELEMENTY,CONLASTELEMENTY //记录上一个节点的坐标,用于线条的点数据坐标的处理
-
-                var DEGREE = 30 * (Math.PI / 180)
-                var arrowLine = {pro:[],con:[]}
-
-                var loopI
-                //current loop index reflexing the num of the data in database
-                draw(scope.analysisMapInformation.res.data)
-
-                console.log(scope.analysisMapInformation.res.data)
-
-                function draw(data){
-                    PROLASTY = TOP
-                    CONLASTY = TOP
-
-                    for(var i=0;i<data.length;i++){
-                        //先画阐述说明的分析结果
-                        loopI = i
-
-                        paintFromData("construct",data[i].analysisData,data[i].position)
-                        //再画异议说明的分析结果
-                        paintFromData("dissentExplain",data[i].analysisDissentExplainData,data[i].position)
-                    }
-
-                    //画完图后每个点的坐标都计算出来了,接下来开始画线条,连接的线条
-
-                    for(var i=0;i<data.length;i++){
-                        loopI = i
-                        doLineFromData("construct",data[i].analysisData,data[i].position)
-                        doLineFromData("dissentExplain",data[i].analysisDissentExplainData,data[i].position)
-                    }
-
-
-                   drawConnectedLine(arrowLine.pro,"#bdf")
-                   drawConnectedLine(arrowLine.con,"#bfd")
-                }
-
-
-                function drawConnectedLine(data,color){
-                    for(var i=0;i<data.length;i++){
-                        var line = svg.append("line")
-                        line.attr("x1",data[i].startX)
-                        line.attr("y1",data[i].startY)
-                        line.attr("x2",data[i].endX)
-                        line.attr("y2",data[i].endY)
-                        line.attr("stroke",color)
-                        line.attr("stroke-width",5)
-                    }
-                }
-
-                function paintFromData(category,data,position){
-
-                    if(position == 1){
-                        var px1 = PROX1
-                        var px2 = PROX2
-                        var px3 = PROX3
-                    }else if(position == 2){
-                        var px1 = CONX1
-                        var px2 = CONX2
-                        var px3 = CONX3
-                    }else{
-                        return;
-                    }
-
-
-                    if(category == "construct"){
-                        if(angular.equals({},data)){
-                            return;
-                        }
-
-                            for(var i=0;i<data.analysisResult.length;i++){
-                                if(data.analysisResult[i].claim){
-                                    append(category,position,"claim",data.analysisResult[i].claim,px1,[0,i,j])
-                                }
-
-                                for(var j=0;j<data.analysisResult[i].support.length;j++){
-                                    if(data.analysisResult[i].support[j].warrant){
-                                        append(category,position,"warrant",data.analysisResult[i].support[j].warrant,px2,[0,i,j])
-                                    }
-
-                                    if(data.analysisResult[i].support[j].evidence){
-                                        append(category,position,"evidence",data.analysisResult[i].support[j].evidence,px3,[0,i,j])
-                                    }
-
-
-                                }
-                            }
-
-
-                    }
-
-                    if(category == "dissentExplain"){
-                        if(data.length == 0){
-                            //如果没有数据的话就到此为止了
-                            return;
-                        }
-
-                            for(var s=0;s<data.length;s++) {
-                                for (var i = 0; i < data[s].analysisResult.length; i++) {
-                                    append(category,position,"claim",data[s].analysisResult[i].claim,px1,[s,i,j])
-                                    for (var j = 0; j < data[s].analysisResult[i].support.length; j++) {
-
-                                        if(data[s].analysisResult[i].support[j].warrant){
-                                            append(category,position,"warrant",data[s].analysisResult[i].support[j].warrant,px2,[s,i,j])
-                                        }
-
-                                        if(data[s].analysisResult[i].support[j].evidence){
-                                            append(category,position,"evidence",data[s].analysisResult[i].support[j].evidence,px3,[s,i,j])
-                                        }
-                                    }
-                                }
-
-                            }
-
-                    }
-
-
-
-                }
-
-
-                function doLineFromData(category,data,position){
-                    //arrowLine
-
-                    if(position == 1){
-                        var colum = "pro"
-                    }else if(position == 2){
-                        var colum = "con"
-                    }else{
-                        return;
-                    }
-
-
-                    if(category == "construct"){
-                        if(angular.equals({},data)){
-                            return;
-                        }
-
-
-                        for(var i=0;i<data.analysisResult.length;i++){
-
-
-                            for(var j=0;j<data.analysisResult[i].support.length;j++){
-
-                                if(data.analysisResult[i].support[j].warrant){
-                                    //如果warrant存在的话
-                                    var startX = data.analysisResult[i].coordinateC.x
-                                    var startY = data.analysisResult[i].coordinateC.y
-                                    var endX = data.analysisResult[i].support[j].coordinateW.x
-                                    var endY = data.analysisResult[i].support[j].coordinateW.y
-                                    arrowLine[colum].push({startX:startX,startY:startY,endX:endX,endY:endY})
-                                }
-
-                                if(data.analysisResult[i].support[j].evidence){
-
-                                    //如果evidence存在的话
-                                    if(data.analysisResult[i].support[j].warrant){
-                                        //如果warrant存在,那么连接warrant
-                                        var startX = data.analysisResult[i].support[j].coordinateW.x
-                                        var startY = data.analysisResult[i].support[j].coordinateW.y
-                                    }else{
-                                        //如果warrant不存在,那么连接claim
-                                        var startX = data.analysisResult[i].coordinateC.x
-                                        var startY = data.analysisResult[i].coordinateC.y
-                                    }
-
-                                    var endX = data.analysisResult[i].support[j].coordinateE.x
-                                    var endY = data.analysisResult[i].support[j].coordinateE.y
-                                    arrowLine[colum].push({startX:startX,startY:startY,endX:endX,endY:endY})
-                                }
-
-                            }
-                        }
-
-
-                    }
-
-                    if(category == "dissentExplain"){
-                        if(data.length == 0){
-                            //如果没有数据的话就到此为止了
-                            return;
-                        }
-
-                        for(var s=0;s<data.length;s++) {
-
-                            for (var i = 0; i < data[s].analysisResult.length; i++) {
-
-                                for (var j = 0; j < data[s].analysisResult[i].support.length; j++) {
-                                        if(data[s].analysisResult[i].support[j].warrant){
-
-                                            var startX = data[s].analysisResult[i].coordinateC.x
-                                            var startY = data[s].analysisResult[i].coordinateC.y
-
-
-                                            var endX = data[s].analysisResult[i].support[j].coordinateW.x
-                                            var endY = data[s].analysisResult[i].support[j].coordinateW.y
-                                            arrowLine[colum].push({startX:startX,startY:startY,endX:endX,endY:endY})
-                                        }
-
-
-                                        if(data[s].analysisResult[i].support[j].evidence){
-
-                                            if(data[s].analysisResult[i].support[j].warrant){
-                                                    //如果warrant存在,那么连接warrant
-                                                var startX = data[s].analysisResult[i].support[j].coordinateW.x
-                                                var startY = data[s].analysisResult[i].support[j].coordinateW.y
-                                            }else{
-                                                    //如果warrant不存在,那么连接claim
-                                                var startX = data[s].analysisResult[i].coordinateC.x
-                                                var startY = data[s].analysisResult[i].coordinateC.y
-                                            }
-
-                                            var endX = data[s].analysisResult[i].support[j].coordinateE.x
-                                            var endY = data[s].analysisResult[i].support[j].coordinateE.y
-                                            arrowLine[colum].push({startX:startX,startY:startY,endX:endX,endY:endY})
-                                        }
-                                }
-                            }
-
-                        }
-
-                    }
-                }
-
-
-
-                function append(category,position,type,_text,XPOSITION,conf){
-                    var i = parseInt(conf[1])
-                    var j = parseInt(conf[2])
-
-                    if(position == 1){
-                        var colum = "pro"
-                        var px1 = PROX1
-                        var px2 = PROX2
-                        var px3 = PROX3
-                        var color = "#bdf"
-                        var lastY = PROLASTY
-                    }else if(position == 2){
-                        var colum = "con"
-                        var px1 = CONX1
-                        var px2 = CONX2
-                        var px3 = CONX3
-                        var color = "#bfd"
-                        var lastY = CONLASTY
-                    }else{
-                        return;
-                    }
-
-                    //写得好乱啊
-                    var coordinate = drawACircle(XPOSITION,lastY,R,color)
-                    editCoordinate(coordinate,category,type,conf)
-                    drawAText(XPOSITION - R*0.7,lastY + R*0.1,type,{category:category,conf:conf,coordinate:coordinate})
-
-                    var _verticalInterval = Math.tan(DEGREE)*(_width/7)
-
-                    if(position == 1){
-                        PROLASTY += _verticalInterval
-                    }else if(position == 2){
-                        CONLASTY += _verticalInterval
-                    }else{
-                        return;
-                    }
-
-                }
-
-
-
-                function drawACircle(x,y,r,color){
-                    var circle = svg.append("circle")
-                    circle.attr("cx",x)
-                    circle.attr("r",r)
-                    circle.attr("cy",y)
-                    circle.attr("fill",color)
-                    return {x:x,y:y}
-                }
-
-
-                function drawAText(x,y,_text,info){
-                    var text = svg.append("text")
-                    text.attr("x",x)
-                    text.text(_text + "----"+info.coordinate.y+"--"+info.category)
-                    text.attr("y",y)
-                }
-
-                function editCoordinate(coordinate,category,type,conf){
-                    //scope.analysisMapInformation.res.data
-
-                    var s = parseInt(conf[0])
-                    var i = parseInt(conf[1])
-                    var j = parseInt(conf[2])
-
-
-                    if(category == "construct"){
-                        if(type == "claim"){
-                            scope.analysisMapInformation.res.data[loopI].analysisData.analysisResult[i].coordinateC = coordinate
-                        }else if(type == "evidence"){
-                            scope.analysisMapInformation.res.data[loopI].analysisData.analysisResult[i].support[j].coordinateE = coordinate
-                        }else if(type == "warrant"){
-                            scope.analysisMapInformation.res.data[loopI].analysisData.analysisResult[i].support[j].coordinateW = coordinate
-                        }else{
-
-                        }
-                    }else if(category == "dissentExplain"){
-
-                        if(type == "claim"){
-                            scope.analysisMapInformation.res.data[loopI].analysisDissentExplainData[s].analysisResult[i].coordinateC = coordinate
-                        }else if(type == "evidence"){
-                            scope.analysisMapInformation.res.data[loopI].analysisDissentExplainData[s].analysisResult[i].support[j].coordinateE = coordinate
-                        }else if(type == "warrant"){
-                            scope.analysisMapInformation.res.data[loopI].analysisDissentExplainData[s].analysisResult[i].support[j].coordinateW = coordinate
-                        }else{
-
-                        }
-                    }else{
-                        return;
-                    }
-                }
-
-
-            },
-            templateUrl:"/angularJSTemplate/public/analysisMapResult.html"
-        }
-    })
-
-
-
-
-
-
-
-    myApp.directive("analysisMapResult2",function(){
-        return {
-            scope:false,
-            link:function(scope,element){
-
-
-                var _width = document.getElementById("analysisMapSVG").offsetWidth //实际svg的宽度
-                var svg = d3.select("#analysisMapSVG").append("svg")
-                svg.attr("width","1200px")
-                svg.attr("height","2000px")
-                svg.style("background","#bdf")
-
-                var LEFT = _width*0.05
-                var TOP = 35
-
-                var CLAIMWIDTH = (_width-2*LEFT)*0.4  //占据除去两个边距后5分之4的位置
-                var POPUPRECTWIDTH = CLAIMWIDTH
-                var CLAIMHEIGHT = 100;
-                var POPUPRECTHEIGHT = CLAIMHEIGHT
-                var CLAIMXINTERVAL = (_width-2*LEFT)*0.2 //间距占据除去两个编剧后5分之1的位置
-                var CLAIMYINTERVAL = 100
-                var SUPPORTYINTERVAL = 20
-                var CLAIMANDSUPPORTYINTERVAL = 20  //主张和support的纵距离
-                var SUPPORTANDSUPPORTYINTERVAL = 20  //support和support之间的纵距离
-                var SUPPORTELEMENTANDDISSENTEXPLAINELEMENTYINTERVAL = 30  //被质疑的evidence或者warrant距离下面的解释说明的主张的距离
-
-                var WARRANTWIDTH = CLAIMWIDTH/5  //占据5分之1的的位置
-
-
-                var WARRANTHEIGHT = WARRANTWIDTH*0.7
-                var EVIDENCEWIDTH = CLAIMWIDTH/5  //占据5分之1的的位置
-                var EVIDENCEHEIGHT = EVIDENCEWIDTH*0.7
-
-
-                var CLAIMXPRO = LEFT
-                var CLAIMXCON = LEFT + CLAIMWIDTH + CLAIMXINTERVAL
-                var LASTYPRO,LASTYCON
-                LASTYPRO = TOP
-                LASTYCON = TOP
-
-
-                var WARRANTXPRO = CLAIMXPRO + CLAIMWIDTH/5
-                var EVIDENCEXPRO = WARRANTXPRO +  2*(CLAIMWIDTH/5)
-
-                var WARRANTXCON = CLAIMXCON + CLAIMWIDTH/5
-                var EVIDENCEXCON = WARRANTXCON +  2*(CLAIMWIDTH/5)
-
-
-                var MAINLINEXPRO = CLAIMXPRO + WARRANTWIDTH/3  //左侧主线条的起点横坐标
-                var MAINLINEXCON = CLAIMXCON + WARRANTWIDTH/3  //右侧主线条的起点横坐标
-
-                var MAINLINESTARTYPRO,MAINLINELASTYPRO //左侧主线条的起点和终点纵坐标
-                var MAINLINESTARTYCON,MAINLINELASTYCON //右侧主线条的起点和终点纵坐标
-
-
-                scope.mapData = {pro:[],con:[]}
-                scope.mapDissentData = []
-                dealWithData()
-                function dealWithData(){
-
-
-
-                    //先把主张的分析结果合一块儿
-                    for(var i=0;i<scope.analysisMapInformation.res.data.length;i++){
-                        var analysisResult = scope.analysisMapInformation.res.data[i].analysisData.analysisResult
-                        var analysisDissentExplainData = scope.analysisMapInformation.res.data[i].analysisDissentExplainData
-
-                        if(analysisDissentExplainData.length > 0) scope.mapDissentData.push(analysisDissentExplainData)
-                        var position = scope.analysisMapInformation.res.data[i].position
-
-                        if(position == 1){
-                            scope.mapData.pro.push(analysisResult)
-                        }else{
-                            scope.mapData.con.push(analysisResult)
-                        }
-                    }
-
-
-
-
-                    digui()
-                    //最难的递归啦
-
-                    function digui(){
-                        //递归处理质疑的质疑
-
-                        for(var i=0;i<scope.mapDissentData.length;i++){
-                            for(var j=0;j<scope.mapDissentData[i].length;j++){
-
-                                var indexToAnalysis = scope.mapDissentData[i][j].indexToAnalysis
-
-                                var _slightestOrNot = slightestOrNot(scope.mapDissentData[i][j].analysisResult)
-
-                                if(_slightestOrNot){
-                                    var _findRandomByIndexToAnalysis = findRandomByIndexToAnalysis(indexToAnalysis)
-
-                                    if(_findRandomByIndexToAnalysis){
-                                        //删掉队列中的scope.mapDissentData[i][j] 放入相应的子元素下面
-                                        var _copy = scope.mapDissentData[i][j].analysisResult
-                                        scope.mapDissentData[i].splice(j,1)
-                                        var _type = _findRandomByIndexToAnalysis.type
-                                        var _i = _findRandomByIndexToAnalysis.i
-                                        var _j = _findRandomByIndexToAnalysis.j
-                                        var _k = _findRandomByIndexToAnalysis.k
-                                        var _m = _findRandomByIndexToAnalysis.m
-
-                                        if(_type == "warrant"){
-                                            scope.mapDissentData[_i][_j].analysisResult[_k].support[_m].wDissent = _copy
-                                        }
-
-                                        if(_type == "evidence"){
-                                            scope.mapDissentData[_i][_j].analysisResult[_k].support[_m].eDissent = _copy
-                                        }
-
-
-
-                                        digui()
-                                    }
-                                }
-
-                                //alert(findRandomByIndexToAnalysis(indexToAnalysis,i,j))
-
-
-                            }
-                        }
-
-                        return false;
-
-                    }
-
-
-
-
-
-                    function slightestOrNot(arr){
-                        for(var i=0;i<arr.length;i++){
-                            for(var j=0;j<arr[i].support.length;j++){
-
-                                if(findIndexToAnalysisByRandom(arr[i].support[j].wrandom)){
-                                    return false
-                                }
-
-                                if(findIndexToAnalysisByRandom(arr[i].support[j].erandom)){
-                                    return false
-                                }
-
-
-                            }
-                        }
-
-                        return true
-                    }
-
-
-                    function findIndexToAnalysisByRandom(random){
-
-                        for(var i=0;i<scope.mapDissentData.length;i++){
-                            for(var j=0;j<scope.mapDissentData[i].length;j++){
-
-                                for(var k=0;k<scope.mapDissentData[i][j].analysisResult.length;k++){
-                                    var indexToAnalysis =  scope.mapDissentData[i][j].indexToAnalysis
-                                    if(indexToAnalysis == random){
-                                        return true
-                                    }
-                                }
-
-
-
-
-                            }
-                        }
-
-                        return false;
-                    }
-
-
-                    function findRandomByIndexToAnalysis(indexToAnalysis){
-
-
-                        for(var i=0;i<scope.mapDissentData.length;i++){
-                            for(var j=0;j<scope.mapDissentData[i].length;j++){
-
-                                for(var k=0;k<scope.mapDissentData[i][j].analysisResult.length;k++){
-
-                                    for(var m=0;m<scope.mapDissentData[i][j].analysisResult[k].support.length;m++){
-                                        var wrandom = scope.mapDissentData[i][j].analysisResult[k].support[m].wrandom
-                                        var erandom = scope.mapDissentData[i][j].analysisResult[k].support[m].erandom
-
-                                        if(indexToAnalysis == wrandom){
-                                            return {type:"warrant",i:i,j:j,k:k,m:m}
-                                        }
-
-                                        if(indexToAnalysis == erandom){
-                                            return {type:"evidence",i:i,j:j,k:k,m:m}
-                                        }
-
-                                    }
-                                }
-
-
-
-
-                            }
-                        }
-
-                        return false;
-                    }
-
-
-
-
-
-
-
-                    //再处理刚刚合一块儿的主张结果,对其中每个元素做检查,看是否有对他的质疑解释
-
-
-                    for(var i=0;i<scope.mapData.pro.length;i++){
-                        for(var j=0;j<scope.mapData.pro[i].length;j++){
-                            var res =  findDissentAnalysisResult(scope.mapData.pro[i][j].random)
-                            if(res){
-                                scope.mapData.pro[i][j].cDissent = res
-                            }
-
-                            for(var k=0;k<scope.mapData.pro[i][j].support.length;k++){
-                                var res1 =  findDissentAnalysisResult(scope.mapData.pro[i][j].support[k].wrandom)
-                                if(res1){
-                                    scope.mapData.pro[i][j].support[k].wDissent = res1
-                                    //初始情况不显示
-                                    scope.mapData.pro[i][j].support[k].wDissentShow = 0
-                                }
-                                var res2 =  findDissentAnalysisResult(scope.mapData.pro[i][j].support[k].erandom)
-                                if(res2){
-                                    scope.mapData.pro[i][j].support[k].eDissent = res2
-                                    //初始情况不显示
-                                    scope.mapData.pro[i][j].support[k].eDissentShow = 0
-                                }
-                            }
-                        }
-                    }
-
-                    opt(scope.mapData.pro,1)
-
-                    for(var i=0;i<scope.mapData.con.length;i++){
-                        for(var j=0;j<scope.mapData.con[i].length;j++){
-                            var res =  findDissentAnalysisResult(scope.mapData.con[i][j].random)
-                            if(res){
-                                scope.mapData.con[i][j].cDissent = res
-                            }
-                            for(var k=0;k<scope.mapData.con[i][j].support.length;k++){
-                                var res1 =  findDissentAnalysisResult(scope.mapData.con[i][j].support[k].wrandom)
-                                var res2 =  findDissentAnalysisResult(scope.mapData.con[i][j].support[k].erandom)
-
-                                if(res1){
-                                    scope.mapData.con[i][j].support[k].wDissent = res1
-                                    //初始情况不显示
-                                    scope.mapData.con[i][j].support[k].wDissentShow = 0
-                                }
-                                if(res2){
-                                    scope.mapData.con[i][j].support[k].eDissent = res2
-                                    //初始情况不显示
-                                    scope.mapData.con[i][j].support[k].eDissentShow = 0
-                                }
-
-                            }
-
-                        }
-                    }
-
-                    opt(scope.mapData.con,2)
-
-
-                }
-
-
-
-
-
-
-
-
-
-                function reDraw(){
-
-                    svg.selectAll(".mapData").remove()
-                    //起点重新规划
-                    CLAIMXPRO = LEFT
-                    CLAIMXCON = LEFT + CLAIMWIDTH + CLAIMXINTERVAL
-                    LASTYPRO = TOP
-                    LASTYCON = TOP
-
-                    opt(scope.mapData.pro,1)
-                    opt(scope.mapData.con,2)
-
-
-
-                }
-
-
-                function findDissentAnalysisResult(random){
-                        for(var i=0;i<scope.mapDissentData.length;i++){
-                            for(var j=0;j<scope.mapDissentData[i].length;j++){
-                                if(random == scope.mapDissentData[i][j].indexToAnalysis){
-                                        return scope.mapDissentData[i][j].analysisResult
-                                }
-                            }
-                        }
-                            return false
-                }
-
-
-
-                function drawLine(position){
-
-                    if(position == 1){
-                        painLine(svg,MAINLINEXPRO,MAINLINEXPRO,MAINLINESTARTYPRO,MAINLINELASTYPRO,"#e2e2e2")
-                    }
-
-                    if(position == 2){
-                        painLine(svg,MAINLINEXCON,MAINLINEXCON,MAINLINESTARTYCON,MAINLINELASTYCON,"#e2e2e2")
-                    }
-
-
-                }
-
-
-                function painLine(platform,x1,x2,y1,y2,color){
-                    var svg = platform
-                    var line = svg.append("line")
-                    line.attr("class","mapData")
-                    line.attr("x1",x1)
-                    line.attr("x2",x2)
-                    line.attr("y1",y1)
-                    line.attr("y2",y2)
-                    line.attr("stroke",color)
-                    line.attr("stroke-width",5)
-                }
-
-
-                function opt(data,position){
-                    for(var i=0;i<data.length;i++){
-                        var analysisResult = data[i]
-                        //console.log(scope.analysisMapInformation.res.data[i].position)
-
-                        for(var j=0;j<analysisResult.length;j++){
-                            var text = analysisResult[j].claim
-
-                            if(!text) continue;
-                            appendClaimText(text,position)
-
-
-                            var support = analysisResult[j].support
-
-                            if(position == 1){
-                                MAINLINESTARTYPRO = LASTYPRO + CLAIMHEIGHT  //主线条的开始垂直纵坐标
-                                LASTYPRO = LASTYPRO + CLAIMHEIGHT
-                                if(support[0].evidence || support[0].warrant){
-                                    //如果这个claim所属的evidence或者warrant存在的话那么把最后的延长线延伸到support
-                                    LASTYPRO = LASTYPRO + CLAIMANDSUPPORTYINTERVAL  //模块的最后垂直坐标
-                                }
-                            }else{
-                                MAINLINESTARTYCON = LASTYCON  + CLAIMHEIGHT  //主线条的开始垂直纵坐标
-                                LASTYCON = LASTYCON + CLAIMHEIGHT
-                                if(support[0].evidence || support[0].warrant){
-                                    LASTYCON = LASTYCON + CLAIMANDSUPPORTYINTERVAL  //模块的最后垂直坐标
-                                }
-
-                            }
-
-
-                            for(var k=0;k<support.length;k++){
-                                var coordinateE = appendEvidence(support[k].evidence,position,support[k].eDissent,support[k].erandom,i,j,k)
-                                var coordinateW = appendWarrant(support[k].warrant,position,support[k].wDissent,support[k].wrandom,i,j,k)
-
-
-                                if(support[k].evidence || support[k].warrant){
-                                    if(position == 1){
-                                        MAINLINELASTYPRO = LASTYPRO + WARRANTHEIGHT/2
-
-                                        if(support[k+1]){
-                                            //如果还有下一个support的话
-                                            LASTYPRO = LASTYPRO + EVIDENCEHEIGHT + SUPPORTANDSUPPORTYINTERVAL
-                                        }else{
-                                            LASTYPRO = LASTYPRO + EVIDENCEHEIGHT
-                                        }
-
-
-                                    }else{
-                                        MAINLINELASTYCON = LASTYCON + WARRANTHEIGHT/2
-
-                                        if(support[k+1]){
-                                            //如果还有下一个support的话
-                                            LASTYCON = LASTYCON + EVIDENCEHEIGHT + SUPPORTANDSUPPORTYINTERVAL
-                                        }else{
-                                            LASTYCON = LASTYCON + EVIDENCEHEIGHT
-                                        }
-
-                                    }
-                                }
-
-                                addDissentIfExists(support[k],position,coordinateE,coordinateW)
-                            }
-
-
-                            //如果还有下一个claim的话
-                            if(analysisResult[j+1]){
-                                if(position == 1){
-                                    LASTYPRO = LASTYPRO + CLAIMYINTERVAL
-                                }else{
-                                    LASTYCON = LASTYCON + CLAIMYINTERVAL
-                                }
-                            }
-
-
-
-                            drawLine(position)
-                            //每循环一个claim画一次主线条
-
-                        }
-
-
-                    }
-
-                }
-
-
-
-
-                function appendClaimText(text,position){
-                    if(!text) return;
-
-                    var foreignObject = svg.append("foreignObject")
-                    foreignObject.attr("width",CLAIMWIDTH)
-                    foreignObject.attr("height",CLAIMHEIGHT)
-                    foreignObject.attr("class","mapData")
-
-                    var x = position == 1?CLAIMXPRO:CLAIMXCON
-                    var y = position == 1?LASTYPRO:LASTYCON
-
-
-                    foreignObject.attr("x",x)
-                    foreignObject.attr("y",y)
-                    var div = foreignObject.append('xhtml:div')
-                    div.attr("class","panel panel-default")
-                    var _div = div.append("div")
-                    _div.attr("class","panel-body")
-
-                    _div.style("height",CLAIMHEIGHT+"px")
-                    _div.style("overflow","auto")
-                    var p = _div.append("p")
-                    p.text(text)
-
-
-
-                }
-
-
-
-                function appendWarrant(text,position,dissentArr,wRandom,i,j,k){
-                    if(!text) return;
-
-                    var foreignObject = svg.append("foreignObject")
-                    foreignObject.attr("width",WARRANTWIDTH)
-                    foreignObject.attr("height",WARRANTHEIGHT)
-                    foreignObject.attr("class","mapData")
-
-                    var x = position == 1?WARRANTXPRO:WARRANTXCON
-                    var y = position == 1?LASTYPRO:LASTYCON
-
-                    foreignObject.attr("x",x)
-                    foreignObject.attr("y",y)
-                    var div = foreignObject.append('xhtml:div')
-
-                    var button = div.append("button")
-                    button.attr("class","btn btn-default")
-                    button.text("論拠")
-                    var _id = "warrant"+Math.round(Math.random()*10000)
-                    button.attr("id",_id)
-                    document.getElementById(_id).onclick = function(){
-                        popUp(text,x,y,position)
-                    }
-
-                    if(dissentArr){
-                        button.append("span").attr("class","glyphicon glyphicon-star")
-                    }
-                    button.on("click",function(){
-
-                        if(position == 1){
-                            scope.mapData.pro[i][j].support[k].wDissentShow = (scope.mapData.pro[i][j].support[k].wDissentShow +1 ) % 2
-                        }else if(position == 2){
-                            scope.mapData.con[i][j].support[k].wDissentShow = (scope.mapData.con[i][j].support[k].wDissentShow + 1) % 2
-                        }else{
-                            alert("dvg")
-                        }
-
-                        reDraw()
-
-                    })
-
-
-
-
-                    return {x:x+10,y:y}
-                }
-
-
-
-                function popUp(text,x,y,position){
-
-                    d3.selectAll(".balloon").remove()
-
-                    var rect = svg.append("foreignObject")
-
-                    rect.attr("x",x)
-                    rect.attr("y",y)
-                    rect.attr("width",POPUPRECTWIDTH)
-                    rect.attr("height",POPUPRECTHEIGHT)
-
-
-                    var div = rect.append('xhtml:div')
-                    div.style("width",POPUPRECTWIDTH)
-                    div.style("height",POPUPRECTHEIGHT)
-                    div = div.append("div")
-
-
-                    div.attr("class","row col-sm-12 balloon")
-
-                    if(position == 1){
-                        rect.attr("x",x+WARRANTWIDTH + 30)
-                        div.classed("_balloon", true);
-                    }else{
-                        rect.attr("x",x-WARRANTHEIGHT)
-                        div.classed("__balloon", true);
-                    }
-
-                    div.style("width",POPUPRECTWIDTH+"px")
-                    div.style("background-color","#fff")
-
-
-                    var sdiv = div.append("div")
-                    sdiv.attr("class","row")
-
-                    var title = sdiv.append("div")
-                    title.attr("class","col-sm-10")
-
-                    var remove = sdiv.append("div")
-                    remove.attr("class","col-sm-6")
-                    remove = remove.append("span")
-                    remove.attr("class","glyphicon glyphicon-remove")
-                    remove.attr("aria-hidden","true")
-                    remove.style("cursor","pointer")
-
-                    remove.on("click",function(){
-                        rect.remove()
-                    })
-
-
-                    var content = sdiv.append("div")
-                    content.attr("class","col-sm-11")
-                    content.html(text)
-
-                }
-
-                function appendEvidence(text,position,dissentArr,eRandom,i,j,k){
-                    if(!text) return;
-
-                    var foreignObject = svg.append("foreignObject")
-                    foreignObject.attr("width",EVIDENCEWIDTH)
-                    foreignObject.attr("height",EVIDENCEHEIGHT)
-                    foreignObject.attr("class","mapData")
-
-                    var x = position == 1?EVIDENCEXPRO:EVIDENCEXCON
-                    var y = position == 1?LASTYPRO:LASTYCON
-
-                    foreignObject.attr("x",x)
-                    foreignObject.attr("y",y)
-
-                    var div = foreignObject.append('xhtml:div')
-
-                    var button = div.append("button")
-                    button.attr("class","btn btn-default")
-                    button.text("根拠")
-
-
-                    var _id = "evidence"+Math.round(Math.random()*10000)
-                    button.attr("id",_id)
-                    document.getElementById(_id).onclick = function(){
-                        popUp(text,x,y,position)
-                    }
-
-
-                    if(dissentArr){
-                        button.append("span").attr("class","glyphicon glyphicon-star")
-                    }
-                    button.on("click",function(){
-
-                        if(position == 1){
-                            scope.mapData.pro[i][j].support[k].eDissentShow = (scope.mapData.pro[i][j].support[k].eDissentShow + 1 ) % 2
-                        }else if(position == 2){
-                            scope.mapData.con[i][j].support[k].eDissentShow = (scope.mapData.con[i][j].support[k].eDissentShow + 1) % 2
-                        }else{
-                            alert("dvrg")
-                        }
-                        reDraw()
-
-                    })
-
-                    //evidence存在,那么直接画一条横线从evidence到claim
-
-                    if(position == 1){
-                        painLine(svg,MAINLINEXPRO,EVIDENCEXPRO,LASTYPRO + EVIDENCEHEIGHT/2,LASTYPRO + EVIDENCEHEIGHT/2,"#e2e2e2")
-                    }else{
-                        painLine(svg,MAINLINEXCON,EVIDENCEXCON,LASTYCON + EVIDENCEHEIGHT/2,LASTYCON + EVIDENCEHEIGHT/2,"#e2e2e2")
-                    }
-
-                    return {x:x+10,y:y}
-                }
-
-                function appendRect(platform,x,y,type,text,position,_text){
-                    if(!text)  return
-                    var svg = platform
-                    var foreignObject = svg.append("foreignObject")
-                    foreignObject.attr("class","mapData")
-                    foreignObject.attr("width",EVIDENCEWIDTH)
-                    foreignObject.attr("height",EVIDENCEHEIGHT)
-
-                    foreignObject.attr("x",x)
-                    foreignObject.attr("y",y)
-                    var div = foreignObject.append('xhtml:div')
-
-                    var button = div.append("button")
-                    button.attr("class","btn btn-danger")
-                    button.text(text)
-
-                    var _id = type + Math.round(Math.random()*10000)
-                    button.attr("id",_id)
-
-                    document.getElementById(_id).onmouseover = function(){
-                        popUp(_text,x,y,position)
-                    }
-                }
-
-                function addDissentIfExists(obj,position,coordinateE,coordinateW){
-                    if(!obj.wDissent && !obj.eDissent){
-                        //如果针对warrant和evidence的质疑都没有的话
-                        return;
-                    }
-
-                        //现在正在画左边还是正在画右边
-                    if(position == 1){
-                        LASTYPRO = LASTYPRO + SUPPORTELEMENTANDDISSENTEXPLAINELEMENTYINTERVAL
-                    }else{
-                        LASTYCON = LASTYCON + SUPPORTELEMENTANDDISSENTEXPLAINELEMENTYINTERVAL
-                    }
-
-
-
-                    //先warrant
-                    if(obj.wDissent){
-                        //如果处于开启状态的话
-
-                        if(obj.wDissentShow == 1){
-                            tmp(obj.wDissent,"warrant",position,obj.wrandom)
-                        }
-
-                    }
-
-
-                    //再evidence
-                    if(obj.eDissent){
-                        if(obj.eDissentShow == 1){
-                            tmp(obj.eDissent,"evidence",position,obj.erandom)
-                        }
-
-                    }
-
-
-                    function tmp(obj,type,position,random){
-                        var platform = svg.append("g")
-                        platform.attr("id",random)
-
-                        for(var i=0;i<obj.length;i++){
-                            var y = position == 1?LASTYPRO:LASTYCON
-                            if(type == "warrant"){
-                                var x = position == 1?WARRANTXPRO:WARRANTXCON
-                                tmp2(x,y,obj,position,i,platform,coordinateW)
-                            }else if(type == "evidence"){
-                                var x = position == 1?EVIDENCEXPRO:EVIDENCEXCON
-                                tmp2(x,y,obj,position,i,platform,coordinateE)
-                            }else{
-                                return;
-                            }
-                        }
-                    }
-
-
-                    function tmp2(x,y,obj,position,i,platform,startCoordinate){
-                        var startMainLineX = startCoordinate.x
-                        var startMainLineY = startCoordinate.y + EVIDENCEHEIGHT*0.9
-                        var endMainLineX = startMainLineX
-                        var endMainLineY
-
-                        appendRect(platform,x+30,y,"claim","主張",position,obj[i].claim)
-                        if(position == 1){
-                            LASTYPRO = LASTYPRO + EVIDENCEHEIGHT + SUPPORTANDSUPPORTYINTERVAL
-                        }else{
-                            LASTYCON = LASTYCON + EVIDENCEHEIGHT + SUPPORTANDSUPPORTYINTERVAL
-                        }
-
-                        //主体线和claim模块的连线
-                        painLine(platform,startMainLineX,x+30,y+EVIDENCEHEIGHT/2,y+EVIDENCEHEIGHT/2,"#e2e2e2")
-
-
-
-                        for(var j=0;j<obj[i].support.length;j++){
-                            var _obj = obj[i].support[j]
-                            var y = y + EVIDENCEHEIGHT + SUPPORTANDSUPPORTYINTERVAL
-                            if(_obj.evidence){
-                                var _x = x+4*EVIDENCEWIDTH
-
-                                appendRect(platform,_x,y,"evidence","根拠",position,obj[i].support[j].evidence)
-
-                                //主体线和evidence模块的连线
-                                painLine(platform,startMainLineX,_x,y+EVIDENCEHEIGHT/2,y+EVIDENCEHEIGHT/2,"#e2e2e2")
-
-                            }
-
-                            if(_obj.warrant){
-                                var _x = x+2*EVIDENCEWIDTH
-                                appendRect(platform,_x,y,"warrant","論拠",position,obj[i].support[j].warrant)
-                            }
-
-                            if(_obj.warrant || _obj.evidence){
-
-                                endMainLineY = y + EVIDENCEHEIGHT/2
-                                    if(position == 1){
-                                        LASTYPRO = LASTYPRO + EVIDENCEHEIGHT + SUPPORTANDSUPPORTYINTERVAL
-                                    }else{
-                                        LASTYCON = LASTYCON + EVIDENCEHEIGHT + SUPPORTANDSUPPORTYINTERVAL
-                                    }
-
-
-
-                                //addDissentIfExists(_obj,position,{x:_x,y:y},{x:_x,y:y})
-                            }
-                        }
-
-
-                        //小模块内的主体线
-                        painLine(platform,startMainLineX,endMainLineX,startMainLineY,endMainLineY,"#e2e2e2")
-
-
-                    }
-
-
-                }
-
-
-
-
-
-            },
-            templateUrl:"/angularJSTemplate/public/_analysisMapResult.html"
-        }
-    })
-
-
-
-
-    myApp.directive("analysisMapResult3",function() {
+    myApp.directive("analysisMapResult3",function(getDebateAnalysisMapInformation) {
         return {
             scope: false,
-            link: function (scope, element) {
+            link: function (scope, element,attr) {
 
-                var _width = document.getElementById("navyMap").offsetWidth //实际svg的宽度
-                var svg = d3.select("#analysisMapSVG3").append("svg")
+                var svg = d3.select(element.find("svg")[0])
+
                 svg.attr("width","1200px")
-                svg.attr("height","2000px")
+                svg.attr("height","4000px")
                 svg.style("background","#bdf")
 
-                var LEFT = _width*0.05
-                var TOP = 35
 
-                var CLAIMWIDTH = (_width-2*LEFT)*0.4  //占据除去两个边距后5分之4的位置
-                var CLAIMHEIGHT = 200;
-                var CLAIMXINTERVAL = (_width-2*LEFT)*0.2 //间距占据除去两个编剧后5分之1的位置
-                var CLAIMYINTERVAL = 100  //轮次内的主张之间的垂直间隙
+                var LEFT
+                var TOP
 
-                var CLAIMTURNYINTERVAL = 150  //不同轮次内的主张和主张之间的垂直间隙
-                var CLAIMANDSUPPORTYINTERVAL = 20  //主张和support的纵距离
-                var SUPPORTANDCLAIMYINTERVAL = 10  //support和主张的纵距离
-                var SUPPORTANDSUPPORTYINTERVAL = 20  //support和support之间的纵距离
-                var SUPPORTELEMENTANDDISSENTEXPLAINELEMENTYINTERVAL = 30  //被质疑的evidence或者warrant距离下面的解释说明的主张的距离
+                var CLAIMWIDTH //占据除去两个边距后5分之4的位置
 
+                var CLAIMHEIGHT
+                var CLAIMXINTERVAL  //间距占据除去两个编剧后5分之1的位置
+                var CLAIMYINTERVAL //轮次内的主张之间的垂直间隙
 
-                var POPUPWIDTH = CLAIMWIDTH //弹出框的宽度
-                var POPUPHEIGHT = CLAIMWIDTH*0.75
+                var CLAIMANDSUPPORTYINTERVAL //主张和support的纵距离
+                var SUPPORTANDCLAIMYINTERVAL //support和主张的纵距离
+                var SUPPORTANDSUPPORTYINTERVAL //support和support之间的纵距离
 
-                var ELEMENTWIDTH = CLAIMWIDTH/5  //占据5分之1的的位置
-                var ELEMENTHEIGHT = ELEMENTWIDTH*0.7
+                var POPUPWIDTH //弹出框的宽度
+                var POPUPHEIGHT
 
+                var ELEMENTWIDTH  //占据5分之1的的位置
+                var ELEMENTHEIGHT
 
-                var CLAIMXPRO = LEFT
-                var CLAIMXCON = LEFT + CLAIMWIDTH + CLAIMXINTERVAL
-                var CLAIMX = ["",CLAIMXPRO,CLAIMXCON]
+                var CLAIMXPRO
+                var CLAIMXCON
+                var CLAIMX
 
+                var LASTY  //一个数组的第二项和第三项分别存储正方和反方的升降机标尺数据
 
-                var LASTY = ["",TOP,TOP] //一个数组的第二项和第三项分别存储正方和反方的升降机标尺数据
+                var MAINARROWLEFTOFFSET
+                var LINEWIDTH
 
-                var ELEMENTXINTERVAL = CLAIMWIDTH/5
+                var PROCOLOR
+                var CONCOLOR
 
-                var MAINLINEXPRO = CLAIMX[1] + ELEMENTWIDTH/3  //左侧主线条的起点横坐标
-                var MAINLINEXCON = CLAIMX[2] + ELEMENTWIDTH/3  //右侧主线条的起点横坐标
+                var mainLeftArrow
+                var mainLeftArrowOfDissent
+                var ELEMENTDISSENTCLAIM
 
-                var MAINLINESTARTYPRO,MAINLINELASTYPRO //左侧主线条的起点和终点纵坐标
-                var MAINLINESTARTYCON,MAINLINELASTYCON //右侧主线条的起点和终点纵坐标
-
-                var MAINARROWLEFTOFFSET = 10
-                var LINEWIDTH = 5
+                var FONTSIZE
 
 
-                var PROCOLOR = "#2aabd2"
-                var CONCOLOR = "#419641"
 
 
-                scope.mapData = {pro:[],con:[]}
-                scope.mapDissentData = []
-                dealWithData()
+                var analysisMapInformation = getDebateAnalysisMapInformation.getDebateAnalysisMapInformation()
+
+                analysisMapInformation.then(function(msg){
+                    scope.analysisMapInformation = msg
+                    scope.mapData = {pro:[],con:[]}
+                    scope.mapDissentData = []
+                    dealWithData()
+                    dealWithDraw()
+                })
+
+                scope.$on("reDrawMap",function(){
+                    setTimeout(function(){
+                        dealWithDraw()
+                    },500)
+                })
+
+
+                function define(){
+                    var _width = element.find("div")[0].offsetWidth
+                    LEFT = _width*0.05
+                    TOP = 35
+
+                    CLAIMWIDTH = (_width-2*LEFT)*0.4  //占据除去两个边距后5分之4的位置
+
+                    CLAIMHEIGHT = CLAIMWIDTH*1.2;
+                    CLAIMXINTERVAL = (_width-2*LEFT)*0.2 //间距占据除去两个编剧后5分之1的位置
+                    CLAIMYINTERVAL = 100  //轮次内的主张之间的垂直间隙
+
+                    CLAIMANDSUPPORTYINTERVAL = 50  //主张和support的纵距离
+                    SUPPORTANDCLAIMYINTERVAL = 10  //support和主张的纵距离
+                    SUPPORTANDSUPPORTYINTERVAL = 20  //support和support之间的纵距离
+
+                    POPUPWIDTH = CLAIMWIDTH //弹出框的宽度
+                    POPUPHEIGHT = CLAIMWIDTH*0.75
+
+                    ELEMENTWIDTH = CLAIMWIDTH/5  //占据5分之1的的位置
+                    ELEMENTHEIGHT = ELEMENTWIDTH*0.7
+
+                    CLAIMXPRO = LEFT
+                    CLAIMXCON = LEFT + CLAIMWIDTH + CLAIMXINTERVAL
+                    CLAIMX = ["",CLAIMXPRO,CLAIMXCON]
+
+                    LASTY = ["",TOP,TOP] //一个数组的第二项和第三项分别存储正方和反方的升降机标尺数据
+
+                    MAINARROWLEFTOFFSET = 10
+                    LINEWIDTH = 5
+
+                    PROCOLOR = "#2aabd2"
+                    CONCOLOR = "#419641"
+
+                    if(_width>=900){
+                        FONTSIZE = 16
+                    }else if(_width>=700 && _width<900){
+                        FONTSIZE = 14
+                    }else if(_width>=500 && _width<700){
+                        FONTSIZE = 12
+                    }else{
+                        FONTSIZE = 10
+                    }
+
+                    mainLeftArrow = {pro:[],con:[]}
+                    mainLeftArrowOfDissent = {pro:{},con:{}}
+                    ELEMENTDISSENTCLAIM = {pro:{},con:{}}
+                }
+
                 function dealWithData() {
                     //先把主张的分析结果合一块儿
                     for (var i = 0; i < scope.analysisMapInformation.res.data.length; i++) {
                         var analysisResult = scope.analysisMapInformation.res.data[i].analysisData.analysisResult
                         var analysisDissentExplainData = scope.analysisMapInformation.res.data[i].analysisDissentExplainData
 
-                        if (analysisDissentExplainData.length > 0){
+                        if (analysisDissentExplainData.length > 0) {
                             var analysisDissentExplainData = addAnalysisIndexInto(analysisDissentExplainData)
                             scope.mapDissentData.push(analysisDissentExplainData)
                         }
@@ -3628,14 +2941,13 @@
                     }
 
 
-
-                    function addAnalysisIndexInto(data){
+                    function addAnalysisIndexInto(data) {
                         //很遗憾服务器端claim里没有数据告诉里claim指向的是那个analysis index 所以只好在这里作处理
-                        for(var i=0;i<data.length;i++){
+                        for (var i = 0; i < data.length; i++) {
                             var indexToAnalysis = data[i].indexToAnalysis
-                            for(var j=0;j<data[i].analysisResult.length;j++){
+                            for (var j = 0; j < data[i].analysisResult.length; j++) {
                                 data[i].analysisResult[j].indexToAnalysis = indexToAnalysis
-                                for(var k=0;k<data[i].analysisResult[j].support.length;k++){
+                                for (var k = 0; k < data[i].analysisResult[j].support.length; k++) {
                                     data[i].analysisResult[j].support[k].indexToAnalysis = indexToAnalysis
                                 }
                             }
@@ -3770,8 +3082,8 @@
                     appendDissentAnalysisDataToElement("pro")
                     appendDissentAnalysisDataToElement("con")
 
-                    function appendDissentAnalysisDataToElement(position){
-                        
+                    function appendDissentAnalysisDataToElement(position) {
+
                         for (var i = 0; i < scope.mapData[position].length; i++) {
                             for (var j = 0; j < scope.mapData[position][i].length; j++) {
                                 var res = findDissentAnalysisResult(scope.mapData[position][i][j].random)
@@ -3798,15 +3110,10 @@
                     }
 
 
-
-
-
-
-
-                    function findDissentAnalysisResult(random){
-                        for(var i=0;i<scope.mapDissentData.length;i++){
-                            for(var j=0;j<scope.mapDissentData[i].length;j++){
-                                if(random == scope.mapDissentData[i][j].indexToAnalysis){
+                    function findDissentAnalysisResult(random) {
+                        for (var i = 0; i < scope.mapDissentData.length; i++) {
+                            for (var j = 0; j < scope.mapDissentData[i].length; j++) {
+                                if (random == scope.mapDissentData[i][j].indexToAnalysis) {
                                     return scope.mapDissentData[i][j].analysisResult
                                 }
                             }
@@ -3814,29 +3121,21 @@
                         return false
                     }
 
+                    }
 
+                function dealWithDraw(){
+                    define()
                     console.log(scope.mapData)
                     console.log(66666666666666666)
                     console.log(scope.mapDissentData)
-                    var mainLeftArrow = {pro:[],con:[]}
-                    var mainLeftArrowOfDissent = {pro:{},con:{}}
-                    var ELEMENTDISSENTCLAIM = {pro:{},con:{}}
 
-
+                    clearDraw()
                     //主体思想是嵌套循环数据,分为左右两个区域
-                    starDraw(scope.mapData.pro,1)
-                    starDraw(scope.mapData.con,2)
+                    startDraw(scope.mapData.pro,1)
+                    startDraw(scope.mapData.con,2)
 
-
-                    function starDraw(data,position){
-                        for(var i=0;i<data.length;i++){
-                            //第i轮的主张
-                            var recursionI = 0  //这个变存储递归的深度
-                            drawClaim(recursionI,data[i],position,CLAIMX[position])
-                        }
-                    }
-
-
+                    console.log("ak47")
+                    console.log(mainLeftArrowOfDissent)
 
                     drawMainArrow(mainLeftArrow,PROCOLOR,1)
                     drawMainArrow(mainLeftArrow,CONCOLOR,2)
@@ -3846,491 +3145,834 @@
 
                     _drawMainArrow(ELEMENTDISSENTCLAIM.pro,"red")
                     _drawMainArrow(ELEMENTDISSENTCLAIM.con,"red")
+                }
 
-                    function drawMainArrow(data,color,position){
-                        var data = (position == 1)?data.pro:data.con
+                function startDraw(data,position){
                         for(var i=0;i<data.length;i++){
-                            //painLine(svg,data.proX,data[i].endX,data[i].startY,data[i].endY,color)
-                            painLine(svg,data[i].x,data[i].x,data[i].startY,data[i].endY,color)
+                            //第i轮的主张
+                            var recursionI = 0  //这个变存储递归的深度
+
+                            position == 1?mainLeftArrow.pro[i] = []:mainLeftArrow.con[i] = []
+                            drawClaim(i,recursionI,data[i],position,CLAIMX[position])
                         }
                     }
 
+                function clearDraw(){
+                    svg.selectAll(".mapData").remove()
+                    LASTY = ["",TOP,TOP] //一个数组的第二项和第三项分别存储正方和反方的升降机标尺数据
+                }
 
-
-                    function _drawMainArrow(data,color){
-                        console.log("htcasdas")
-                        console.log(data)
-
-                        for(var i in data){
-                            painLine(svg,data[i].x,data[i].x,data[i].startY-5,data[i].endY,color)
-                        }
-
-
-                    }
-
-
-
-
-                    function painLine(platform,x1,x2,y1,y2,color){
-                        var svg = platform
-                        var line = svg.append("line")
-                        line.attr("class","mapData")
-                        line.attr("x1",x1)
-                        line.attr("x2",x2)
-                        line.attr("y1",y1)
-                        line.attr("y2",y2)
-                        line.attr("stroke",color)
-                        line.attr("stroke-width",LINEWIDTH)
-                    }
-
-
-                    function judeElementPosition(position,recursionI){
-                       //通过对递归深度的分析和对位置的分析判断这个元素是正方还是反方做出的
-
-                        //比如说position==1,代表正方pro,在正方pro中所有偶数的递归深度值都指的是pro,所有奇数的递归深度值都指的是con
-                        //相反说position==2,代表反方con,在反方con中所有偶数的递归深度值都指的是con,所有奇数的递归深度值都指的是pro
-
-                        if(recursionI%2==0){
-                            if(position == 1) return 1
-                            if(position == 2) return 2
-                        }else{
-                            if(position == 1) return 2
-                            if(position == 2) return 1
+                function drawMainArrow(data,color,position){
+                    var data = (position == 1)?data.pro:data.con
+                    for(var i=0;i<data.length;i++){
+                        //i代表第几轮
+                        for(var j=0;j<data[i].length;j++){
+                            painLine(svg,data[i][j].x,data[i][j].x,data[i][j].startY,data[i][j].endY,color)
                         }
                     }
+                }
 
 
 
-                    function drawClaim(recursionI,data,position,currentX){
-
-                        //主轴是以原始claim为模块进行描画的
-                        for(var j=0;j<data.length;j++){
-                            if(!data[j].claim) return;
-
-                            if(recursionI == 0){
-                                //说明这是最原始的claim不是異議説明的claim
-                                //这里实际上push的是第j个对象
-                                position == 1?mainLeftArrow.pro.push({x:(currentX-MAINARROWLEFTOFFSET),startY:LASTY[position] + ELEMENTHEIGHT/2}):mainLeftArrow.con.push({x:(currentX-10),startY:LASTY[position] + ELEMENTHEIGHT/2})
-                                //连接和左边mainLine的连线
-                                var color = position == 1?PROCOLOR:CONCOLOR
-                                painLine(svg,currentX-MAINARROWLEFTOFFSET-LINEWIDTH/2,currentX,LASTY[position] + ELEMENTHEIGHT/2,LASTY[position] + ELEMENTHEIGHT/2,color)
-                            }else{
-                                //说明这里的claim不是原始的claim而是異議説明的claim
-                                var indexToAnalysis = data[j].indexToAnalysis
-                                position == 1?mainLeftArrowOfDissent.pro[indexToAnalysis] = {x:currentX+ELEMENTWIDTH/2,startY:LASTY[position]+ELEMENTHEIGHT}:mainLeftArrowOfDissent.con[indexToAnalysis] = {x:currentX+ELEMENTWIDTH/2,startY:LASTY[position]+ELEMENTHEIGHT}
-                                //mainLeftArrowOfDissent
-                            }
-
-                            var y = LASTY[position]
-
-                            appendElement(recursionI,currentX,LASTY[position],"主張",position,0,data[j].claim,"claim",data[j].random)
+                function _drawMainArrow(data,color){
+                    console.log("htcasdas")
+                    console.log(data)
 
 
-
-                            //这个时候升降机的调整要分是原始claim的情况和非原始claim的情况
-
-                            if(recursionI == 0){
-                                //为原始claim的情况
-                                var shenjiangjiHEIGHT = CLAIMHEIGHT
-                            }else{
-                                //为非原始claim的情况
-                                var shenjiangjiHEIGHT = ELEMENTHEIGHT
-                            }
-
-                            if(data[j].support[0].evidence){
-                                //如果次主张下的第一个support有数据的话,那么把升降机下降至support数据的高度
-                                LASTY[position] = LASTY[position] + shenjiangjiHEIGHT + CLAIMANDSUPPORTYINTERVAL
-                                drawSupport(recursionI,data[j].support,position,currentX,j)
-                            }else{
-                                //如果该次主张下没有support的话
-                                if(data[j+1]){
-                                    //如果该轮次下一个主张存在的话,那么把升降机下降到该轮次下一个主张的高度
-                                    LASTY[position] = LASTY[position] + shenjiangjiHEIGHT + CLAIMYINTERVAL
-                                }else{
-                                    LASTY[position] = LASTY[position] + shenjiangjiHEIGHT
-                                }
-                            }
-
-
-                        }
-
-                        return y
+                    for(var i in data){
+                        painLine(svg,data[i].x,data[i].x,data[i].startY-5,data[i].endY,color)
                     }
 
-
-                    function drawSupport(recursionI,data,position,currentX,j){
-                        for(var i=0;i<data.length;i++){
-                            if(recursionI == 0){
-                                //说明这是最原始的claim不是異議説明的claim
-                                //这里实际上push的是第j个对象
-                                position == 1?mainLeftArrow.pro[j].endY = LASTY[position] + ELEMENTHEIGHT*0.5:mainLeftArrow.con[j].endY = LASTY[position] + ELEMENTHEIGHT*0.5
-                            }else{
-                                //说明这里不是原始的claim是異議説明的claim
-                                var indexToAnalysis = data[i].indexToAnalysis
-                                //这里所属的元素是属于对那个元素的质疑
-                                position == 1?mainLeftArrowOfDissent.pro[indexToAnalysis].endY = (LASTY[position] + ELEMENTHEIGHT/2):mainLeftArrowOfDissent.con[indexToAnalysis].endY = (LASTY[position] + ELEMENTHEIGHT/2)
-                                //mainLeftArrowOfDissent
-                            }
-
-                            var y1 = LASTY[position] + ELEMENTHEIGHT
-                                //先画evidence
-                                    if(data[i].evidence){
-                                        var evidenceX = appendEvidence(recursionI,data,i,position,currentX)
-                                    }
-
-                                //再画warrant
-                                    if(data[i].warrant){
-                                        var warrantX = appendWarrant(recursionI,data,i,position,currentX)
-                                    }
-
-
-
-                                //递归还是不递归判断分析
-
-                                if(data[i].eDissent){
-                                    //如果对于evidence的质疑解释还有的话
-                                    LASTY[position] = LASTY[position] + CLAIMANDSUPPORTYINTERVAL
-                                    var y2 = drawClaim((recursionI+1),data[i].eDissent,position,evidenceX)  //返回这个元素所属的claim的高度
-                                    //进行一次递归调用,因此递归深度在原有的递归深度上+1
-
-                                    var indexToAnalysis = data[i].erandom
-                                    position==1?ELEMENTDISSENTCLAIM.pro[indexToAnalysis] = {x:evidenceX+ELEMENTWIDTH/2,startY:y1,endY:y2}:ELEMENTDISSENTCLAIM.con[indexToAnalysis] = {x:evidenceX+ELEMENTWIDTH/2,startY:y1,endY:y2}
-                                }
-
-                                if(data[i].wDissent){
-                                    //如果对warrant的质疑解释还有的话
-                                    LASTY[position] = LASTY[position] + CLAIMANDSUPPORTYINTERVAL
-                                    var y2 = drawClaim((recursionI+1),data[i].wDissent,position,warrantX) //返回这个元素所属的claim的高度
-                                    //进行一次递归调用,因此递归深度在原有的递归深度上+1
-
-                                    var indexToAnalysis = data[i].wrandom
-                                    position==1?ELEMENTDISSENTCLAIM.pro[indexToAnalysis] = {x:warrantX+ELEMENTWIDTH/2,startY:y1,endY:y2}:ELEMENTDISSENTCLAIM.con[indexToAnalysis] = {x:warrantX+ELEMENTWIDTH/2,startY:y1,endY:y2}
-                                }
-
-                        }
-                    }
-
-
-                    function appendEvidence(recursionI,data,i,position,currentX){
-                        var text = data[i].evidence
-
-
-                        if(recursionI % 2 == 0){
-                            //如果递归深度为偶数向右伸展
-                            var x = currentX + 3*ELEMENTWIDTH
-                        }else{
-                            //如果递归深度为奇数向左伸展
-                            var x = currentX - 3*ELEMENTWIDTH
-                        }
-
-                        if(data[i].eDissent){
-                            var dissent = 1
-                        }else{
-                            var dissent = 0
-                        }
-
-
-                        if(recursionI == 0){
-                            //说明这是最原始的claim不是異議説明的claim
-                            //连接和左边mainLine的连线
-                            var color = position == 1?PROCOLOR:CONCOLOR
-                            painLine(svg,currentX-MAINARROWLEFTOFFSET-LINEWIDTH/2,x,LASTY[position] + ELEMENTHEIGHT/2,LASTY[position] + ELEMENTHEIGHT/2,color)
-                        }else{
-                            //说明这不是最原始的claim而是異議説明的claim
-                            var indexToAnalysis = data[i].indexToAnalysis
-                            //连接和左边mainLine的连线
-                            if(position == 1){
-                                var _startx = mainLeftArrowOfDissent.pro[indexToAnalysis].x + LINEWIDTH/2
-                            }else{
-                                var _startx = mainLeftArrowOfDissent.con[indexToAnalysis].x + LINEWIDTH/2
-                            }
-                            painLine(svg,_startx,x,LASTY[position] + ELEMENTHEIGHT/2,LASTY[position] + ELEMENTHEIGHT/2,"#000")
-                        }
-
-
-
-                        appendElement(recursionI,x,LASTY[position],"根拠",position,dissent,data[i].evidence,"evidence",data[i].erandom)
-                        if(!data[i].warrant){
-                            //如果下一个要画的warrant不存在的话,那么现在就开始调整升降机//否则等到下一个画warrant的时候再调整升降机
-                                            if(data[i+1]){
-                                                //如果下一个support存在的话那么调整升降机到下一个support的位置
-                                                LASTY[position] = LASTY[position] + ELEMENTHEIGHT + SUPPORTANDSUPPORTYINTERVAL
-                                            }else{
-                                                //如果下一个support不存在的话
-                                                LASTY[position] = LASTY[position] + ELEMENTHEIGHT + SUPPORTANDCLAIMYINTERVAL
-                                            }
-                        }
-
-                        //返回当前集结点的横坐标信息
-                        return x
-                    }
-
-                    function appendWarrant(recursionI,data,i,position,currentX){
-
-                        if(recursionI % 2 == 0){
-                            //如果递归深度为偶数向右伸展
-                            var x = currentX+ELEMENTWIDTH
-                        }else{
-                            //如果递归深度为奇数向左伸展
-                            var x = currentX - ELEMENTWIDTH
-                        }
-
-
-
-
-                        if(data[i].wDissent){
-                            var dissent = 1
-                        }else{
-                            var dissent = 0
-                        }
-
-
-                        appendElement(recursionI,x,LASTY[position],"論拠",position,dissent,data[i].warrant,"warrant",data[i].wrandom)
-
-                        //处理升降机
-
-                        if(data[i+1]){
-                            //如果下一个support存在的话那么调整升降机到下一个support的位置
-                            LASTY[position] = LASTY[position] + ELEMENTHEIGHT + SUPPORTANDSUPPORTYINTERVAL
-                        }else{
-                            LASTY[position] = LASTY[position] + ELEMENTHEIGHT + SUPPORTANDCLAIMYINTERVAL
-                        }
-
-                        //返回当前集结点的横坐标信息
-                        return currentX+ELEMENTWIDTH
-                    }
-
-
-                    function appendElement(recursionI,x,y,text,position,dissent,_text,type,random){
-                        if(!text)  return
-                        var foreignObject = svg.append("foreignObject")
-                        foreignObject.attr("class","mapData")
-
-
-                        if(type == "claim" && recursionI == 0){
-                            //如果是最原始的claim的话那么以claim级别去对待
-                            foreignObject.attr("width",CLAIMWIDTH)
-                            foreignObject.attr("height",CLAIMHEIGHT)
-                        }else{
-                            //如果不是最原始的claim的话那么以元素级别去对待
-                            foreignObject.attr("width",ELEMENTWIDTH)
-                            foreignObject.attr("height",ELEMENTHEIGHT)
-                        }
-
-
-                        foreignObject.attr("x",x)
-                        foreignObject.attr("y",y)
-                        var div = foreignObject.append('xhtml:div')
-
-                        div.style("height",ELEMENTHEIGHT+"px")
-
-                        if(type == "claim" && recursionI == 0){
-                            //如果是最原始的claim的话那么以claim级别去对待
-                           var div = div.append("div")
-                               div.attr("class","panel panel-default")
-                               var div = div.append("div")
-                               div.attr("class","panel-body")
-                               div.text(_text)
-                               div.text(_text)
-
-                        }else{
-                            //如果不是最原始的claim的话那么以元素级别去对待
-
-                            var button = div.append("button")
-                            if(judeElementPosition(position,recursionI) == 1){
-                                button.attr("class","btn btn-info")
-                            }else{
-                                button.attr("class","btn btn-success")
-                            }
-
-
-
-
-                            button.text(text)
-
-                            if(dissent == 1){
-                                var span = button.append("span")
-                                span.attr("class","glyphicon glyphicon-star")
-                            }
-
-                            var _id = "element"+Math.round(Math.random()*10000)
-                            button.attr("id",_id)
-                            document.getElementById(_id).onclick = function(){
-                                popUp(text,x,y,position,_text)
-                                if(dissent == 1){
-                                    changeShowStatus(random,position)
-                                }
-                            }
-
-
-                        }
-
-
-                    }
-
-
-
-                    function changeShowStatus(random,position){
-                        //递归查询scope.mapData中wrandom或者erandom为random的并把这个数据的显示状态反置
-                        var data = position == 1?scope.mapData.pro:scope.mapData.con
-
-                        for(var i=0;i<data.length;i++){
-                            for(var j=0;j<data[i].length;j++){
-
-                                var res = diguiGetPosition(random,data[i][j])
-                                if( res != 0){
-
-                                    alert(res)
-                                    return;
-                                }else{
-
-                                }
-                            }
-
-                        }
-                    }
-
-                    function diguiGetPosition(random,data){
-                        if(!data || !data.support ) return;
-
-                        for(var i=0;i<data.support.length;i++){
-                            var erandom = data.support[i].erandom
-                            var wrandom = data.support[i].wrandom
-
-                            if(random == erandom){
-                                if(!data.support[i].eDissentShow){
-                                    data.support[i].eDissentShow = 1
-                                }else{
-                                    data.support[i].eDissentShow = (data.support[i].eDissentShow + 1) % 2
-                                }
-
-                                return "find in erandom"
-                            }
-
-                            if(random == wrandom){
-                                if(!data.support[i].wDissentShow){
-                                    data.support[i].wDissentShow = 1
-                                }else{
-                                    data.support[i].wDissentShow = (data.support[i].wDissentShow + 1) % 2
-                                }
-
-                                return "find in wrandom"
-                            }
-
-
-                            //如果当前递归深度的wrandom以及erandom没有找到匹配的那么看看它的自元素
-
-                            if(data.support[i].eDissent){
-                                var res = diguiGetPosition(random,data.support[i].eDissent)
-                                alert(res)
-                                if(res != 0){
-                                    data.support[i].eDissent = res
-                                    return res
-                                }
-                            }
-
-                            if(data.support[i].wDissent){
-                                var res = diguiGetPosition(random,data.support[i].wDissent)
-                                alert(res)
-                                if(res != 0){
-                                    data.support[i].wDissent = res
-                                    return res
-                                }
-                            }
-
-                        }
-
-                        return "not find"
-
-                    }
-
-                    function popUp(text,x,y,position,_text){
-
-
-                        d3.selectAll(".balloon").remove()
-
-                        var rect = svg.append("foreignObject")
-
-                        rect.attr("x",x)
-                        rect.attr("y",y)
-                        rect.attr("width",POPUPWIDTH)
-                        rect.attr("height",POPUPHEIGHT)
-
-
-                        var div = rect.append('xhtml:div')
-                        div.style("width",POPUPWIDTH)
-                        div.style("height",POPUPHEIGHT)
-                        div = div.append("div")
-
-
-                        div.attr("class","row col-sm-12 balloon")
-
-                        if(position == 1){
-                            rect.attr("x",x+ELEMENTWIDTH + 30)
-                            div.classed("_balloon", true);
-                        }else{
-                            rect.attr("x",x-ELEMENTWIDTH)
-                            div.classed("__balloon", true);
-                        }
-
-                        div.style("width",POPUPWIDTH+"px")
-                        div.style("background-color","#fff")
-
-
-                        var sdiv = div.append("div")
-                        sdiv.attr("class","row")
-
-                        var title = sdiv.append("div")
-                        title.attr("class","col-sm-10")
-
-                        var remove = sdiv.append("div")
-                        remove.attr("class","col-sm-6")
-                        remove = remove.append("span")
-                        remove.attr("class","glyphicon glyphicon-remove")
-                        remove.attr("aria-hidden","true")
-                        remove.style("cursor","pointer")
-
-                        remove.on("click",function(){
-                            rect.remove()
-                        })
-
-
-                        var content = sdiv.append("div")
-                        content.attr("class","col-sm-11")
-                        content.html(_text)
-
-                    }
 
                 }
 
+
+                function painLine(platform,x1,x2,y1,y2,color){
+
+                    var svg = platform
+                    var line = svg.append("line")
+                    line.attr("class","mapData")
+                    line.attr("x1",x1)
+                    line.attr("x2",x2)
+                    line.attr("y1",y1)
+                    line.attr("y2",y2)
+                    line.attr("stroke",color)
+                    line.attr("stroke-width",LINEWIDTH)
+                }
+
+
+                function judeElementPosition(position,recursionI){
+                   //通过对递归深度的分析和对位置的分析判断这个元素是正方还是反方做出的
+
+                    //比如说position==1,代表正方pro,在正方pro中所有偶数的递归深度值都指的是pro,所有奇数的递归深度值都指的是con
+                    //相反说position==2,代表反方con,在反方con中所有偶数的递归深度值都指的是con,所有奇数的递归深度值都指的是pro
+
+                    if(recursionI%2==0){
+                        if(position == 1) return 1
+                        if(position == 2) return 2
+                    }else{
+                        if(position == 1) return 2
+                        if(position == 2) return 1
+                    }
+                }
+
+
+
+                function drawClaim(I,recursionI,data,position,currentX){
+                    //I代表第几轮主张
+                    //主轴是以原始claim为模块进行描画的
+                    for(var j=0;j<data.length;j++){
+
+                        if(!data[j].claim) return;
+
+                        if(recursionI == 0){
+                            //说明这是最原始的claim不是異議説明的claim
+                            //这里实际上push的是第j个对象
+
+                            position == 1?mainLeftArrow.pro[I].push({x:(currentX-MAINARROWLEFTOFFSET),startY:LASTY[position] + ELEMENTHEIGHT/2}):mainLeftArrow.con[I].push({x:(currentX-10),startY:LASTY[position] + ELEMENTHEIGHT/2})
+                            //连接和左边mainLine的连线
+                            var color = position == 1?PROCOLOR:CONCOLOR
+                            painLine(svg,currentX-MAINARROWLEFTOFFSET-LINEWIDTH/2,currentX,LASTY[position] + ELEMENTHEIGHT/2,LASTY[position] + ELEMENTHEIGHT/2,color)
+                        }else{
+                            //说明这里的claim不是原始的claim而是異議説明的claim
+                            var indexToAnalysis = data[j].indexToAnalysis
+
+                            position == 1?mainLeftArrowOfDissent.pro[indexToAnalysis] = {x:currentX+ELEMENTWIDTH/2,startY:LASTY[position]+ELEMENTHEIGHT}:mainLeftArrowOfDissent.con[indexToAnalysis] = {x:currentX+ELEMENTWIDTH/2,startY:LASTY[position]+ELEMENTHEIGHT}
+                            //mainLeftArrowOfDissent
+                        }
+
+                        var y = LASTY[position]
+
+                        var _element = appendElement(recursionI,currentX,LASTY[position],"主張",position,0,data[j].claim,"claim",data[j].random)
+
+                        //这个时候升降机的调整要分是原始claim的情况和非原始claim的情况
+
+                        if(recursionI == 0){
+                            //为原始claim的情况
+                            var shenjiangjiHEIGHT = CLAIMHEIGHT
+                            //var shenjiangjiHEIGHT = document.getElementById(_element.id).clientHeight
+                        }else{
+                            //为非原始claim的情况
+                            var shenjiangjiHEIGHT = ELEMENTHEIGHT
+                            //var shenjiangjiHEIGHT = document.getElementById(_element.id).clientHeight
+                        }
+
+                        if(data[j].support[0].evidence){
+                            //如果次主张下的第一个support有数据的话,那么把升降机下降至support数据的高度
+                            LASTY[position] = LASTY[position] + shenjiangjiHEIGHT + CLAIMANDSUPPORTYINTERVAL
+                            drawSupport(I,recursionI,data[j].support,position,currentX,j)
+                        }else{
+                            //如果该次主张下没有support的话
+                            if(data[j+1]){
+                                //如果该轮次下一个主张存在的话,那么把升降机下降到该轮次下一个主张的高度
+                                LASTY[position] = LASTY[position] + shenjiangjiHEIGHT + CLAIMYINTERVAL
+                            }else{
+                                LASTY[position] = LASTY[position] + shenjiangjiHEIGHT
+                            }
+                        }
+
+                    }
+
+                    return y
+                }
+
+
+                function drawSupport(I,recursionI,data,position,currentX,j){
+                    //I代表第几轮主张
+
+                    for(var i=0;i<data.length;i++){
+                        if(recursionI == 0){
+                            //说明这是最原始的claim不是異議説明的claim
+                            //这里实际上push的是第j个对象
+
+                            position == 1?mainLeftArrow.pro[I][j].endY = LASTY[position] + ELEMENTHEIGHT*0.5:mainLeftArrow.con[I][j].endY = LASTY[position] + ELEMENTHEIGHT*0.5
+                        }else{
+                            //说明这里不是原始的claim是異議説明的claim
+                            var indexToAnalysis = data[i].indexToAnalysis
+                            //这里所属的元素是属于对那个元素的质疑
+                            position == 1?mainLeftArrowOfDissent.pro[indexToAnalysis].endY = (LASTY[position] + ELEMENTHEIGHT/2):mainLeftArrowOfDissent.con[indexToAnalysis].endY = (LASTY[position] + ELEMENTHEIGHT/2)
+                            //mainLeftArrowOfDissent
+                        }
+
+                        var y1 = LASTY[position] + ELEMENTHEIGHT
+                            //先画evidence
+                                if(data[i].evidence){
+                                    var evidenceX = appendEvidence(recursionI,data,i,position,currentX)
+                                }
+
+                            //再画warrant
+                                if(data[i].warrant){
+                                    var warrantX = appendWarrant(recursionI,data,i,position,currentX)
+                                }
+
+
+
+                            //递归还是不递归判断分析
+
+                            if(data[i].eDissent){
+                                //如果对于evidence的质疑解释还有的话
+                                LASTY[position] = LASTY[position] + CLAIMANDSUPPORTYINTERVAL
+                                var y2 = drawClaim(I,(recursionI+1),data[i].eDissent,position,evidenceX)  //返回这个元素所属的claim的高度
+                                //进行一次递归调用,因此递归深度在原有的递归深度上+1
+
+                                var indexToAnalysis = data[i].erandom
+
+                                position==1?ELEMENTDISSENTCLAIM.pro[indexToAnalysis] = {x:evidenceX+ELEMENTWIDTH/2,startY:y1,endY:y2}:ELEMENTDISSENTCLAIM.con[indexToAnalysis] = {x:evidenceX+ELEMENTWIDTH/2,startY:y1,endY:y2}
+                            }
+
+                            if(data[i].wDissent){
+                                //如果对warrant的质疑解释还有的话
+                                LASTY[position] = LASTY[position] + CLAIMANDSUPPORTYINTERVAL
+                                var y2 = drawClaim(I,(recursionI+1),data[i].wDissent,position,warrantX) //返回这个元素所属的claim的高度
+                                //进行一次递归调用,因此递归深度在原有的递归深度上+1
+
+                                var indexToAnalysis = data[i].wrandom
+                                position==1?ELEMENTDISSENTCLAIM.pro[indexToAnalysis] = {x:warrantX+ELEMENTWIDTH/2,startY:y1,endY:y2}:ELEMENTDISSENTCLAIM.con[indexToAnalysis] = {x:warrantX+ELEMENTWIDTH/2,startY:y1,endY:y2}
+                            }
+
+                    }
+                }
+
+
+                function appendEvidence(recursionI,data,i,position,currentX){
+                    var text = data[i].evidence
+
+
+                    if(recursionI % 2 == 0){
+                        //如果递归深度为偶数向右伸展
+                        var x = currentX + 3*ELEMENTWIDTH
+                    }else{
+                        //如果递归深度为奇数向左伸展
+                        var x = currentX - 3*ELEMENTWIDTH
+                    }
+
+                    if(data[i].eDissent){
+                        var dissent = 1
+                    }else{
+                        var dissent = 0
+                    }
+
+
+                    if(recursionI == 0){
+                        //说明这是最原始的claim不是異議説明的claim
+                        //连接和左边mainLine的连线
+                        var color = position == 1?PROCOLOR:CONCOLOR
+                        painLine(svg,currentX-MAINARROWLEFTOFFSET-LINEWIDTH/2,x,LASTY[position] + ELEMENTHEIGHT/2,LASTY[position] + ELEMENTHEIGHT/2,color)
+                    }else{
+                        //说明这不是最原始的claim而是異議説明的claim
+                        var indexToAnalysis = data[i].indexToAnalysis
+                        //连接和左边mainLine的连线
+                        if(position == 1){
+                            var _startx = mainLeftArrowOfDissent.pro[indexToAnalysis].x + LINEWIDTH/2
+                        }else{
+                            var _startx = mainLeftArrowOfDissent.con[indexToAnalysis].x + LINEWIDTH/2
+                        }
+                        painLine(svg,_startx,x,LASTY[position] + ELEMENTHEIGHT/2,LASTY[position] + ELEMENTHEIGHT/2,"#000")
+                    }
+
+
+
+                    appendElement(recursionI,x,LASTY[position],"根拠",position,dissent,data[i].evidence,"evidence",data[i].erandom)
+                    if(!data[i].warrant){
+                        //如果下一个要画的warrant不存在的话,那么现在就开始调整升降机//否则等到下一个画warrant的时候再调整升降机
+                                        if(data[i+1]){
+                                            //如果下一个support存在的话那么调整升降机到下一个support的位置
+                                            LASTY[position] = LASTY[position] + ELEMENTHEIGHT + SUPPORTANDSUPPORTYINTERVAL
+                                        }else{
+                                            //如果下一个support不存在的话
+                                            LASTY[position] = LASTY[position] + ELEMENTHEIGHT + SUPPORTANDCLAIMYINTERVAL
+                                        }
+                    }
+
+                    //返回当前集结点的横坐标信息
+                    return x
+                }
+
+                function appendWarrant(recursionI,data,i,position,currentX){
+
+                    if(recursionI % 2 == 0){
+                        //如果递归深度为偶数向右伸展
+                        var x = currentX+ELEMENTWIDTH
+                    }else{
+                        //如果递归深度为奇数向左伸展
+                        var x = currentX - ELEMENTWIDTH
+                    }
+
+
+
+
+                    if(data[i].wDissent){
+                        var dissent = 1
+                    }else{
+                        var dissent = 0
+                    }
+
+
+                    appendElement(recursionI,x,LASTY[position],"論拠",position,dissent,data[i].warrant,"warrant",data[i].wrandom)
+
+                    //处理升降机
+
+                    if(data[i+1]){
+                        //如果下一个support存在的话那么调整升降机到下一个support的位置
+                        LASTY[position] = LASTY[position] + ELEMENTHEIGHT + SUPPORTANDSUPPORTYINTERVAL
+                    }else{
+                        LASTY[position] = LASTY[position] + ELEMENTHEIGHT + SUPPORTANDCLAIMYINTERVAL
+                    }
+
+                    //返回当前集结点的横坐标信息
+                    return x
+                }
+
+
+                function appendElement(recursionI,x,y,text,position,dissent,_text,type,random){
+                    if(!text)  return
+                    var foreignObject = svg.append("foreignObject")
+                    foreignObject.attr("class","mapData")
+
+                    var id = type + Math.round(Math.random()*10000000)
+
+                    if(type == "claim" && recursionI == 0){
+                        //如果是最原始的claim的话那么以claim级别去对待
+                        foreignObject.attr("width",CLAIMWIDTH)
+
+
+                        //根据text的长度,确定模块的高度
+
+                        if(_text.length > 200){
+                            CLAIMHEIGHT = CLAIMWIDTH*1.2
+                        }else if(_text.length > 100 && _text.length <= 200){
+                            CLAIMHEIGHT = CLAIMWIDTH*1.0
+                        }else if(_text.length > 50 && _text.length <= 100){
+                            CLAIMHEIGHT = CLAIMWIDTH*0.6
+                        }else{
+                            CLAIMHEIGHT = CLAIMWIDTH*0.3
+                        }
+
+                        foreignObject.attr("height",CLAIMHEIGHT)
+                    }else{
+                        //如果不是最原始的claim的话那么以元素级别去对待
+                        foreignObject.attr("width",ELEMENTWIDTH)
+                        foreignObject.attr("height",ELEMENTHEIGHT)
+                    }
+
+                    foreignObject.attr("id",id)
+                    foreignObject.attr("x",x)
+                    foreignObject.attr("y",y)
+                    var div = foreignObject.append('xhtml:div')
+
+                    if(type == "claim" && recursionI == 0){
+                        //如果是最原始的claim的话那么以claim级别去对待
+                        //div.style("height",CLAIMHEIGHT+"px")
+                        div.style("overflow","auto")
+
+                       var div = div.append("div")
+                           div.attr("class","panel panel-default")
+                           var div = div.append("div")
+                           div.attr("class","panel-body")
+                           div.text(_text)
+                           div.text(_text)
+                           div.style("font-size",FONTSIZE+"px")
+                    }else{
+                        //如果不是最原始的claim的话那么以元素级别去对待
+                        div.style("height",ELEMENTHEIGHT+"px")
+                        div.style("overflow","auto")
+
+                        var button = div.append("button")
+                        if(judeElementPosition(position,recursionI) == 1){
+                            button.attr("class","btn btn-info")
+                        }else{
+                            button.attr("class","btn btn-success")
+                        }
+
+
+                        button.text(text)
+                        button.style("font-size",FONTSIZE+"px")
+
+                        if(dissent == 1){
+                            var span = button.append("span")
+                            span.attr("class","glyphicon glyphicon-star")
+                        }
+
+                        var _id = "element"+Math.round(Math.random()*10000)
+                        button.attr("id",_id)
+                        document.getElementById(_id).onclick = function(){
+                            popUp(text,x,y,position,_text)
+
+                            if(dissent == 1){
+                                changeShowStatus(random,position)
+                            }
+                        }
+
+
+                    }
+
+                    return {id:id}
+
+                }
+
+
+
+                function changeShowStatus(random,position){
+                    //递归查询scope.mapData中wrandom或者erandom为random的并把这个数据的显示状态反置
+                    var data = position == 1?scope.mapData.pro:scope.mapData.con
+
+                    for(var i=0;i<data.length;i++){
+                        for(var j=0;j<data[i].length;j++){
+                            var res = diguiGetPosition(random,data[i][j])
+                            if( res != 0){
+                                return;
+                            }else{
+                                return;
+                            }
+                        }
+
+                    }
+                }
+
+                function diguiGetPosition(random,data){
+                    if(!data || !data.support ) return;
+
+                    for(var i=0;i<data.support.length;i++){
+                        var erandom = data.support[i].erandom
+                        var wrandom = data.support[i].wrandom
+
+                        if(random == erandom){
+                            if(!data.support[i].eDissentShow){
+                                data.support[i].eDissentShow = 1
+                            }else{
+                                data.support[i].eDissentShow = (data.support[i].eDissentShow + 1) % 2
+                            }
+
+                            return "find in erandom"
+                        }
+
+                        if(random == wrandom){
+                            if(!data.support[i].wDissentShow){
+                                data.support[i].wDissentShow = 1
+                            }else{
+                                data.support[i].wDissentShow = (data.support[i].wDissentShow + 1) % 2
+                            }
+
+                            return "find in wrandom"
+                        }
+
+
+                        //如果当前递归深度的wrandom以及erandom没有找到匹配的那么看看它的自元素
+
+                        if(data.support[i].eDissent){
+                            var res = diguiGetPosition(random,data.support[i].eDissent)
+                            if(res != 0){
+                                data.support[i].eDissent = res
+                                return res
+                            }
+                        }
+
+                        if(data.support[i].wDissent){
+                            var res = diguiGetPosition(random,data.support[i].wDissent)
+                            if(res != 0){
+                                data.support[i].wDissent = res
+                                return res
+                            }
+                        }
+
+                    }
+
+                    return 0
+
+                }
+
+                function popUp(text,x,y,position,_text){
+
+
+                    d3.selectAll(".balloon").remove()
+
+                    var rect = svg.append("foreignObject")
+
+                    rect.attr("x",x)
+                    rect.attr("y",y)
+                    rect.attr("width",POPUPWIDTH)
+                    rect.attr("height",POPUPHEIGHT)
+
+
+                    var div = rect.append('xhtml:div')
+                    div.style("width",POPUPWIDTH)
+                    div.style("height",POPUPHEIGHT)
+                    div = div.append("div")
+
+
+                    div.attr("class","row col-sm-12 balloon")
+
+                    if(position == 1){
+                        rect.attr("x",x+ELEMENTWIDTH + 30)
+                        div.classed("_balloon", true);
+                    }else{
+                        rect.attr("x",x-ELEMENTWIDTH)
+                        div.classed("__balloon", true);
+                    }
+
+                    div.style("width",POPUPWIDTH+"px")
+                    div.style("background-color","#fff")
+
+
+                    var sdiv = div.append("div")
+                    sdiv.attr("class","row")
+
+                    var title = sdiv.append("div")
+                    title.attr("class","col-sm-10")
+
+                    var remove = sdiv.append("div")
+                    remove.attr("class","col-sm-6")
+                    remove = remove.append("span")
+                    remove.attr("class","glyphicon glyphicon-remove")
+                    remove.attr("aria-hidden","true")
+                    remove.style("cursor","pointer")
+
+                    remove.on("click",function(){
+                        rect.remove()
+                    })
+
+
+                    var content = sdiv.append("div")
+                    content.attr("class","col-sm-11")
+                    content.html(_text)
+                }
             },
             templateUrl:"/angularJSTemplate/public/__analysisMapResult.html"
         }
     })
 
 
-    myApp.directive("statementMapResult",function(){
+    myApp.directive("statementMapResult2",function(getDebateStatementMapInformation){
+        return{
+            scope:false,
+            link:function(scope,element){
+                var LEFT  //左边距
+                var RIGHT //右边距
+                var TOP //上边距
+                var RECTWIDTH //模块的宽度
+                var RECTHEIGHT //模块的高度
+                var BUTTONWIDTH //按钮的宽度
+                var BUTTONHEIGHT //按钮的高度
+                var LASTY //升降机的高度坐标
+                var XPRO //左边pro模块的横坐标
+                var XCON //右边con模块的横坐标
+                var svg
+                var INTERVALY  //模块和模块之间的垂直间距
+                var CONNECTLINE
+                var LINEWIDTH
+
+                var statementMapInformation = getDebateStatementMapInformation.getDebateStatementMapInformation()
+
+
+                statementMapInformation.then(function(msg){
+                    scope.statementMapInformation = msg
+                    draw(scope.statementMapInformation.res.data)
+                    drawLine(CONNECTLINE)
+                })
+
+                function define(){
+                    var _width = element.find("div")[0].offsetWidth
+                    LEFT = _width*0.05
+                    RIGHT = LEFT
+                    TOP = 10
+                    RECTWIDTH = (_width - (LEFT+RIGHT))/3
+                    RECTHEIGHT = RECTWIDTH*0.8
+                    BUTTONWIDTH = RECTWIDTH*0.2
+                    BUTTONHEIGHT = BUTTONWIDTH*0.8
+                    INTERVALY = RECTHEIGHT*0.3
+
+                    XPRO = LEFT
+                    XCON = _width - RIGHT - RECTWIDTH
+                    LASTY = ["",TOP,TOP]
+                    CONNECTLINE = {}
+                    LINEWIDTH = 2
+
+                    svg = d3.select(element.find("svg")[0])
+                    svg.attr("width","1200px")
+                    svg.attr("height","4000px")
+
+                }
+
+
+                function draw(data){
+                    define()
+
+
+                    if(scope.debateInfo.analysisFunc == 1){
+                        //有分析功能的,肯定带有质疑功能
+                        dealWithData(data)
+                        for(var i=0;i<data.length;i++){
+                            for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
+                                appendRect(data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement)
+                            }
+                            appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0)
+                        }
+                    }
+
+
+                    if(scope.debateInfo.analysisFunc == 0){
+                        //不带分析功能的肯定不带质疑功能
+                        for(var i=0;i<data.length;i++){
+                            appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0)
+                        }
+                    }
+
+
+                }
+
+
+                function drawLine(data){
+                    console.log(data)
+                    for(var i in data) {
+                        for(var j=0;j<data[i].end.length;j++){
+                            var startX = data[i].startX
+                            var startY = data[i].startY
+                            var endX = data[i].end[j].endX
+                            var endY = data[i].end[j].endY
+                            //painLine(svg,startX,startY,endX,endY,"blue")
+
+                            //折线画四个点
+                            var ax,ay,bx,by,cx,cy,dx,dy
+                            var zheXNum = generateRandomNum()
+                            ax = startX
+                            bx = startX + (endX - startX)/zheXNum
+                            cx = bx
+                            dx = endX
+                            ay = startY
+                            by = startY
+                            cy = endY
+                            dy = endY
+
+                            painDot(svg,startX,startY,5)
+                            painDot(svg,endX,endY,5)
+                            painLine(svg,ax,bx,ay,by,"#000")
+                            painLine(svg,bx,cx,by,cy,"#000")
+                            painLine(svg,cx,dx,cy,dy,"#000")
+
+                        }
+                    }
+
+                }
+
+                function generateRandomNum(){
+                    return Math.round(Math.random()*8) + Math.random()*2
+                }
+
+
+                function painLine(platform,x1,x2,y1,y2,color){
+                    var svg = platform
+                    var line = svg.append("line")
+                    line.attr("class","mapData")
+                    line.attr("x1",x1)
+                    line.attr("x2",x2)
+                    line.attr("y1",y1)
+                    line.attr("y2",y2)
+                    line.attr("stroke",color)
+                    line.attr("stroke-width",LINEWIDTH)
+                            .attr("class","arrow draw")
+                }
+
+
+                function painDot(platform,x,y,r){
+                    var circle = platform.append("circle")
+                    circle.attr("cx",x)
+                    circle.attr("cy",y)
+                    circle.attr("r",r)
+                    circle.attr("fill","red")
+                }
+
+
+                function addIntoCoordinate(index,obj,startOrEnd){
+                    if(!CONNECTLINE[index]){
+                        CONNECTLINE[index] = {}
+                    }
+
+
+                    if(startOrEnd == "start"){
+                        for(var i in obj){
+                            CONNECTLINE[index][i] = obj[i]
+                        }
+                    }else{
+                        if(!CONNECTLINE[index]["end"]) {
+                            CONNECTLINE[index]["end"] = []
+                        }
+                        CONNECTLINE[index]["end"].push(obj)
+                    }
+
+                }
+
+                function appendRect(text,position,type,dissent,random,indexToStatement){
+                        if(!text) return
+                        var _x,_y
+                        if(position == 1){
+                            _x = XPRO
+                            _y = LASTY[position]
+                        }else if(position == 2){
+                            var _x = XCON
+                            _y = LASTY[position]
+                        }else{
+                            alert("cdk")
+                            return
+                        }
+
+                        //根据文字的实际长度来决定模块的高度
+
+
+                        var foreignObject = svg.append("foreignObject")
+                        foreignObject.attr("width",RECTWIDTH)
+                        foreignObject.attr("height",RECTHEIGHT)
+                        foreignObject.attr("x",_x)
+                        foreignObject.attr("y",_y)
+
+
+                        //处理異議説明的连接线
+                        if(dissent == 1){
+                            //开始的坐标  因为dissent==1代表这个内容里面有被质疑的部分
+
+                            //左右所在地不同,那么连接线的开始结束的方位也应该不同
+
+                            var __y = _y + RECTHEIGHT/6
+                            if(position == 1){
+                                var __x = _x + RECTWIDTH
+                            }else{
+                                var __x = _x
+                            }
+
+
+
+                            addIntoCoordinate(random,{startX:__x,startY:__y},"start")
+                        }
+
+                        if(type == "dissentExplain"){
+                            //结束的坐标 因为dissentExplain的数据都是异议解释数据
+
+
+                            //左右所在地不同,那么连接线的开始结束的方位也应该不同
+                            var __y = _y + RECTHEIGHT/2.5
+                            if(position == 1){
+                                var __x = _x + RECTWIDTH
+                            }else{
+                                var __x = _x
+                            }
+
+                            addIntoCoordinate(indexToStatement,{endX:__x,endY:__y},"end")
+                        }
+
+                        //处理升降机
+                        LASTY[position] = LASTY[position] + RECTHEIGHT + BUTTONHEIGHT + INTERVALY
+
+
+                        var div = foreignObject.append('xhtml:div')
+                        div.style("width",RECTWIDTH+"px")
+                        div.style("height",RECTHEIGHT+"px")
+                        div.style("overflow","auto")
+
+                        var div = div.append("div")
+                        if(position == 1){
+                            div.attr("class","panel panel-info")
+                        }else{
+                            div.attr("class","panel panel-success")
+                        }
+
+                        var heading = div.append("div").attr("class","panel-heading")
+                        var body = div.append("div").attr("class","panel-body")
+
+                        if(type == "construct"){
+                            heading.text("立論")
+                        }else{
+                            heading.text("異議説明")
+                        }
+
+                        body.text(text)
+                }
+
+
+
+                function dealWithData(data){
+                    for(var s=0;s<data.length;s++){
+
+                        var res = indexAndRandom(data[s].everyStatement.statementDataRandom)
+                        if(res.res > 0){
+                            scope.statementMapInformation.res.data[s].everyStatement.dissent = 1
+                        }else{
+                            scope.statementMapInformation.res.data[s].everyStatement.dissent = 0
+                        }
+
+                        for(var k=0;k<data[s].everyStatement.dissentExplain.length;k++){
+                            var res = indexAndRandom(data[s].everyStatement.dissentExplain[k].random)
+                            if(res.res > 0){
+                                scope.statementMapInformation.res.data[s].everyStatement.dissentExplain[k].dissent = 1
+                            }else{
+                                scope.statementMapInformation.res.data[s].everyStatement.dissentExplain[k].dissent = 0
+                            }
+                        }
+
+                    }
+                }
+
+                function indexAndRandom(random){
+                    var data = scope.statementMapInformation.res.data
+                    for(var i=0;i<data.length;i++){
+                        for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
+                            if(data[i].everyStatement.dissentExplain[j].indexToStatement == random){
+                                return {res:1,i:i,j:j}
+                            }
+                        }
+                    }
+                    return {res:0}
+                }
+
+
+            },
+            templateUrl:"/angularJSTemplate/public/_statementMapResult.html"
+        }
+    })
+
+    myApp.directive("statementMapResult",function(getDebateStatementMapInformation){
         return {
             scope:false,
             link:function(scope,element){
 
-
-                var RECTWIDTH = 450  //模块的长度
-                var RECTHEIGHT = 140  //模块的宽度
-                var LEFT = 50  //最开始模块距离左边的边距
-                var TOP = 50  //最开始模块距离顶端的边距
-                var SPACEX = 150 //左边模块和右边模块的横向间距
-                var SPACEY = 50 //模块和模块的上下垂直距离
+                var RECTWIDTH  //模块的长度
+                var RECTHEIGHT  //模块的宽度
+                var LEFT //最开始模块距离左边的边距
+                var TOP //最开始模块距离顶端的边距
+                var SPACEX //左边模块和右边模块的横向间距
+                var SPACEY //模块和模块的上下垂直距离
                 var LASTX,LASTY
-                var svg = d3.select("#statementMapSVG").append("svg")
-                svg.attr("width","1400px")
-                svg.attr("height","2000px")
-                draw(scope.statementMapInformation.res.data)
+                var svg
+                var LINEWIDTH
+
+                var statementMapInformation = getDebateStatementMapInformation.getDebateStatementMapInformation()
+
+                var CONNECTLINE //異議あり、異議説明的连线的坐标信息
+
+                statementMapInformation.then(function(msg){
+                    scope.statementMapInformation = msg
+                    draw(scope.statementMapInformation.res.data)
+                })
+
+
+                function define(){
+                    LEFT = 50  //最开始模块距离左边的边距
+                    TOP = 50  //最开始模块距离顶端的边距
+                    SPACEX = 150 //左边模块和右边模块的横向间距
+                    SPACEY = 50 //模块和模块的上下垂直距离
+                    LINEWIDTH = 5
+                    var _width = element.find("div")[0].offsetWidth
+
+                    RECTWIDTH =  _width/3 //模块的长度
+                    RECTHEIGHT = RECTWIDTH*0.6  //模块的宽度
+                    CONNECTLINE = {}
+                    svg = d3.select("#statementMapSVG").append("svg")
+                    svg.attr("width","1400px")
+                    svg.attr("height","4000px")
+                }
 
 
 
                 function draw(data){
-
+                    define()
                     dealWithData(data)
 
                     LASTX = LEFT
@@ -4338,11 +3980,65 @@
                     for(var i=0;i<data.length;i++){
                         for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
                             appendRect(LASTX,LASTY,data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent)
+                            if(data[i].everyStatement.position == 1){
+                                var _x = LASTX
+                            }else{
+                                var _x = LASTX + RECTWIDTH + SPACEX
+                            }
+                            if(data[i].everyStatement.dissentExplain[j].dissent == 1){
+                                addIntoCoordinate(data[i].everyStatement.dissentExplain[j].random,{startX:_x,startY:LASTY})
+                            }
+                            addIntoCoordinate(data[i].everyStatement.dissentExplain[j].indexToStatement,{endX:_x,endY:LASTY})
                             LASTY += (RECTHEIGHT + SPACEY)
                         }
                             appendRect(LASTX,LASTY,data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent)
+                            if(data[i].everyStatement.dissent == 1){
+                                if(data[i].everyStatement.position == 1){
+                                    var _x = LASTX
+                                }else{
+                                    var _x = LASTX + RECTWIDTH + SPACEX
+                                }
+
+                                addIntoCoordinate(data[i].everyStatement.statementDataRandom,{startX:LASTX,startY:LASTY})
+                            }
                             LASTY += (RECTHEIGHT + SPACEY)
                     }
+
+                    //drawDissentConnectLine(CONNECTLINE)
+                }
+
+                function addIntoCoordinate(index,obj){
+                        if(!CONNECTLINE[index]){
+                            CONNECTLINE[index] = {}
+                        }
+
+                        for(var i in obj){
+                            CONNECTLINE[index][i] = obj[i]
+                        }
+                }
+
+                function drawDissentConnectLine(data){
+                        for(var i in data){
+                            console.log(data[i])
+                            var middleX = data[i].startX
+                            var middleY = data[i].endY
+                            painLine(svg,data[i].startX,middleX,data[i].startY,middleY,"blue")
+                            painLine(svg,middleX,data[i].endX,middleY,data[i].endY,"blue")
+                        }
+                }
+
+
+                function painLine(platform,x1,x2,y1,y2,color){
+
+                    var svg = platform
+                    var line = svg.append("line")
+                    line.attr("class","mapData")
+                    line.attr("x1",x1)
+                    line.attr("x2",x2)
+                    line.attr("y1",y1)
+                    line.attr("y2",y2)
+                    line.attr("stroke",color)
+                    line.attr("stroke-width",LINEWIDTH)
                 }
 
                 function dealWithData(data){
@@ -4409,26 +4105,42 @@
                     _div.append("p").text(txt)
 
 
+                    if(position == 2){
+                        if(type == "construct"){
+                            var _div = div.append("div")
+                            _div.html('<button type="button" class="btn btn-default pull-left">立論</button>')
+                        }else if(type == "dissentExplain"){
+                            var _div = div.append("div")
+                            _div.html('<button type="button" class="btn btn-default pull-left">異議説明</button>')
+                        }else{
 
+                        }
 
-                    if(type == "construct"){
-                        var _div = div.append("div")
-                        _div.html('<button type="button" class="btn btn-default pull-left">立論</button>')
-                    }else if(type == "dissentExplain"){
-                        var _div = div.append("div")
-                        _div.html('<button type="button" class="btn btn-default pull-left">異議説明</button>')
-                    }else{
-
+                        if(dissent>0) _div.html(_div.html() + '<button type="button" class="btn btn-danger pull-right">異議あり</button>')
                     }
 
-                    if(dissent>0) _div.html(_div.html() + '<button type="button" class="btn btn-danger pull-right">異議あり</button>')
+
+                    if(position == 1){
+                        if(type == "construct"){
+                            var _div = div.append("div")
+                            _div.html('<button type="button" class="btn btn-default pull-right">立論</button>')
+                        }else if(type == "dissentExplain"){
+                            var _div = div.append("div")
+                            _div.html('<button type="button" class="btn btn-default pull-right">異議説明</button>')
+                        }else{
+
+                        }
+
+                        if(dissent>0) _div.html(_div.html() + '<button type="button" class="btn btn-danger pull-left">異議あり</button>')
+                    }
+
                 }
             },
             templateUrl:"/angularJSTemplate/public/statementMapResult.html"
         }
     })
 
-    myApp.directive("infoTable",function(myPost) {
+    myApp.directive("infoTable",function(myPost,coreSocket) {
         return {
             scope: false,
             link: function ($scope) {
@@ -4534,6 +4246,11 @@
                             $scope.rateable = false
                         }
                     })
+                }
+
+                $scope.cyousi = function(){
+                    var cyousiVal = $scope.cyousiVal
+                    coreSocket.emit("sendCyousi",{cyousiVal:cyousiVal})
                 }
 
                 $scope.ratingStates = [

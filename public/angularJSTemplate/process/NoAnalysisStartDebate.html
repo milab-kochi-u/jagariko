@@ -1,0 +1,51 @@
+
+<div>
+    <info></info>
+</div>
+<div>
+    <div class="row">
+        <div class="row"  ng-show="LAN=='JP'" style="height: 350px;overflow:auto;">
+            <div  class="panel panel-info">
+                <div class="panel-body" >
+
+                    <div class="row col-sm-8" style="height: 330px;overflow:auto;">
+
+                        <div  class="panel panel-info" >
+                            <div class="panel-heading">
+                                <span ng-if="debateInfo.position == 2">相手の主張をお待ちください</span>
+                                <span ng-if="debateInfo.position == 1">主張を出してください</span>
+                            </div>
+                            <div class="panel-body">
+                                <div ng-show="debateInfo.position == 1">
+                                    <div ng-show="statementStatus.name != 'preview'">
+                                        <input-text-area></input-text-area>
+                                    </div>
+                                    <div ng-show="statementStatus.name == 'preview'">
+                                        <div style="height: 220px;overflow: auto">
+                                            <statement-result></statement-result>
+                                        </div>
+                                        <div style="height:20px">
+                                            <button class="btn btn-default pull-right" ng-click="submit()">送信</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="debateInfo.position == 2">
+                                    <opposite-statement-info></opposite-statement-info>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                    <div class="row col-sm-4">
+                        <concept></concept>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

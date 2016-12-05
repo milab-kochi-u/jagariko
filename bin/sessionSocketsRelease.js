@@ -18,51 +18,7 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
         console.log("connection of release")
         console.log(socket.id)
 
-
-
-
         var roomID = socket.id
-
-
-        socket.on("prepare",function(msg){
-
-            var _update
-            steps(function(){
-                mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
-                    if(parseInt(session.debateLogin.position) == 1){
-                        if(_res[0].proPrepare == 1){
-                            _update = {proPrepare:0,time:Date.parse(new Date())}
-                        }else{
-                            _update = {proPrepare:1,time:Date.parse(new Date())}
-                        }
-                    }else{
-                        if(_res[0].conPrepare == 1){
-                            _update = {conPrepare:0,time:Date.parse(new Date())}
-                        }else{
-                            _update = {conPrepare:1,time:Date.parse(new Date())}
-                        }
-                    }
-                }))
-            },function(){
-                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:_update},this.hold(function(){
-                    socket.emit("prepared",_update)
-                    socket.to(session.debateLogin.rNum).broadcast.emit("prepared",_update)
-                }))
-            },function(){
-                mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
-                    if(parseInt(_res[0].conPrepare) == 1 && parseInt(_res[0].proPrepare) == 1){
-                        this.step(function(){
-                            mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{status:"start",preStatus:"wait",order:0,time:Date.parse(new Date())}},this.hold(function(){
-                                socket.emit("prepareCompelete",{})
-                                socket.to(session.debateLogin.rNum).broadcast.emit("prepareCompelete",{})
-                            }))
-                        })
-                    }
-                }))
-            })()
-        })
-
-
 
         socket.on("enterRoom",function(msg){
             if(!session.debateLogin){
@@ -95,23 +51,77 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
             socket.to(session.debateLogin.rNum).broadcast.emit("enterRoom",{})
 
 
-            socket.emit('sys', user + '加入了房间', roomInfo[roomID]);
-            socket.to(session.debateLogin.rNum).broadcast.emit('sys', user + '加入了房间', roomInfo[roomID]);
-            console.log(user + '加入了' + roomID);
-
+            socket.emit('refreshOnline', {onlineInfo:roomInfo[roomId]});
+            socket.to(session.debateLogin.rNum).broadcast.emit('refreshOnline', {onlineInfo:roomInfo[roomId]});
         })
 
         socket.on("giveStatement",function(msg){
+
+            var totalNum = 1
+
+            if(session.debateLogin.analysisFunc == 0){
+                var order
+                steps(function(){
+                    mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
+                            var _update = {}
+                            order = _res[0].order
+
+                            if(_res[0].status == "noAnalysisStart"){
+                                _update = {$set:{status:"noAnalysisFuncAppealAndState",preStatus:_res[0].status,time:Date.parse(new Date())}}
+                            }else if(_res[0].status == "noAnalysisFuncAppealAndState"){
+                                if(_res[0].order == (totalNum - 1)){
+                                    _update = {$set:{status:"noAnalysisfinish",preStatus:_res[0].status,time:Date.parse(new Date())},$inc:{order:1}}
+                                }else{
+                                    _update = {$set:{status:"noAnalysisStart",preStatus:_res[0].status,time:Date.parse(new Date())},$inc:{order:1}}
+                                }
+                            }else{
+
+                                this.terminate()
+                            }
+
+                        return _update
+                    }))
+                },function(_update){
+                    mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},_update,{},this.hold(function(_res){
+
+                    }))
+                },function(){
+                    var sendObj = {}
+                    sendObj.position = session.debateLogin.position
+                    sendObj.statementData = msg.statementData
+
+                    //分别给立論和異議説明的陈述语言加random,以便之后做map时候的骨肉相连
+
+                    sendObj.statementDataRandom  = Math.round(Math.random()*100000)
+
+                    sendObj.order = order
+
+
+                    mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyStatement:sendObj}},{},this.hold(function(_res){
+                        socket.emit("receiveStatement",{sendObj:sendObj})
+                        socket.to(session.debateLogin.rNum).broadcast.emit("receiveStatement",{sendObj:sendObj})
+                        return sendObj
+                    }))
+
+                },function(sendObj){
+                    mongo.insert("statementLog",{num:session.debateLogin.num,rNum:session.debateLogin.rNum,everyStatement:sendObj,position:session.debateLogin.position,time:
+                        (new Date()).getTime(),type:"first"},{},this.hold(function(_res){
+                    }))
+                })()
+
+                return;
+            }
+
+
+
+
+            if(session.debateLogin.analysisFunc == 1){
             var order
             steps(function(){
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
 
                     var _update = {}
-
                     order = _res[0].order
-
-                    var totalNum = 1
-
 
                     if(_res[0].status == "start"){
                         _update = {$set:{status:"analysis",preStatus:_res[0].status,time:Date.parse(new Date())}}
@@ -193,6 +203,9 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                     (new Date()).getTime(),type:"first"},{},this.hold(function(_res){
                 }))
             })()
+
+
+            }
         })
 
 
@@ -247,7 +260,30 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
 
         })
 
+        socket.on("refuseAnalysisResult",function(msg){
+            steps(function(){
+                mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
+                    return  _res[0].status
+                }))
+            },function(status){
+                if(status == "check"){
+                    //从check回到上一步analysis的状态
+                    var update = {$set:{preStatus:status,status:"analysis",time:Date.parse(new Date())}}
+                }else if(status == "kentou"){
+                    //从kentou回到上一步bunseki的状态
+                    var update = {$set:{preStatus:status,status:"bunseki",time:Date.parse(new Date())}}
+                }else{
 
+                }
+
+
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},update,this.hold(function(){
+                    socket.emit("refuseAnalysisResultFinish",{})
+                    socket.to(session.debateLogin.rNum).broadcast.emit("refuseAnalysisResultFinish",{})
+                }))
+
+            })()
+        })
 
         socket.on("confirmAnalysisResult",function(msg){
             var pro
@@ -310,6 +346,39 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
             socket.to(session.debateLogin.rNum).broadcast.emit("textInputing",msg)
         })
 
+        socket.on("textStartInputing",function(msg){
+            socket.to(session.debateLogin.rNum).broadcast.emit("textStartInputing",msg)
+        })
+
+        socket.on("textLeaveInputing",function(msg){
+            socket.to(session.debateLogin.rNum).broadcast.emit("textLeaveInputing",msg)
+        })
+
+        socket.on("sendCyousi",function(msg){
+            var position = session.debateLogin.position
+            msg.position = position
+
+            socket.emit("sendCyousi",msg)
+            socket.to(session.debateLogin.rNum).broadcast.emit("sendCyousi",msg)
+        })
+
+        socket.on("FormInputing",function(msg){
+            socket.to(session.debateLogin.rNum).broadcast.emit("FormInputing",msg)
+        })
+
+        socket.on("FormStartInputing",function(msg){
+            socket.to(session.debateLogin.rNum).broadcast.emit("FormStartInputing",msg)
+        })
+
+        socket.on("FormLeaveInputing",function(msg){
+            socket.to(session.debateLogin.rNum).broadcast.emit("FormLeaveInputing",msg)
+        })
+
+
+
+
+
+
 
         socket.on('disconnect', function(msg){
 
@@ -333,7 +402,11 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
             console.log(roomInfo)
 
             console.log("room debate has been out of connection")
-            console.log(msg)
+
+            socket.emit("refreshOnline",{onlineInfo:roomInfo[roomId]})
+            socket.to(session.debateLogin.rNum).broadcast.emit("refreshOnline",{onlineInfo:roomInfo[roomId]})
+
+
             if(!session){
                 return
             }

@@ -14,16 +14,17 @@
 </div>
 -->
 <div>
-    <info-and-analysis-map></info-and-analysis-map>
+    <info-and-analysis-map mapId="bunsekiMap"></info-and-analysis-map>
 </div>
 
-    <div class="row">
+
+    <div  ng-show="verticalExpandVal == 1" class="row">
         <div style="height: 50%;" class="row">
             <div  class="panel panel-info">
                 <div class="panel-body " >
 
 
-                    <div class="col-sm-8 " style="height: 330px;overflow:auto;">
+                    <div class="col-sm-8 " style="height: 350px;overflow:auto;">
 
 
                         <div ng-show="debateInfo.position==1">
@@ -32,9 +33,11 @@
 
                         <div  class="panel panel-info" ng-show="debateInfo.position==2">
                             <div class="panel-heading">
-                                <span>相手の分析結果をお待ちください</span>
+                                <span ng-show="formStartInputingVal==0">相手の分析結果をお待ちください</span>
+                                <span ng-show="formStartInputingVal==1">相手は今分析しています.........</span>
                             </div>
                             <div class="panel-body" id="inputBody">
+                                <opposite-input-info></opposite-input-info>
                             </div>
                         </div>
 

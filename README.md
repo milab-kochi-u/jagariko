@@ -41,8 +41,8 @@
 
 
   status
+    //分析機能があり
 
-  wait //before start the debate
   start //both of the user prepare pro is writing construct
   analysis // pro has given construct and con is analyzing or request for another construct
   check  //pro check the result of the analysis from con is right or not
@@ -53,6 +53,14 @@
   lookup    // pro's result of analysis gets the approval and pro start to pick dissent
     noberu   // pro select dissent from the result of analysis and give statement
   ....analysis
+
+
+
+    //分析機能がなし
+
+  noAnalysisStart // pro start to give his/her statement
+  noAnalysisFuncAppealAndState //con give the rebuttal and his/her statement
+
 
 变量说明
 

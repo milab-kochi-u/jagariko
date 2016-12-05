@@ -13,13 +13,11 @@
 
 
 
-
-
 <div>
-    <info-and-analysis-map></info-and-analysis-map>
+    <info-and-analysis-map mapId="stateMap"></info-and-analysis-map>
 </div>
 
-<div class="row">
+<div class="row"  ng-show="verticalExpandVal == 1">
 <div class="row"  style="height: 350px;overflow:auto;">
     <div  class="panel panel-info">
         <div class="panel-body" >
@@ -48,6 +46,12 @@
 
                             </div>
                         </div>
+
+                        <div ng-show="debateInfo.position == 1">
+                            <opposite-statement-info></opposite-statement-info>
+                        </div>
+
+
                     </div>
 
                 </div>

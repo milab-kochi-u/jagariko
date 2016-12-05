@@ -55,10 +55,8 @@ module.exports = {
                     if(result.length<=0){res.end(JSON.stringify({error:1,msg:"username or password not correct"}));this.terminate();}
 
 
-
                     var cookieId = makeid(10)
                     req.session.cookieId = cookieId
-
 
 
                     if(result[0].debateInvolve){
@@ -72,6 +70,12 @@ module.exports = {
                                 if(_result[0].con == result[0].username){
                                     req.session.debateLogin.position = 2
                                 }
+
+                                req.session.debateLogin.analysisFunc = _result[0].analysisFunc
+                                if(_result[0].analysisFunc == 1){
+                                    req.session.debateLogin.mapFunc = _result[0].mapFunc
+                                }
+
                                 res.end(JSON.stringify({error:0,msg:"successful",cookieId:cookieId,debating:true}))
                                 return;
                             }else{
@@ -79,7 +83,6 @@ module.exports = {
                                 return;
                             }
                         }))
-
 
                     }else{
                         req.session.debateLogin = {username:result[0].username,password:result[0].password,type:result[0].type,group:result[0].group,debateInvolve:false}
@@ -93,10 +96,7 @@ module.exports = {
            )()
     },
 
-
     groupController:function(req,res){
-
-
         if(tool.isEmpty(req.session.debateLogin)){
             res.redirect("login")
             return;
@@ -113,6 +113,7 @@ module.exports = {
 
         res.render("release/groupNew.html")
     },
+
     getListInformationController:function(req,res){
         var themes = []
         var debateStatus = []
@@ -143,6 +144,7 @@ module.exports = {
             res.end(JSON.stringify(themes))
         })()
     },
+
     getCurrentSelfDebateInfoController:function(req,res){
         var username = req.session.debateLogin.username
         var group = req.session.debateLogin.group
@@ -152,6 +154,7 @@ module.exports = {
             })
         })()
     },
+
     getThemeListController:function(req,res){
         steps(function(){
             mongo.find("themes",{group:req.session.debateLogin.group},{},this.hold(function(_res){
@@ -159,6 +162,7 @@ module.exports = {
             }))
         })()
     },
+
     getDebatingListController:function(req,res){
         steps(function(){
             mongo.find("debateStatus",{group:req.session.debateLogin.group,finish:false},{},this.hold(function(_res){
@@ -166,6 +170,7 @@ module.exports = {
             }))
         })()
     },
+
     getDebateFinishListController:function(req,res){
         steps(function(){
             mongo.find("debateStatus",{group:req.session.debateLogin.group,finish:true},{},this.hold(function(_res){
@@ -173,26 +178,47 @@ module.exports = {
             }))
         })()
     },
+
     createNewRoomController:function(req,res){
         var position = req.body.position
         var num = req.body.num
         var title = req.body.title
         var timeLimit = req.body.timeLimit
         var timeLimitVal = req.body.timeLimitVal
+        var analysisFunc = req.body.analysisFunc
+        var mapFunc = req.body.mapFunc
 
-        var rNum = Math.round(Math.random()*10000)
-        if(position == 1){
-            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:"wait",preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal}
+        if(analysisFunc == 0){
+            //如果没有分析功能的话,那么肯定没有地图功能
+            mapFunc = 0
+            var startStatus = "noAnalysisStart"
         }else{
-            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:"wait",preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal}
+            var startStatus = "start"
         }
 
-        req.session.debateLogin.position = position
+        var rNum = Math.round(Math.random()*10000)
+
+
+
+
+        if(position == 1){
+            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:startStatus,preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal,analysisFunc:analysisFunc,mapFunc:mapFunc}
+        }else{
+            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:startStatus,preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal,analysisFunc:analysisFunc,mapFunc:mapFunc}
+        }
+
+
+
         steps(function(){
             mongo.insert("debateStatus",newRoom,{},this.hold(function(_res){
                 req.session.debateLogin.num = num
                 req.session.debateLogin.rNum = rNum
                 req.session.debateLogin.model = "debate"
+
+                req.session.debateLogin.position = position
+                req.session.debateLogin.analysisFunc = parseInt(analysisFunc)
+                req.session.debateLogin.mapFunc = parseInt(mapFunc)
+
                 res.end(JSON.stringify({err:0,msg:"successfully"}))
             }))
         },function(){
@@ -201,6 +227,7 @@ module.exports = {
             })
         })()
     },
+
     participateRoomController:function(req,res){
         var position = parseInt(req.body.position)
         var num = req.body.num
@@ -240,6 +267,9 @@ module.exports = {
                             res.end(JSON.stringify({err:1,msg:"illegal position data"}))
                             this.terminate()
                         }
+
+                        req.session.debateLogin.analysisFunc = result[0].analysisFunc
+                        req.session.debateLogin.mapFuc = result[0].mapFunc
 
                     }))
                 }
@@ -340,6 +370,11 @@ module.exports = {
                        req.session.debateLogin.position = 2
                    }
 
+
+                   req.session.debateLogin.analysisFunc = result[0].analysisFunc
+                   req.session.debateLogin.mapFuc = result[0].mapFunc
+
+                    console.log(req.session.debateLogin)
                     num = result[0].num
                     rNum = result[0].rNum
                     req.session.debateLogin.num = num
@@ -356,6 +391,7 @@ module.exports = {
         var rNum = req.session.debateLogin.rNum
         var position = req.session.debateLogin.position
         var deleteRoom = false
+        /*
         steps(function(){
             mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
                 if(result.length == 0) return;
@@ -377,6 +413,35 @@ module.exports = {
             }))
         },function(){
             res.end(JSON.stringify({err:0,data:{}}))
+        })()
+        */
+
+        //这里面需求改变了,原来更具有没有准备来决定退出这个房间的时候放不放弃这条记录
+        //现在则是根据有没有做statement来决定退出时保不保留这条记录
+
+
+        //如果正方退出时
+        //1.反方有人
+            //1.自己以做出主張 ----->不改变pro字段,保留数据记录
+            //2.自己还没有做出主張 ------->删除pro字段,保留数据记录
+        //2.反方无人
+            //1.自己已做出主張  -------> 删除数据记录
+            //2.自己还没有做出主張 -----> 删除数据记录
+
+        //如果反方退出时
+        //1.正方有人
+            //1.正方已做出主張 -------->不改变con字段,保留数据记录
+            //2.正方还没有做出主張-------->改变con字段
+        //2.正方没人
+
+
+        steps(function(){
+            mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                if(result.length == 0) return;
+                //只有处于开始阶段退出的时候才有可能被删除
+
+                //只有是在开始阶段,如果对方空缺
+            }))
         })()
     },
     rateController:function(req,res){

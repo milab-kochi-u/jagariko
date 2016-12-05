@@ -17,10 +17,10 @@
 
 
 <div>
-    <info-and-analysis-map></info-and-analysis-map>
+    <info-and-analysis-map mapParentId="startMap"></info-and-analysis-map>
 </div>
 
-<div>
+<div  ng-show="verticalExpandVal == 1">
     <div class="row">
     <div class="row"  ng-show="LAN=='JP'" style="height: 350px;overflow:auto;">
         <div  class="panel panel-info">
@@ -50,18 +50,7 @@
                             </div>
 
                             <div ng-show="debateInfo.position == 2">
-
-
-
-                                <div class="panel panel-default">
-                                    <div class="panel-body">
-                                        相手の入力:{{textInputingContent}}
-                                    </div>
-                                </div>
-
-
-
-
+                                <opposite-statement-info></opposite-statement-info>
                             </div>
 
                         </div>

@@ -1,0 +1,33 @@
+<div class="panel panel-default" ng-show="opposite_analysisData.txt">
+    <div class="panel-heading">
+        <h3 class="panel-title">意見:{{opposite_analysisData.txt}}</h3>
+    </div>
+    <div class="panel-body" ng-repeat="(i,val) in opposite_analysisData.analysisResult track by $index">
+        <div ng-show="opposite_analysisData.analysisResult[i].claim" class="alert alert-success col-sm-12" role="alert">主張:{{opposite_analysisData.analysisResult[i].claim}}</div>
+        <div ng-repeat="(n,_val) in opposite_analysisData.analysisResult[i].support track by $index">
+                <div ng-show="opposite_analysisData.analysisResult[i].support[n].warrant" class="alert alert-success col-sm-11 col-sm-offset-1" role="alert">論拠:{{opposite_analysisData.analysisResult[i].support[n].warrant}}</div>
+                <div ng-show="opposite_analysisData.analysisResult[i].support[n].evidence" class="alert alert-success col-sm-10 col-sm-offset-2" role="alert">根拠:{{opposite_analysisData.analysisResult[i].support[n].evidence}}</div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default" ng-show="opposite_analysisDissentExplainData.length > 0" ng-repeat="(i,val) in opposite_analysisDissentExplainData track by $index">
+    <div >
+        <div class="panel-heading">
+            <h3 class="panel-title">意見:{{val.txt}}</h3>
+        </div>
+        <div class="panel-body" ng-repeat="(_i,_val) in val.analysisResult track by $index">
+            <div class="alert alert-success col-sm-12" role="alert" ng-show="_val.claim">主張:{{_val.claim}}</div>
+            <div ng-repeat="(__i,__val) in _val.support">
+                <div class="alert alert-success col-sm-11 col-sm-offset-1" ng-show="__val.warrant" role="alert">論拠:{{__val.warrant}}</div>
+                <div class="alert alert-success col-sm-10 col-sm-offset-2" ng-show="__val.evidence" role="alert">根拠:{{__val.evidence}}</div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+
+

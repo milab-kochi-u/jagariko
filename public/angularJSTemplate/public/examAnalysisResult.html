@@ -5,7 +5,7 @@
 
 <div>
 
-                        <div>
+                        <div class="row">
 
 
                         <div class="radio col-sm-8">
@@ -14,8 +14,12 @@
                         </div>
 
 
+                        <div class="form-group col-sm-8" ng-show="examAnalysisResultTabVal == 1">
+                            <input type="text" class="form-control" ng-model="examAnalysisResultComment" placeholder="うまく分析できましたよね">
+                        </div>
+
                         <div class="form-group col-sm-8" ng-show="examAnalysisResultTabVal == 2">
-                            <input type="text" class="form-control" placeholder="私の想像したものとずれている">
+                            <input type="text" class="form-control" ng-model="examAnalysisResultComment" placeholder="私の想像したものとずれている">
                         </div>
 
                         <div class="form-group col-sm-4">

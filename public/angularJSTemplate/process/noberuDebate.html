@@ -13,13 +13,11 @@
 </div>
 
 -->
-
-
 <div>
-    <info-and-analysis-map></info-and-analysis-map>
+    <info-and-analysis-map mapId="noberuMap"></info-and-analysis-map>
 </div>
 
-<div class="row">
+<div class="row"  ng-show="verticalExpandVal == 1">
 <div class="row"  style="height: 350px;overflow:auto;">
     <div  class="panel panel-info">
         <div class="panel-body" >
@@ -46,6 +44,12 @@
                                    <button class="btn btn-default pull-right" ng-click="submit()">送信</button>
                                 </div>
                             </div>
+                        </div>
+
+
+
+                        <div ng-show="debateInfo.position == 2">
+                            <opposite-statement-info></opposite-statement-info>
                         </div>
                     </div>
 

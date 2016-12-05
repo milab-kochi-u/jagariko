@@ -1,34 +1,40 @@
-<table class="table" style="width: 90%;margin:0 auto">
-
-
-
+<table class="table" style="width: 95%;margin-top:1px;float: left">
     <tr class="info">
         <td width="20%">あなた</td>
         <td colspan="3">{{debateInfo.username}}
             <span ng-if="debateInfo.position == 1">(肯定側)</span>
             <span ng-if="debateInfo.position == 2">(否定側)</span>
         </td>
-
     </tr>
     <tr class="active">
 
         <td width="15%">肯定側
         </td>
         <td width="30%">
-            <span ng-if="debateInfo.pro">
-                {{debateInfo.pro}}
-            </span>
-            <span ng-if="debateInfo.proPrepare == 1">
-                準備済み
-            </span>
+            <input ng-show="debateInfo.pro == debateInfo.username" ng-blur="cyousi()" ng-model="cyousiVal" type="text" class="form-control"  value="現在いい調子です" placeholder="よろしくお願いします">
+            <p ng-show="debateInfo.con == debateInfo.username">
+                <span ng-show="!proCyousi">よろしくお願いします</span>
+                <span ng-show="proCyousi">{{proCyousi}}</span>
 
-            <span ng-if="debateInfo.proPrepare != 1">
-                未準備
-            </span>
+            </p>
+            <!--
+            <p ng-show="debateInfo.status == 'wait'">
+                <span ng-if="debateInfo.pro">
+                    {{debateInfo.pro}}
+                </span>
+                <span ng-if="debateInfo.proPrepare == 1">
+                    準備済み
+                </span>
+
+                <span ng-if="debateInfo.proPrepare != 1">
+                    未準備
+                </span>
+            </p>
+            -->
+
         </td>
 
-        <td>時間制限</td>
-        <td>なし</td>
+
 
 
     </tr>
@@ -39,6 +45,8 @@
         </td>
         <td>
 
+            <!--
+            <p ng-show="debateInfo.status == 'wait'">
             <span ng-if="debateInfo.con">
                 {{debateInfo.con}}
             </span>
@@ -50,12 +58,42 @@
             <span ng-if="debateInfo.conPrepare != 1">
                 未準備
             </span>
+            </p>
+            -->
+
+            <input ng-show="debateInfo.con == debateInfo.username" ng-blur="cyousi()" ng-model="cyousiVal" type="text" class="form-control"  value="現在いい調子です" placeholder="よろしくお願いします">
+            <p ng-show="debateInfo.pro == debateInfo.username">
+                <span ng-show="!conCyousi">よろしくお願いします</span>
+                <span ng-show="conCyousi">{{conCyousi}}</span>
+            </p>
         </td>
+    </tr>
 
 
+    <tr class="active">
+        <td>時間制限</td>
+        <td>なし</td>
+    </tr>
+
+    <tr class="success">
         <td>回数</td>
         <td>1回</td>
+    </tr>
 
+    <tr class="success">
+        <td>分析機能</td>
+        <td>
+            <span ng-show="debateInfo.analysisFunc == 1">あり</span>
+            <span ng-show="debateInfo.analysisFunc == 0">なし</span>
+        </td>
+    </tr>
+
+    <tr class="success">
+        <td>マップ機能</td>
+        <td>
+            <span ng-show="debateInfo.mapFunc == 1">あり</span>
+            <span ng-show="debateInfo.mapFunc == 0">なし</span>
+        </td>
     </tr>
 
     <!--
@@ -64,7 +102,6 @@
 
         <td>今の段階</td>
         <td colspan="3">
-
             <span ng-if="debateInfo.status == 'wait'">待ち状態,肯定側と否定側は準備していないです</span>
             <span ng-if="debateInfo.status == 'start'">肯定側と否定側は準備でき、肯定側が意見を述べています</span>
             <span ng-if="debateInfo.status == 'analysis'">肯定側が意見を述べました,否定側は肯定側の意見を分析しています</span>
@@ -165,111 +202,11 @@
     </tr>
 
 
-
-
-
-
-
-
-
-
         </td>
 
     </tr>
 
 </table>
 
+<img ng-click="expand()" style="width:5%;margin-top:80px;cursor: pointer" src="/release/expand.png" alt="">
 
-
-
-<div class="row" ng-if="LAN=='CN'">
-    <table class="table">
-        <tr class="danger">
-            <td>话题</td>
-            <td>{{debateInfo.title}}</td>
-
-        </tr>
-        <tr class="info">
-            <td>你:</td>
-            <td>{{debateInfo.username}}
-                <span ng-if="debateInfo.position == 1">(正方)</span>
-                <span ng-if="debateInfo.position == 2">(反方)</span>
-
-            </td>
-
-        </tr>
-        <tr class="active">
-
-            <td>正方</td>
-            <td>
-                <span ng-if="debateInfo.pro">
-                {{debateInfo.pro}}
-                </span>
-                 <span ng-if="!debateInfo.pro">
-                 空位
-                </span>
-                <span ng-if="debateInfo.proPrepare == 1">
-                    准备完成
-                </span>
-
-                <span ng-if="debateInfo.proPrepare != 1">
-                    未准备
-                </span>
-            </td>
-        </tr>
-        <tr class="success">
-
-            <td>反方</td>
-            <td>
-                <span ng-if="debateInfo.con">
-                    {{debateInfo.con}}
-                </span>
-
-                <span ng-if="!debateInfo.con">
-                    空位
-                </span>
-
-                <span ng-if="debateInfo.conPrepare == 1">
-                    准备完成
-                </span>
-
-                <span ng-if="debateInfo.conPrepare != 1">
-                    未准备
-                </span>
-            </td>
-
-        </tr>
-        <tr class="warning">
-
-            <td>观战</td>
-            <td></td>
-
-        </tr>
-        <tr class="danger">
-            <td>次数</td>
-            <td></td>
-
-        </tr>
-        <tr class="info">
-
-
-            <td>现阶段</td>
-            <td>
-                <span ng-if="debateInfo.status == 'wait'">双方正处于准备阶段</span>
-                <span ng-if="debateInfo.status == 'start'">双方以准备完毕,辩论开始,正方正在阐述观点</span>
-                <span ng-if="debateInfo.status == 'analysis'">正方已阐述完观点,现在反方正在分析正方的观点</span>
-                <span ng-if="debateInfo.status == 'check'">反方已分析完正方的观点,现在请正反检查反方的分析结果</span>
-                <span ng-if="debateInfo.status == 'appeal'">正方已同意反方的观点,现在请反方质疑并做阐述和说明</span>
-                <span ng-if="debateInfo.status == 'state'">反方已完成质疑的阶段,现在请反方做阐述和说明</span>
-                <span ng-if="debateInfo.status == 'bunseki'">反方完成阐述和说明,现在请正方分析反方的阐述和说明</span>
-                <span ng-if="debateInfo.status == 'kentou'">正方已分析完反方的观点,现在请反方检查正方的分析结果</span>
-                <span ng-if="debateInfo.status == 'lookup'">反方已同意正方的观点,现在请正方做质疑并做阐述和说明</span>
-                <span ng-if="debateInfo.status == 'noberu'">正方已完成质疑阶段,现在请正方做阐述和说明</span>
-                <span ng-if="debateInfo.status == 'analysis'">正方完成阐述和说明,现在请反方分析正方的阐述和说明</span>
-                <span ng-if="debateInfo.status == 'finish'">終了</span>
-
-            </td>
-
-        </tr>
-    </table>
-</div>

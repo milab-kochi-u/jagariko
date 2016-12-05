@@ -1,0 +1,43 @@
+<div>
+    <div class="panel panel-default" ng-show="textStartInputingVal == 1">
+        <div class="panel-body">
+            相手は今入力しています......
+        </div>
+    </div>
+
+    <div class="panel panel-default" ng-show="textStartInputingVal == 0">
+        <div class="panel-body">
+            相手の主張をお待ちください
+        </div>
+    </div>
+
+    <div class="panel panel-default" ng-show="textInputingContent">
+        <div class="panel-body">
+            {{textInputingContent}}
+        </div>
+    </div>
+</div>
+
+
+<div>
+
+    <div class="panel panel-default" ng-show="opposite_statementData">
+        <div class="panel-heading">
+            <h3 class="panel-title">主張</h3>
+        </div>
+        <div class="panel-body">
+            {{opposite_statementData}}
+        </div>
+    </div>
+
+
+    <div class="panel panel-default" ng-repeat="(i,val) in opposite_dissentData track by $index">
+        <div class="panel-heading">
+            <h3 class="panel-title">これに対して異議あり:{{val.txt}}</h3>
+        </div>
+        <div class="panel-body">
+            {{val.reply}}
+        </div>
+    </div>
+
+</div>

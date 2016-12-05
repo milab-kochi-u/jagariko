@@ -1,20 +1,18 @@
 
 <div>
-    <info-and-analysis-map></info-and-analysis-map>
+    <info-and-analysis-map mapId="checkMap"></info-and-analysis-map>
 </div>
 
 
-<div>
+<div  ng-show="verticalExpandVal == 1">
 <div class="row">
     <div class="row" >
         <div  class="panel panel-info">
             <div class="panel-body" >
 
-                <div class="row col-sm-8" style="height:330px;overflow: auto" ng-if="debateInfo.position ==1">
+                <div class="row col-sm-8" style="height:330px;overflow: auto" ng-show="debateInfo.position ==1">
 
-
-
-                    <div  class="panel panel-info" >
+                    <div class="panel panel-info" >
                         <div class="panel-heading">
                             正しく分析されているか確認してください
                         </div>
@@ -27,13 +25,9 @@
                             </div>
                         </div>
                     </div>
-
-
-
-
                 </div>
 
-                <div class="row col-sm-8"  style="height:330px;overflow: auto"  ng-if="debateInfo.position ==2">
+                <div class="row col-sm-8"  style="height:330px;overflow: auto"  ng-show="debateInfo.position ==2">
                     <div  class="panel panel-info" >
                         <div class="panel-heading">
                             相手はあなたが正しく分析しているかを確認しています

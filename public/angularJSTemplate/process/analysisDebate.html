@@ -21,35 +21,29 @@
     </div>
 </div>
 -->
-
     <div style="height:50%" class="row">
-        <info-and-analysis-map></info-and-analysis-map>
+        <info-and-analysis-map mapId="analysisMap"></info-and-analysis-map>
     </div>
 
-    <div class="row" style="height: 50%">
+    <div  ng-show="verticalExpandVal == 1" class="row" style="height: 50%">
         <div class="row">
         <div style="height: 50%;" class="row">
             <div  class="panel panel-info">
-                <div class="panel-body " >
-
-
-                    <div class="col-sm-8 " style="height: 330px;overflow:auto;">
-
-
+                <div class="panel-body row" >
+                    <div class="col-sm-8 " style="height: 350px;overflow: auto">
                         <div ng-show="debateInfo.position==2">
-                            <input-form-area></input-form-area>
+                           <input-form-area></input-form-area>
                         </div>
 
                         <div  class="panel panel-info" ng-show="debateInfo.position==1">
                             <div class="panel-heading">
-                                <span>相手の分析結果をお待ちください</span>
+                                <span ng-show="formStartInputingVal==0">相手の分析結果をお待ちください</span>
+                                <span ng-show="formStartInputingVal==1">相手は今分析しています.........</span>
                             </div>
-                            <div class="panel-body" id="inputBody">
+                            <div class="panel-body">
+                                <opposite-input-info></opposite-input-info>
                             </div>
                         </div>
-
-
-
                     </div>
                     <div class="col-sm-4 row">
                         <concept></concept>

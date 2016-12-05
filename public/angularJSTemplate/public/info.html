@@ -21,7 +21,7 @@
             <div  class="col-sm-4" style="padding: 0px;" ng-show="expandVal == 1">
                 <div class="">
                     <ul class="nav nav-tabs">
-                        <li role="presentation" ng-click="changeTab(0)"><a href="#">討論情報</a></li>
+                        <li role="presentation"><a href="#">討論情報</a></li>
                     </ul>
                     <div style="height: {{topInfoHeight}}px;overflow: auto">
                     <info-table></info-table>
@@ -30,28 +30,24 @@
             </div>
 
 
+
             <div ng-class="{'col-sm-8':expandVal == 1, 'col-sm-12':expandVal == 0}"  style="padding: 0px">
                 <ul class="nav nav-tabs" style="">
-                    <li role="presentation" ng-click="changeTab(0)"><a href="#">マップ</a></li>
                     <li role="presentation" ng-click="changeTab(1)"><a href="#">ログ</a></li>
                     <li class="pull-right" role="presentation" ><a>肯定側:{{debateInfo.pro}} <span ng-show="proOnline">オンライン</span> <span ng-show="!proOnline">オフライン</span></a></li>
                     <li class="pull-right" role="presentation" ><a>否定側:{{debateInfo.con}} <span ng-show="conOnline">オンライン</span> <span ng-show="!conOnline">オフライン</span></a></li>
                 </ul>
                 <div class="panel" style="height:{{topInfoHeight}}px;overflow:auto">
                     <img ng-click="expand()" ng-show="expandVal==0" width="2%" src="/release/expand.png" alt="" style="float: left;margin-top:80px">
-                    <div ng-if="changeTabVal==0"><analysis-map-result3 ></analysis-map-result3></div>
-                    <div ng-if="changeTabVal==1"><statement-map-result2></statement-map-result2></div>
+                    <div><statement-map-result2></statement-map-result2></div>
                 </div>
             </div>
 
 
-        </div>
 
 
-        <div class=" col-sm-3 col-sm-offset-5">
-            <span ng-show="verticalExpandVal == 1" class="glyphicon glyphicon-chevron-down" style="width:100px;height:20px;cursor: pointer" ng-click="verticalExpand()">展開</span>
-            <span ng-show="verticalExpandVal == 0" class="glyphicon glyphicon-chevron-up" style="width:100px;height:20px;cursor: pointer" ng-click="verticalExpand()">縮小</span>
         </div>
+
 
     </div>
 

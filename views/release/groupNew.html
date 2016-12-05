@@ -76,8 +76,6 @@
 </head>
 <body ng-app="myApp">
 <div class="container"  ng-controller="myController">
-
-
     <script type="text/ng-template" id="ruleConfirmCtrl.html">
         <div class="modal-header">
             <h3 class="modal-title" >{{title}}</h3>
@@ -106,7 +104,6 @@
                     </label>
 
                 </div>
-
 
            </div>
 
@@ -144,6 +141,40 @@
                     時間制限がある場合、時間制限いないに反応がない方は自動的に降参に判定される
                 </div>
             </div>
+
+            <hr>
+
+
+            <div class="row">
+                <div class="col-sm-offset-1 col-sm-3">分析機能</div>
+                <div class="col-sm-6">
+                    <label>
+                        <input ng-disabled="funcDisable == 1" type="radio" ng-model="analysisFunc"  name="analysisFunc" value="1" >
+                        ある
+                    </label>
+
+                    <label>
+                        <input ng-disabled="funcDisable == 1"  type="radio" ng-model="analysisFunc"  name="analysisFunc" value="0" >
+                        なし
+                    </label>
+                </div>
+            </div>
+
+            <div class="row" ng-show="analysisFunc == '1'">
+                <div class="col-sm-offset-1 col-sm-3">マップ機能</div>
+                <div class="col-sm-6">
+                    <label>
+                        <input ng-disabled="funcDisable == 1" disabled type="radio" ng-model="mapFunc"  name="mapFunc" value="1" >
+                        ある
+                    </label>
+
+                    <label>
+                        <input ng-disabled="funcDisable == 1" disabled type="radio" ng-model="mapFunc"  name="mapFunc" value="0" >
+                        なし
+                    </label>
+                </div>
+            </div>
+
 
         </div>
 
@@ -219,11 +250,11 @@
 
                                     <span ng-if="_val.pro == username || _val.con == username" ng-click="backToRoom(_val._id)" style="font-size:23px;line-height: 36px;cursor: pointer;" class="glyphicon glyphicon-home" aria-hidden="true"></span>
                                     <span ng-if="_val.pro != username && _val.con != username && (!_val.pro || !_val.con)" >
-                                        <button ng-if="_val.pro" ng-click="participateRoom(_val.num,_val.rNum,2,_val.timeLimit)"  class="label label-success" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
-                                        <button ng-if="_val.con" ng-click="participateRoom(_val.num,_val.rNum,1,_val.timeLimit)"  class="label label-info" style="height: 30px;margin-top:10px;"><span style="font-size:23px;line-height:18px;font-size:23px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
+                                        <button ng-if="_val.pro" ng-click="participateRoom(_val.num,_val.rNum,2,_val.timeLimit,_val.analysisFunc,_val.mapFunc)"  class="label label-success" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
+                                        <button ng-if="_val.con" ng-click="participateRoom(_val.num,_val.rNum,1,_val.timeLimit,_val.analysisFunc,_val.mapFunc)"  class="label label-info" style="height: 30px;margin-top:10px;"><span style="font-size:23px;line-height:18px;font-size:23px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
                                     </span>
                                     <span ng-if="_val.pro != username && _val.con != username && (_val.pro && _val.con)" >
-                                       <button ng-click="participateRoom(_val.num,_val.rNum,0,_val.timeLimit)"  class="label label-default" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
+                                       <button ng-click="participateRoom(_val.num,_val.rNum,0,_val.timeLimit,_val.analysisFunc,_val.mapFunc)"  class="label label-default" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
                                     </span>
 
                                 </div>
@@ -250,7 +281,20 @@
                                                 <span  style="font-size: 13px;"  class="label label-success">否定側</span>
                                                 <span>{{_val.con}}</span>
                                             </div>
-
+                                            <div class="row col-sm-3">
+                                                <span style="font-size: 13px;"  class="label label-default">
+                                                    分析機能
+                                                </span>
+                                                <span ng-show="_val.analysisFunc == 1">あり</span>
+                                                <span ng-show="_val.analysisFunc == 0">なし</span>
+                                            </div>
+                                            <div class="row col-sm-3" ng-show="_val.analysisFunc == 1">
+                                                <span style="font-size: 13px;"  class="label label-default">
+                                                    マップ機能
+                                                </span>
+                                                <span ng-show="_val.mapFunc == 1">あり</span>
+                                                <span ng-show="_val.mapFunc == 0">なし</span>
+                                            </div>
                                         </div>
                                 </div>
                             </a>
@@ -283,59 +327,9 @@
                                             <span style="font-size: 13px;" class="label label-warning">勝負の結果:未決着</span>
                                         </div>
 
-
                                     </div>
                                 </div>
                             </a>
-
-
-
-<!--
-                            <table class="table table-condensed">
-                                <tr class="active"><td class="info">肯定側</td><td class="info">{{_val.pro}}</td> <td class="success">否定側</td><td class="success">{{_val.con}}</td> <td>总次数</td><td>1次</td><td>时间限制</td><td ng-show="_val.timeLimit == 1">ある</td></tr>
-                            </table>
-
-                            <div class="pull-right">
-                                <span  ng-if="_val.status == 'wait'">
-                                    <span ng-if="_val.pro != username && _val.con != username">
-                                    <a ng-if="_val.pro"  ng-click="participateRoom(_val.num,_val.rNum,2,_val.timeLimit)" class="btn btn-success ">
-                                        <span class="glyphicon glyphicon-floppy-save"></span><br>反対として参加
-                                    </a>
-
-                                    <a ng-if="_val.con"  ng-click="participateRoom(_val.num,_val.rNum,1,_val.timeLimit)" class="btn btn-success ">
-                                        <span class="glyphicon glyphicon-floppy-save"></span><br>賛成として参加
-                                    </a>
-
-                                    <a  ng-click="participateRoom(_val.num,_val.rNum,0)" class="btn btn-default ">
-                                        <span class="glyphicon glyphicon-floppy-save"></span><br>オブザーバーとして参加
-                                    </a>
-                                    </span>
-
-                                    <span ng-if="_val.pro == username || _val.con == username">
-                                        <a  ng-click="backToRoom(_val._id)" class="btn btn-default ">
-                                        <span class="glyphicon glyphicon-floppy-save">この討論に戻る</span><br>
-                                        </a>
-                                    </span>
-                                </span>
-
-                                <span  ng-if="_val.status != 'wait'">
-                                    <span ng-if="_val.pro != username && _val.con != username">
-                                        <a  ng-click="participateRoom(_val.num,_val.rNum,0)" class="btn btn-default ">
-                                            <span class="glyphicon glyphicon-floppy-save"></span><br>オブザーバーとして参加
-                                        </a>
-                                    </span>
-
-
-                                    <span ng-if="_val.pro == username || _val.con == username">
-                                        <a  ng-click="backToRoom(_val._id)" class="btn btn-default ">
-                                        <span class="glyphicon glyphicon-floppy-save">この討論に戻る</span><br>
-                                        </a>
-                                    </span>
-                                </span>
-
-                            </div>
--->
-
 
                         </div>
 
@@ -537,13 +531,13 @@
             })
         }
 
-        $scope.participateRoom = function(num,rNum,position,timeLimit){
+        $scope.participateRoom = function(num,rNum,position,timeLimit,analysisFunc,mapFunc){
             $uibModal.open({
                 controller: 'ruleConfirmCtrl',
                 templateUrl: 'ruleConfirmCtrl.html',
                 resolve: {
                     items: function () {
-                        return {num:num,rNum:rNum,position:position,status:"participate",timeLimit:timeLimit}
+                        return {num:num,rNum:rNum,position:position,status:"participate",timeLimit:timeLimit,analysisFunc:analysisFunc,mapFunc:mapFunc}
                     }
                 }
             })
@@ -611,11 +605,29 @@
         $scope.timeLimit = 0
         $scope.timeLimitVal = '2'
         $scope.observer = 0
+
+        if($scope.analysisFunc == undefined){
+            $scope.analysisFunc = 1
+        }else{
+            $scope.analysisFunc = items.analysisFunc
+        }
+
+        if($scope.mapFunc == undefined){
+            $scope.mapFunc = 1
+        }else{
+            $scope.mapFunc = items.mapFunc
+        }
+
+
+        $scope.funcDisable = 0 //分析機能選択し,マップ機能選択しができるかどうか
+
         if(items.status ==  "newRoom"){
             $scope.position = 1
         }
 
         if(items.status == "participate"){
+            $scope.funcDisable = 1
+
             $scope.position = items.position
 
             if(items.position == 1){
@@ -643,7 +655,15 @@
         $scope.ok = function () {
 
             if(items.status == "newRoom"){
-                myPost.postData("/release/createNewRoom",{title:items.title,num:parseInt(items.num),position:parseInt($scope.position),timeLimit:parseInt($scope.timeLimit),timeLimitVal:parseInt($scope.timeLimitVal)}).then(function(_res){
+                var obj = {title:items.title,
+                            num:parseInt(items.num),
+                            position:parseInt($scope.position),
+                            timeLimit:parseInt($scope.timeLimit),
+                            timeLimitVal:parseInt($scope.timeLimitVal),
+                            analysisFunc:parseInt($scope.analysisFunc),
+                            mapFunc:parseInt($scope.mapFunc)
+                            }
+                myPost.postData("/release/createNewRoom",obj).then(function(_res){
                     if(parseInt(_res.data.err) == 0){
                         if($scope.LAN == 'JP'){
                             location = "/release/chat"
