@@ -202,7 +202,7 @@
         }
     })
 
-    myApp.controller("myController",function($scope,myPost,coreSocket,$q){
+    myApp.controller("myController",function($scope,myPost,coreSocket,$q,$rootScope){
 
         function init(){
 
@@ -277,6 +277,14 @@
             })
 
         })
+
+        coreSocket.on("receiveUpdateAnalysis",function(_res){
+
+            $scope.currentAnalysis = _res.everyAnalysisData
+            $rootScope.$broadcast('reDrawMap');
+        })
+
+
 
         coreSocket.on("confirmAnalysisResultFinish",function(_res){
             console.log("result of analysis has been approved")
@@ -395,6 +403,7 @@
                         if(_res.data.everyAnalysisData){
                             $scope.analysisData = _res.data.everyAnalysisData.analysisData
                             $scope.analysisDissentExplainData = _res.data.everyAnalysisData.analysisDissentExplainData
+
                         }
                     }
 
@@ -682,7 +691,7 @@
 
 
 
-    myApp.directive("checkDebate",function(){
+    myApp.directive("checkDebate",function($rootScope){
         return{
             scope:false,
 
@@ -738,12 +747,12 @@
     })
 
 
-    myApp.directive("kentouDebate",function(){
+    myApp.directive("kentouDebate",function($rootScope){
         return{
             scope:false,
-
             link:function(scope,element){
                 scope.conceptStatus = "kentou"
+
             },
             templateUrl:"/angularJSTemplate/process/kentouDebate.html"
         }
@@ -1071,11 +1080,505 @@
         }
     })
 
+    myApp.directive("analysisResult2",function(coreSocket){
+      return{
+          scope:false,
+          link:function(scope,element){
+               scope.$on("drawAnalysisResult",function(){
+                   startDraw()
+               })
+
+
+              var TOP  //顶端的边距
+              var LEFT  //左边距
+              var RIGHT //右边距
+
+              var RECTWIDTH   //模块的宽度
+              var RECTHEIGHT  //模块的高度
+              var CLAIMX  //claim模块的横坐标
+              var WARRANTX //warrant模块的横坐标
+              var EVIDENCEX //element模块的横坐标
+              var CLIAMANDWARRANTXINTERVAL
+              var WARRANTANDEVIDENCEXINTERVAL
+              var LASTY //升降机
+
+              var DOTTEDLINEX1,DOTTEDLINEX2,DOTTEDLINEX3,DOTTEDLINEX4 //虚线的四个点的横坐标
+              var DOTTEDLINEWIDTH  //虚线的长度
+              var TITLEX  //标题的起始x坐标
+              var TITLEXLEFT  //标题距离左边虚线的边距
+              var TITLEFONTSIZE  //标题的字体大小
+              var TITLEANDRECTINTERVALY //标题和模块的垂直距离
+
+              var CLAIMANDSUPPORTINTERVALY  //claim和支持它的support的垂直距离
+              var SUPPORTANDSUPPORTINTERVALY //同一个模块啊近邻的suppor和support之间的垂直距离
+              var MOKUAIANDMOKUAIINTERVALY //模块和模块之间的垂直距离
+
+
+              var DISSENTTXTWIDTH
+              var DISSENTTXTHEIGHT
+              var DISSENTTXTX
+              var DISSENTTXTANDDISSENTEXPLAININTERVALY  //异议的文字和下面解释内容的垂直距离
+
+
+              var NEXTBUTTONWIDTH
+              var NEXTBUTTONHEIGHT
+              var NEXTBUTTONX
+
+              var svg
+
+
+              startDraw()
+              function startDraw(){
+                  define()
+                  draw()
+              }
+
+              function clearDraw(){
+                  svg.selectAll(".draw").remove()
+              }
+
+
+              function define(){
+                  var _width = document.getElementById("analysisResult").offsetWidth
+                  TOP = 10
+                  LEFT = _width*0.05
+                  RIGHT = LEFT
+                  RECTWIDTH = (_width - LEFT - RIGHT)/3
+                  RECTHEIGHT = RECTWIDTH*0.6
+                  CLIAMANDWARRANTXINTERVAL = _width/8
+                  WARRANTANDEVIDENCEXINTERVAL = _width/8
+                  CLAIMX = _width/12
+                  WARRANTX = CLAIMX + CLIAMANDWARRANTXINTERVAL
+                  EVIDENCEX = WARRANTX + RECTWIDTH + WARRANTANDEVIDENCEXINTERVAL
+
+                  DOTTEDLINEWIDTH = (_width - LEFT - RIGHT)/3
+                  DOTTEDLINEX1 = LEFT
+                  DOTTEDLINEX2 = DOTTEDLINEX1 + DOTTEDLINEWIDTH
+                  DOTTEDLINEX4 = _width - RIGHT
+                  DOTTEDLINEX3 = DOTTEDLINEX4 - DOTTEDLINEWIDTH
+                  TITLEXLEFT = 10
+                  TITLEX = DOTTEDLINEX2 + TITLEXLEFT
+                  TITLEFONTSIZE = 16
+
+                  LASTY = TOP //开始的时候把升降机调整到最顶端的边距位置
+
+                  TITLEANDRECTINTERVALY = 60
+
+                  CLAIMANDSUPPORTINTERVALY = 40
+                  SUPPORTANDSUPPORTINTERVALY = 10
+                  MOKUAIANDMOKUAIINTERVALY = 30
+
+                  DISSENTTXTX = (_width - LEFT - RIGHT)/16
+                  DISSENTTXTWIDTH = _width*0.8
+                  DISSENTTXTHEIGHT = DISSENTTXTWIDTH * 0.3
+                  DISSENTTXTANDDISSENTEXPLAININTERVALY = 30
+
+                  NEXTBUTTONWIDTH = _width*0.8
+                  NEXTBUTTONHEIGHT = NEXTBUTTONWIDTH*0.2
+                  NEXTBUTTONX = (_width - LEFT - RIGHT)*0.167454
+
+                  svg = d3.select(element.find("svg")[0])
+                  svg.attr("width","1200px")
+                  svg.attr("height","6000px")
+
+
+                  scope.addDissentArr = {}
+              }
+
+              function draw(){
+                  clearDraw()
+                  if(scope.debateInfo.preFinish){
+                      //如果是准结束阶段,那么只有異議説明可以分析
+                  }else{
+                      painTitle("construct")
+                      if(scope.analysisData){
+                          paintFromData("construct",scope.analysisData.analysisResult,0,"")
+                      }
+
+                  }
+
+                  if(scope.analysisDissentExplainData){
+                      for(var i=0;i<scope.analysisDissentExplainData.length;i++){
+                          if(!scope.analysisDissentExplainData[i].analysisResult[0].claim) return
+                          painTitle("dissentExplain")
+                          paintFromData("dissentExplain",scope.analysisDissentExplainData[i].analysisResult,i,scope.analysisDissentExplainData[i].txt)
+                      }
+                  }
+
+
+
+                  //如果是在表明异议的阶段的话则在最下方画一个下一步的按钮,点击后进入下一阶段
+                  if((scope.debateInfo.status == 'appeal' && scope.debateInfo.position == 2) || (scope.debateInfo.status == 'lookup' && scope.debateInfo.position == 1)){
+                      addNextButton(LASTY)
+                  }
+              }
+
+
+              function paintFromData(category,data,dissentExplainI,dissentTxt){
+                  var mainArrowStart
+                  var mainArrowEnd = []
+                  if(dissentTxt){
+                      //如果category == dissentExplain 那么说明这里需要显示是对哪条质疑的解释
+                      appendDissentTxt(dissentTxt,DISSENTTXTX,LASTY)
+                  }
+                  for(var i=0;i<data.length;i++){
+                      if(!data[i].claim) return;
+                      mainArrowStart = appendClaim(data[i].claim,[category,i,0,"claim",dissentExplainI])
+                      dealWithLastY("claim",data,i,0)
+
+                      for(var j=0;j<data[i].support.length;j++){
+
+                          if(data[i].support[j].warrant){
+                              appendWarrant(data[i].support[j].warrant,[category,i,j,"warrant",dissentExplainI])
+                              dealWithLastY("warrant",data,i,j)
+                          }
+
+                          //再画evidence
+
+                          if(data[i].support[j].evidence){
+                              mainArrowEnd.push(appendEvidence(data[i].support[j].evidence,[category,i,j,"evidence",dissentExplainI]))
+                              dealWithLastY("evidence",data,i,j)
+                          }
+
+                      }
+
+                  }
+
+                  if(mainArrowEnd.length>0){
+                      drawMainArrow(mainArrowStart,mainArrowEnd)
+                  }
+
+              }
+
+              function appendClaim(text,conf){
+                  appendRect(text,CLAIMX,LASTY,"claim",conf)
+                  return {x:CLAIMX+CLIAMANDWARRANTXINTERVAL/2,y:LASTY+RECTHEIGHT}
+              }
+
+              function appendWarrant(text,conf){
+                  appendRect(text,WARRANTX,LASTY,"warrant",conf)
+                  return {x:WARRANTX,y:LASTY+RECTHEIGHT/2}
+              }
+
+              function appendEvidence(text,conf){
+                  appendRect(text,EVIDENCEX,LASTY,"evidence",conf)
+                  return {x:EVIDENCEX,y:LASTY+RECTHEIGHT/2}
+              }
+
+              function dealWithLastY(type,data,i,j){
+                  if(type == "claim"){
+                        if(data[i].support[j].evidence){
+                            //如果这个claim下面的evidence存在的话
+                            LASTY += CLAIMANDSUPPORTINTERVALY + RECTHEIGHT
+                        }
+                  }
+
+                  if(type == "warrant"){
+                      if(!data[i].support[j].evidence){
+                          //如果对应的warrant不存在的话,那么看看有没有下一个evidence
+                          LASTY += MOKUAIANDMOKUAIINTERVALY + RECTHEIGHT
+                      }
+                  }
+
+                  if(type == "evidence"){
+                      if(data[i].support[j+1]){
+                          //画完了warrant,如果下一个support存在的话
+                            LASTY += SUPPORTANDSUPPORTINTERVALY + RECTHEIGHT
+
+                      }else{
+                          //如果下一个support不存在的话不管如何升降机往下
+                            LASTY += MOKUAIANDMOKUAIINTERVALY + RECTHEIGHT
+                      }
+                  }
+
+              }
+
+
+              function appendRect(text,x,y,type,conf){
+                  var foreignObject = svg.append("foreignObject")
+                  foreignObject.attr("width",RECTWIDTH)
+                  foreignObject.attr("height",RECTHEIGHT)
+                  foreignObject.attr("class","draw")
+                  foreignObject.attr("x",x)
+                  foreignObject.attr("y",y)
+
+                  var div = foreignObject.append('xhtml:div')
+                  div.style("width",RECTWIDTH+"px")
+                  div.style("height",RECTHEIGHT+"px")
+
+                  var panel = div.append("div")
+                  panel.attr("borderd",0)
+                  panel.attr("class","panel panel-default")
+                  panel.style("height","100%")
+
+                  var head = panel.append("div")
+                  head.attr("class","panel-heading")
+                  if(type == "claim"){
+                      head.text("主張")
+                  }
+
+                  if(type == "warrant"){
+                      head.text("論拠")
+                  }
+
+                  if(type == "evidence"){
+                      head.text("根拠")
+                  }
+
+
+                  var body = panel.append("div")
+                  body.attr("class","panel-body")
+                  body.style("height","63%")
+                  body.style("overflow","auto")
+                  body.text(text)
+
+                  dealWithClick(panel,conf,text)
+              }
+
+
+              function dealWithClick(foreignObject,conf,text){
+                  if((scope.debateInfo.status == 'appeal' && scope.debateInfo.position == 2) || (scope.debateInfo.status == 'lookup' && scope.debateInfo.position == 1)){
+                      foreignObject.on("click",function(){
+                          var borderd = (parseInt(foreignObject.attr("borderd"))+1) % 2
+                          foreignObject.attr("borderd",borderd)
+                          if(borderd == 1){
+                              this.style.border = "4px solid yellow"
+                              addDissentArr(conf,text)
+                          }else{
+                              this.style.border = ""
+                              removeDissentArr(conf)
+                          }
+                      })
+                  }
+
+              }
+
+
+
+
+              function toNextStep(){
+
+                  scope.dissentData = []
+
+                  scope.statementData = ""
+
+                  if(angular.equals(scope.addDissentArr, {})){
+                      //如果没有选择质疑的选项那么直接进入下一步的立論的部分
+                      scope.statementStatus = {name:"claim",i:0}
+
+                      if((scope.debateInfo.order == scope.totalNum-1) && (scope.debateInfo.status == 'lookup')){
+                          //说明现在这个阶段不能立論了,因为快要结束了
+                          //而且在这里没有质疑那么直接提交空的異議説明和空的立論
+                          scope.lastStatement = 1
+                          coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
+                      }else{
+
+                      }
+                  }else{
+
+                      scope.statementStatus = {name:"dissent",i:0}
+                  }
+
+
+
+                  for(var i in scope.addDissentArr){
+                      if(scope.addDissentArr[i].res == 0) continue;
+
+                      var category = scope.addDissentArr[i].category
+                      var _i = scope.addDissentArr[i].i
+                      var _j = scope.addDissentArr[i].j
+                      var type = scope.addDissentArr[i].type
+                      var txt = scope.addDissentArr[i].txt
+                      var indexToAnalysis = scope.addDissentArr[i].indexToAnalysis
+                      var indexToStatement = scope.addDissentArr[i].indexToStatement
+                      scope.dissentData.push({category:category,type:type,txt:txt,reply:"",i:_i,j:_j,indexToAnalysis:indexToAnalysis,indexToStatement:indexToStatement})
+                      scope.statementStatus = {name:"dissent",i:0}
+
+                  }
+
+                  coreSocket.emit("selectDissent",{dissentData:scope.dissentData,statementStatus:scope.statementStatus,statementData:scope.statementData})
+
+              }
+
+
+              function addDissentArr(conf,text){
+                  // get index
+
+                  var _category = conf[0]
+                  var _i = conf[1]
+                  var _j = conf[2]
+                  var _type =  conf[3]
+                  var indexToAnalysis,indexToStatement //statement's index <--> analysis random(_index) <----> statements' random(__index) statement中異議説明连analysis中的random,然后再通过analysis中的index找到最初对哪个statement质疑的
+                  var dissentExplainI = conf[4]
+
+
+
+
+
+                  if(_category == "construct"){
+                      indexToStatement = scope.analysisData.indexToStatement
+                      if(_type == "claim"){
+                          indexToAnalysis = scope.analysisData.analysisResult[_i].random
+                      }else if(_type == "warrant"){
+                          indexToAnalysis = scope.analysisData.analysisResult[_i].support[_j].wrandom
+                      }else if(_type == "evidence"){
+                          indexToAnalysis = scope.analysisData.analysisResult[_i].support[_j].erandom
+                      }else{
+                          alert("error0")
+                      }
+
+
+                  }else if(_category == "dissentExplain"){
+
+                      indexToStatement = scope.analysisDissentExplainData[dissentExplainI].indexToStatement
+                      if(_type == "claim"){
+                          indexToAnalysis = scope.analysisDissentExplainData[dissentExplainI].analysisResult[_i].random
+                      }else if(_type == "warrant"){
+                          indexToAnalysis = scope.analysisDissentExplainData[dissentExplainI].analysisResult[_i].support[_j].wrandom
+                      }else if(_type == "evidence"){
+                          indexToAnalysis = scope.analysisDissentExplainData[dissentExplainI].analysisResult[_i].support[_j].erandom
+                      }else{
+                          alert("error1")
+                      }
+
+                  }else{
+                      alert("error2")
+                  }
+
+                  scope.addDissentArr[conf.join("")] = {res:1,category:conf[0],i:conf[1],j:conf[2],type:conf[3],txt:text,indexToAnalysis:indexToAnalysis,indexToStatement:indexToStatement}
+              }
+
+              function removeDissentArr(conf){
+                  scope.addDissentArr[conf.join("")] = {res:0}
+              }
+
+
+              function appendDissentTxt(txt,x,y){
+                  var foreignObject = svg.append("foreignObject")
+                  foreignObject.attr("width",DISSENTTXTWIDTH)
+                  foreignObject.attr("height",DISSENTTXTHEIGHT)
+                  foreignObject.attr("class","draw")
+                  foreignObject.attr("x",x)
+                  foreignObject.attr("y",y)
+                  var div = foreignObject.append('xhtml:div')
+                  div.style("width",DISSENTTXTWIDTH+"px")
+                  div.style("height",DISSENTTXTHEIGHT+"px")
+
+
+                  var panel = div.append("div")
+                  panel.attr("class","panel panel-default")
+                  panel.style("height","100%")
+
+                  var head = panel.append("div")
+                  head.attr("class","panel-heading")
+                  head.text("いかの内容に対する異議説明")
+
+                  var body = panel.append("div")
+                  body.attr("class","panel-body")
+                  body.style("height","63%")
+                  body.style("overflow","auto")
+                  body.text(txt)
+
+                  //调整升降机
+                  LASTY += DISSENTTXTANDDISSENTEXPLAININTERVALY + DISSENTTXTHEIGHT
+
+              }
+
+              function painTitle(type){
+                  //左边部分的虚线
+                  drawDottedLine(DOTTEDLINEX1,DOTTEDLINEX2,LASTY)
+
+                  if(type == "construct"){
+                          drawText("立論の分析結果",TITLEX,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
+                  }else{
+                          drawText("異議説明文の分析結果",TITLEX,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
+                  }
+
+                  //右边部分的虚线
+                  drawDottedLine(DOTTEDLINEX3,DOTTEDLINEX4,LASTY)
+
+                  LASTY += TITLEANDRECTINTERVALY
+              }
+
+              function drawDottedLine(x1,x2,y){
+                  var line = svg.insert("line")
+                          .attr("x1",x1)
+                          .attr("y1",y)
+                          .attr("x2",x2)
+                          .attr("y2",y)
+                          .attr("stroke","#000")
+                          .attr("stroke-width",3)
+                          .attr("class","arrow draw")
+                          .attr("stroke-dasharray","4,10")
+              }
+
+
+              function drawText(txt,x,y,font){
+                  var text = svg.insert("text")
+                  text.text(txt)
+                  text.attr("x",x)
+                          .attr("y",y)
+                          .attr("font-size",font)
+                          .attr("fill","#8a6d3b")
+                          .attr("class","draw")
+              }
+
+
+              function drawMainArrow(start,end){
+                  var len = end.length
+                  drawArrow(start.x,start.x,start.y,end[len-1].y)
+
+                  for(var i=0;i<end.length;i++){
+                      drawArrow(start.x,end[i].x,end[i].y,end[i].y)
+                  }
+
+              }
+
+              function drawArrow(x1,x2,y1,y2){
+                  var line = svg.insert("line",":first-child")
+                          .attr("x1",x1)
+                          .attr("y1",y1)
+                          .attr("x2",x2)
+                          .attr("y2",y2)
+                          .attr("stroke","#9acfea")
+                          .attr("stroke-width",3)
+                          .attr("class","arrow draw")
+              }
+
+              function addNextButton(y){
+                  // will work when we need to add dissent on to the map
+                  var foreignObject = svg.append("foreignObject")
+
+                  foreignObject.attr("x",NEXTBUTTONX)
+                  foreignObject.attr("y",y)
+                  foreignObject.attr("width",NEXTBUTTONWIDTH)
+                  foreignObject.attr("height",NEXTBUTTONHEIGHT)
+
+                  var _div = foreignObject.append('xhtml:div')
+
+                  var button = _div.append("button")
+                      button.html("次へ")
+
+                  button.attr("type","button")
+                  button.attr("class","btn btn-default btn-lg pull-right")
+                  button.style("width",NEXTBUTTONWIDTH+"px")
+                  button.style("height",NEXTBUTTONHEIGHT+"px")
+                  button.on("click",function(){
+                      console.log(scope.addDissentArr)
+                      toNextStep()
+                  })
+
+              }
+
+          },
+          templateUrl:"/angularJSTemplate/public/analysisResult2.html"
+      }
+    })
+
     myApp.directive("analysisResult",function(coreSocket,$compile){
         return {
             scope:false,
             link:function($scope,$element){
-
                 var RECTWIDTH = 450
                 var RECTHEIGHT = 150
                 var OFFSETLEFT = 80
@@ -1108,8 +1611,6 @@
                 $scope.addDissentArr = {}
 
 
-                console.log("ssssssssss")
-                console.log($scope.analysisData)
 
                 function init(){
                     clearDraw()
@@ -1241,7 +1742,6 @@
 
 
                 }
-
 
                 function drawMainArrow(y1,y2){
                     var mainLine = svg.insert("line",":first-child")
@@ -1748,12 +2248,16 @@
                         }
                     }
 
+
+                    //每次填写完当前的analysis信息后都更新debateStatus里面的everyAnalysisData字段
+                    preSubmit()
+
+
                 }
 
 
 
                 $scope.output = function(){
-
 
                     if(!$scope._contents){
                         $scope.data1Success = 0
@@ -1782,17 +2286,16 @@
                     //让滚动条到最底端
                     $("#ak47").animate({scrollTop: 1000}, "slow")
 
-
                     //$("body").animate({scrollTop: $target.offset().top}, "slow");
                     //画图
 
                     $rootScope.$broadcast('click',{});
+
                     checkIfOriginalDataExists()
-
-
 
                     //将目前的表单输入信息传输给对方
                     transportInputInfo("FormInputing")
+
                 }
 
 
@@ -1836,6 +2339,8 @@
                             //coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
                             //print()
                             $scope.analysisObject.target = "preview"
+                            //画图
+                            $rootScope.$broadcast("drawAnalysisResult",{})
                         }
                     } else if($scope.analysisObject.target == "dissentExplain"){
                         $scope.inputStatus.name = "claim"
@@ -1849,6 +2354,7 @@
                             //coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
                             //print()
                             $scope.analysisObject.target = "preview"
+                            $rootScope.$broadcast("drawAnalysisResult",{})
                         }
                     }else{
 
@@ -1858,14 +2364,17 @@
                 }
 
 
-                $scope.submit = function(){
-                   // coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
-
-
-
-                    console.log("cccccccccc")
+                function preSubmit(){
+                    //还没提交以前把最新的analysis data 传给数据库,以便自己和对方都够看到当前即使填写的analysis data信息
+                    console.log("pre submit analysis data")
                     console.log($scope.analysisData)
-                    console.log("nnnnnnnnnnnnn")
+                    console.log($scope.analysisDissentExplainData)
+                    coreSocket.emit("updateGiveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
+                }
+
+                $scope.submit = function(){
+                    console.log("submit analysis data")
+                    console.log($scope.analysisData)
                     console.log($scope.analysisDissentExplainData)
                     coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
                 }
@@ -2293,8 +2802,6 @@
                     })
 
                     scope.textStartInputingVal = 0
-
-
 
 
                     if(scope.dissentData.length > 0){
@@ -2742,6 +3249,7 @@
                 scope.expand = function(){
                     scope.expandVal = (scope.expandVal + 1 ) %2
                     $rootScope.$broadcast('reDrawMap',{});
+                    //重画地图
                 }
 
                 scope.verticalExpand = function(){
@@ -2852,22 +3360,22 @@
 
                 var FONTSIZE
 
-
-
-
                 var analysisMapInformation = getDebateAnalysisMapInformation.getDebateAnalysisMapInformation()
 
                 analysisMapInformation.then(function(msg){
                     scope.analysisMapInformation = msg
-                    scope.mapData = {pro:[],con:[]}
-                    scope.mapDissentData = []
+                    scope.analysisMapInformationLen = scope.analysisMapInformation.res.data.length
+
                     dealWithData()
                     dealWithDraw()
                 })
 
+
                 scope.$on("reDrawMap",function(){
                     setTimeout(function(){
-                        dealWithDraw()
+                            dealWithData()
+                            console.log(scope.mapData)
+                            dealWithDraw()
                     },500)
                 })
 
@@ -2921,6 +3429,14 @@
                 }
 
                 function dealWithData() {
+
+                    if(scope.currentAnalysis){
+                        scope.analysisMapInformation.res.data[scope.analysisMapInformationLen] = scope.currentAnalysis
+                    }
+
+                    scope.mapData = {pro:[],con:[]}
+                    scope.mapDissentData = []
+
                     //先把主张的分析结果合一块儿
                     for (var i = 0; i < scope.analysisMapInformation.res.data.length; i++) {
                         var analysisResult = scope.analysisMapInformation.res.data[i].analysisData.analysisResult
@@ -3167,7 +3683,11 @@
                     for(var i=0;i<data.length;i++){
                         //i代表第几轮
                         for(var j=0;j<data[i].length;j++){
-                            painLine(svg,data[i][j].x,data[i][j].x,data[i][j].startY,data[i][j].endY,color)
+                            if(data[i][j].startY && data[i][j].endY){
+                                //只有等起点和终点同时存在时
+                                painLine(svg,data[i][j].x,data[i][j].x,data[i][j].startY,data[i][j].endY,color)
+                            }
+
                         }
                     }
                 }
@@ -3180,7 +3700,11 @@
 
 
                     for(var i in data){
-                        painLine(svg,data[i].x,data[i].x,data[i].startY-5,data[i].endY,color)
+                        if(data[i].startY && data[i].endY){
+                            //只有等起点和终点同时存在时
+                            painLine(svg,data[i].x,data[i].x,data[i].startY-5,data[i].endY,color)
+                        }
+
                     }
 
 
@@ -3236,7 +3760,6 @@
                         }else{
                             //说明这里的claim不是原始的claim而是異議説明的claim
                             var indexToAnalysis = data[j].indexToAnalysis
-
                             position == 1?mainLeftArrowOfDissent.pro[indexToAnalysis] = {x:currentX+ELEMENTWIDTH/2,startY:LASTY[position]+ELEMENTHEIGHT}:mainLeftArrowOfDissent.con[indexToAnalysis] = {x:currentX+ELEMENTWIDTH/2,startY:LASTY[position]+ELEMENTHEIGHT}
                             //mainLeftArrowOfDissent
                         }
@@ -3311,23 +3834,33 @@
 
                             if(data[i].eDissent){
                                 //如果对于evidence的质疑解释还有的话
-                                LASTY[position] = LASTY[position] + CLAIMANDSUPPORTYINTERVAL
-                                var y2 = drawClaim(I,(recursionI+1),data[i].eDissent,position,evidenceX)  //返回这个元素所属的claim的高度
-                                //进行一次递归调用,因此递归深度在原有的递归深度上+1
 
-                                var indexToAnalysis = data[i].erandom
 
-                                position==1?ELEMENTDISSENTCLAIM.pro[indexToAnalysis] = {x:evidenceX+ELEMENTWIDTH/2,startY:y1,endY:y2}:ELEMENTDISSENTCLAIM.con[indexToAnalysis] = {x:evidenceX+ELEMENTWIDTH/2,startY:y1,endY:y2}
+                                if(data[i].eDissent[0].claim){
+                                    //如果对这个质疑的解释已经加入了内容的话,否则buzuochuli
+                                    LASTY[position] = LASTY[position] + CLAIMANDSUPPORTYINTERVAL
+                                    var y2 = drawClaim(I,(recursionI+1),data[i].eDissent,position,evidenceX)  //返回这个元素所属的claim的高度
+                                    //进行一次递归调用,因此递归深度在原有的递归深度上+1
+
+                                    var indexToAnalysis = data[i].erandom
+
+                                    position==1?ELEMENTDISSENTCLAIM.pro[indexToAnalysis] = {x:evidenceX+ELEMENTWIDTH/2,startY:y1,endY:y2}:ELEMENTDISSENTCLAIM.con[indexToAnalysis] = {x:evidenceX+ELEMENTWIDTH/2,startY:y1,endY:y2}
+                                }
                             }
 
                             if(data[i].wDissent){
                                 //如果对warrant的质疑解释还有的话
-                                LASTY[position] = LASTY[position] + CLAIMANDSUPPORTYINTERVAL
-                                var y2 = drawClaim(I,(recursionI+1),data[i].wDissent,position,warrantX) //返回这个元素所属的claim的高度
-                                //进行一次递归调用,因此递归深度在原有的递归深度上+1
 
-                                var indexToAnalysis = data[i].wrandom
-                                position==1?ELEMENTDISSENTCLAIM.pro[indexToAnalysis] = {x:warrantX+ELEMENTWIDTH/2,startY:y1,endY:y2}:ELEMENTDISSENTCLAIM.con[indexToAnalysis] = {x:warrantX+ELEMENTWIDTH/2,startY:y1,endY:y2}
+                                if(data[i].wDissent[0].claim){
+                                    //如果对这个质疑的解释已经加入了内容的话,否则buzuochuli
+                                    LASTY[position] = LASTY[position] + CLAIMANDSUPPORTYINTERVAL
+                                    var y2 = drawClaim(I,(recursionI+1),data[i].wDissent,position,warrantX) //返回这个元素所属的claim的高度
+                                    //进行一次递归调用,因此递归深度在原有的递归深度上+1
+
+                                    var indexToAnalysis = data[i].wrandom
+                                    position==1?ELEMENTDISSENTCLAIM.pro[indexToAnalysis] = {x:warrantX+ELEMENTWIDTH/2,startY:y1,endY:y2}:ELEMENTDISSENTCLAIM.con[indexToAnalysis] = {x:warrantX+ELEMENTWIDTH/2,startY:y1,endY:y2}
+                                }
+
                             }
 
                     }
@@ -3487,6 +4020,7 @@
 
                         button.text(text)
                         button.style("font-size",FONTSIZE+"px")
+                        button.style("height",ELEMENTHEIGHT*0.95+"px")
 
                         if(dissent == 1){
                             var span = button.append("span")
@@ -3696,8 +4230,6 @@
 
                 function draw(data){
                     define()
-
-
                     if(scope.debateInfo.analysisFunc == 1){
                         //有分析功能的,肯定带有质疑功能
                         dealWithData(data)
@@ -3716,8 +4248,6 @@
                             appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0)
                         }
                     }
-
-
                 }
 
 

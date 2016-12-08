@@ -340,10 +340,27 @@ module.exports = {
         })
     },
     getDebateAnalysisMapInformationController:function(req,res){
-        mongo.find("analysisLog",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum},{},function(_res){
-            console.log(JSON.stringify(_res))
-            res.end(JSON.stringify(_res))
-        })
+        var status
+        steps(function(){
+            mongo.find("analysisLog",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum},{},this.hold(function(_res){
+                /*
+                //只有在分析阶段才会从debateStatus数据表取analysisData
+
+                if(status == "analysis" || status == "bunseki"){
+                    //把当前还没有写入analysisLog的analysisData也放入地图数组信息里面
+                    if(everyAnalysisData){
+                        arr.push(everyAnalysisData)
+                    }
+                }
+
+                */
+
+
+                console.log(_res)
+                res.end(JSON.stringify(_res))
+            }))
+        })()
+
     },
 
     backToRoomController:function(req,res){

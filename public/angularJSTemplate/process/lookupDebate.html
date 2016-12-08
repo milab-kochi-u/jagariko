@@ -1,7 +1,6 @@
 <div >
     <info-and-analysis-map mapParentId="lookupMap"></info-and-analysis-map>
 </div>
-
 <div  ng-show="verticalExpandVal == 1">
     <div class="row">
 <div class="row" ng-show="LAN=='JP'" style="height: 350px;overflow:auto;">
@@ -15,7 +14,8 @@
                     <span ng-if="debateInfo.position == 2">相手の反駁をお待ちください</span>
 
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" id="analysisResult">
+                    <analysis-result2></analysis-result2>
                     <analysis-result></analysis-result>
                 </div>
 

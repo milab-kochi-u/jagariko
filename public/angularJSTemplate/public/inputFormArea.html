@@ -1,4 +1,4 @@
-<div  class="panel panel-info" ng-show="LAN == 'JP'">
+<div  class="panel panel-info" ng-show="LAN == 'JP'" id="analysisResult">
     <div ng-show="analysisObject.target!='preview'"  class="panel" style="height:326px;" ng-show="everyStatementData">
         <div style="height: 40%;overflow: auto">
             <p class="alert alert-warning" style="margin-bottom:2px;">相手の意見を主張,根拠,論拠に分析してください</p>
@@ -194,8 +194,9 @@
 
     </div>
 
-    <div ng-show="analysisObject.target=='preview'"  class="panel">
-        <div class="row" style="height: 250px;width:96%;margin:0 auto;overflow: auto">
+    <div ng-show="analysisObject.target=='preview'"  class="panel" >
+        <div class="row" class="analysisResult" style="height: 326px;width:96%;margin:0 auto;overflow: auto">
+            <analysis-result2></analysis-result2>
             <analysis-result></analysis-result>
         </div>
 

@@ -55,6 +55,8 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
             socket.to(session.debateLogin.rNum).broadcast.emit('refreshOnline', {onlineInfo:roomInfo[roomId]});
         })
 
+
+
         socket.on("giveStatement",function(msg){
 
             var totalNum = 1
@@ -210,8 +212,6 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
 
 
         socket.on("giveAnalysis",function(msg){
-
-
             var sendObj
             var order
             var preFinish
@@ -256,6 +256,31 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
 
 
                 }))
+            })()
+
+        })
+
+
+        //随时把分析的现阶段结果存入数据库的everyAnalysisData字段,以便让自己和对方在地图里面随时可以看到目前的地图
+
+
+
+        socket.on("updateGiveAnalysis",function(msg){
+            var sendObj
+            steps(function(){
+                sendObj = msg
+                sendObj.position = session.debateLogin.position
+
+                console.log(msg)
+                socket.emit("receiveUpdateAnalysis",{everyAnalysisData:sendObj})
+                socket.to(session.debateLogin.rNum).broadcast.emit("receiveUpdateAnalysis",{everyAnalysisData:sendObj})
+            },function(){
+                //console.log({num:session.debateLogin.num,rNum:session.debateLogin.rNum})
+                //console.log({everyAnalysisData:sendObj})
+                //console.log(sendObj.analysisData.analysisResult)
+
+                //mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyAnalysisData:sendObj}},this.hold(function(res){
+                //}))
             })()
 
         })
