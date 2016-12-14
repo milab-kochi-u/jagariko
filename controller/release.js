@@ -305,13 +305,19 @@ module.exports = {
         var group = req.session.debateLogin.group
         var LAN = req.session.LAN
 
-        mongo.find("debateMembers",{username:username,group:group},{},function(_result){
-            if(_result.length>0){
-                res.end(JSON.stringify({err:0,data:{num:num,rNum:rNum,username:username,group:group,status:_result[0].status,debateInvolve:_result[0].debateInvolve,LAN:LAN}}))
-            }else{
-                res.end(JSON.stringify({err:1,msg:"no data find"}))
-            }
-        })
+        steps(
+        function(){
+            //贏了多少次輸了多少次
+        },function(){
+                mongo.find("debateMembers",{username:username,group:group},{},this.hold(function(_result){
+                    if(_result.length>0){
+                        res.end(JSON.stringify({err:0,data:{num:num,rNum:rNum,username:username,group:group,status:_result[0].status,debateInvolve:_result[0].debateInvolve,LAN:LAN,winNum:_result[0].winNum,lostNum:_result[0].lostNum,drawNum:_result[0].drawNum,unDeterminNum:_result[0].unDeterminNum}}))
+                    }else{
+                        res.end(JSON.stringify({err:1,msg:"no data find"}))
+                    }
+                }))
+        })()
+
     },
 
 
@@ -462,26 +468,50 @@ module.exports = {
         })()
     },
     rateController:function(req,res){
+
         var num = req.session.debateLogin.num
         var rNum = req.session.debateLogin.rNum
         var position = req.session.debateLogin.position
         var rate = req.body.rate
         var _update
-        console.log(req.body)
+        var debateResult
+        var pro,con,group
+        var proUpdate = {}
+        var conUpdate = {}
         steps(function(){
             mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
                 if(result.length == 0) return;
 
-                if(result[0].status == "finish"){
+                pro = result[0].pro
+                con = result[0].con
+                group = result[0].group
+
+                if(result[0].status == "finish" || result[0].status == "noAnalysisfinish"){
                     if(position == 1){
+
+                        debateResult = determine(rate,result[0].conRate)
+
                         if(!result[0].proRate){
                             //如果你是正方,且还没有对自己做评价,那么接下来对自己做评价
-                            _update = {$set:{proRate:rate}}
+                            if(debateResult != "wait" && debateResult != "unknow"){
+                                _update = {$set:{proRate:rate,debateResult:debateResult,finish:true}}
+                            }else{
+                                _update = {$set:{proRate:rate,debateResult:debateResult}}
+                            }
+
                         }
                     }else if(position == 2){
+
+                        debateResult = determine(result[0].proRate,rate)
                         if(!result[0].conRate){
                             //如果你是反方,且还没有对自己做评价,那么接下来对自己做评价
-                            _update = {$set:{conRate:rate}}
+
+                            if(debateResult != "wait" && debateResult != "unknow"){
+                                _update = {$set:{conRate:rate,debateResult:debateResult,finish:true}}
+                            }else{
+                                _update = {$set:{conRate:rate,debateResult:debateResult}}
+                            }
+
                         }
                     }else{
                         this.terminate()
@@ -490,8 +520,90 @@ module.exports = {
             }))
         },function(){
             mongo.update("debateStatus",{num:num,rNum:rNum},_update,{},this.hold(function(_result){
-                res.end(JSON.stringify({err:0,data:{}}))
+
+            }))
+        },function(){
+
+            if(debateResult != "wait" && debateResult != "unknow"){
+                if(debateResult == "proWin"){
+                    proUpdate = {$inc:{winNum:1}}
+                    conUpdate = {$inc:{lostNum:1}}
+                }
+
+                if(debateResult == "conWin"){
+                    proUpdate = {$inc:{lostNum:1}}
+                    conUpdate = {$inc:{winNum:1}}
+                }
+
+                if(debateResult == "draw"){
+                    proUpdate = {$inc:{drawNum:1}}
+                    conUpdate = {$inc:{drawNum:1}}
+                }
+
+                if(debateResult == "unable"){
+                    proUpdate = {$inc:{unDeterminNum:1}}
+                    conUpdate = {$inc:{unDeterminNum:1}}
+                }
+
+            }
+
+        },function(){
+            //update pro
+           /*
+            mongo.update("debateMembers",{username:pro,group:group},proUpdate,{},this.hold(function(){
+
+            }))
+
+            */
+
+        },function(){
+            //update con
+            /*
+            mongo.update("debateMembers",{username:con,group:group},conUpdate,{},this.hold(function(){
+
+            }))
+            */
+        },function(){
+            mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
+                res.end(JSON.stringify({err:0,data:{proRate:result[0].proRate,conRate:result[0].conRate}}))
             }))
         })()
+
+
+
+        function determine(proRes,conRes){
+            if(!proRes || !conRes){
+                return "wait"
+            }
+
+            if(proRes == 1 && conRes == 3){
+                return "proWin"
+            }
+
+            if(proRes == 3 && conRes == 1){
+                return "conWin"
+            }
+
+            if(proRes == 2 && conRes == 2){
+                return "draw"
+            }
+
+            if(proRes == 1 && (conRes == 1 || conRes == 2)){
+                return "unable"
+            }
+
+            if(proRes == 3 && (conRes == 2 || conRes == 3)){
+                return "unable"
+            }
+
+            if(proRes == 2 && (conRes == 1 || conRes == 3)){
+                return "unable"
+            }
+
+            return "unknow"
+
+        }
+
+
     }
 }

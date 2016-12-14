@@ -69,15 +69,22 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                             order = _res[0].order
 
                             if(_res[0].status == "noAnalysisStart"){
-                                _update = {$set:{status:"noAnalysisFuncAppealAndState",preStatus:_res[0].status,time:Date.parse(new Date())}}
+                                if(_res[0].preFinish == 1){
+                                    //如果是处于预结束阶段的话,那么在正方最后一次反驳完以后,结束整个辩论
+                                    _update = {$set:{status:"noAnalysisfinish",preStatus:_res[0].status,time:Date.parse(new Date())}}
+                                }else{
+                                    //如果不是处于预结束阶段的话,那么在正反完成一次反驳,立论,或者单纯的立论的时候,进入到下一个步骤
+                                    _update = {$set:{status:"noAnalysisFuncAppealAndState",preStatus:_res[0].status,time:Date.parse(new Date())}}
+                                }
+
                             }else if(_res[0].status == "noAnalysisFuncAppealAndState"){
                                 if(_res[0].order == (totalNum - 1)){
-                                    _update = {$set:{status:"noAnalysisfinish",preStatus:_res[0].status,time:Date.parse(new Date())},$inc:{order:1}}
+                                    //反方反驳完,陈述完,预结束阶段
+                                    _update = {$set:{status:"noAnalysisStart",preFinish:1,preStatus:_res[0].status,time:Date.parse(new Date())},$inc:{order:1}}
                                 }else{
                                     _update = {$set:{status:"noAnalysisStart",preStatus:_res[0].status,time:Date.parse(new Date())},$inc:{order:1}}
                                 }
                             }else{
-
                                 this.terminate()
                             }
 
@@ -97,7 +104,7 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                     sendObj.statementDataRandom  = Math.round(Math.random()*100000)
 
                     sendObj.order = order
-
+                    sendObj.dissentExplain = msg.rebuttalData
 
                     mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyStatement:sendObj}},{},this.hold(function(_res){
                         socket.emit("receiveStatement",{sendObj:sendObj})

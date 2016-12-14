@@ -1,104 +1,8 @@
-<!--
-<div class="row" ng-show="LAN == 'JP'">
-    <div  class="panel panel-info">
-        <div class="panel-body" >
-            <div class="row col-sm-4">
-                <concept></concept>
-            </div>
-
-            <div class="row col-sm-1"></div>
-
-            <div class="row col-sm-7">
-                <div  class="panel panel-info">
-                    <div class="panel-heading">トピック:{{debateInfo.title}}</div>
-                    <div class="panel-body" id="statementBody">
-
-                        <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'dissent'"  role="alert">
-                            <a href="#" class="alert-link">まず異議の部分を説明してください</a>
-                        </div>
-
-                        <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'claim'"  role="alert">
-                            <a href="#" class="alert-link">あなたの意見を主張してください</a>
-                        </div>
-
-                        <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'submit'"  role="alert">
-                            <a href="#" class="alert-link">以上の立論を送信しますか</a>
-                        </div>
-
-                        <label ng-show="statementStatus.name == 'dissent'" >説明:</label>
-                        <label ng-show="statementStatus.name == 'claim'" >立論:</label>
-
-
-                        <textarea class="form-control" rows="7" ng-show="statementStatus.name == 'dissent' || statementStatus.name == 'claim'" ng-model="statement" ></textarea>
-                        <p>
-                            <span ng-if="data2Success==0">入力項目が必須</span>
-                            <button type="button" class="btn btn-default pull-right" ng-show="statementStatus.name == 'dissent'" ng-click="output2()" >次へ</button>
-                            <button type="button" ng-show="statementStatus.name == 'claim'" class="btn btn-default pull-right" ng-click="output2()" >次へ</button>
-                            <div ng-show="statementStatus.name == 'submit'">
-                            <button type="button"  class="btn btn-default pull-right" ng-click="output2()" >送信</button>
-                            <button type="button"  class="btn btn-default pull-right" ng-click="edit2('dissent',0)" >続いて編集</button>
-                            </div>
-                        </p>
-
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div>
 
 
 
 
 
-<div class="row" ng-show="LAN == 'CN'">
-    <div  class="panel panel-info">
-        <div class="panel-body" >
-            <div class="row col-sm-4">
-                <concept></concept>
-            </div>
-
-            <div class="row col-sm-1"></div>
-            <div class="row col-sm-7">
-                <div  class="panel panel-info">
-                    <div class="panel-heading">话题:{{debateInfo.title}}</div>
-                    <div class="panel-body" id="statementBody">
-
-                        <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'dissent'"  role="alert">
-                            <a href="#" class="alert-link">首先,请对您选择地质疑元素做解释阐述</a>
-                        </div>
-
-                        <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'claim'"  role="alert">
-                            <a href="#" class="alert-link">您已完成对所有的质疑的解释,现在请阐述你原本的意见</a>
-                        </div>
-
-                        <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'submit'"  role="alert">
-                            <a href="#" class="alert-link">请检查您的所有阐述信息,如果你觉得满意,请点击提交</a>
-                        </div>
-
-                        <label ng-show="statementStatus.name == 'dissent'" >质疑说明:</label>
-                        <label ng-show="statementStatus.name == 'claim'" >阐述:</label>
-
-                        <textarea class="form-control" rows="7" ng-show="statementStatus.name == 'dissent' || statementStatus.name == 'claim'" ng-model="statement" ></textarea>
-                        <p>
-                            <span ng-if="data2Success==0">入力項目が必須</span>
-                            <button type="button" class="btn btn-default pull-right" ng-show="statementStatus.name == 'dissent'" ng-click="output2()" >下一步</button>
-                            <button type="button" ng-show="statementStatus.name == 'claim'" class="btn btn-default pull-right" ng-click="output2()" >下一步</button>
-                            <div ng-show="statementStatus.name == 'submit'">
-                            <button type="button"  class="btn btn-default pull-right" ng-click="output2()" >提交</button>
-                            <button type="button"  class="btn btn-default pull-right" ng-click="edit2('dissent',0)" >继续修改</button>
-                            </div>
-
-                        </p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div>
--->
 
 <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'dissent'"  role="alert">
     <a href="#" class="alert-link">まず異議の部分を説明してください</a>
@@ -119,7 +23,10 @@
 
 
 
-<textarea class="form-control" rows="7" ng-show="statementStatus.name == 'dissent' || statementStatus.name == 'claim'" ng-model="statement" ng-focus="focus()" ng-blur="blur()" ng-change="inputing()" ></textarea>
+<textarea class="form-control" rows="7" ng-show="statementStatus.name == 'dissent' || statementStatus.name == 'claim'" ng-model="statement" ng-focus="focus()" ng-blur="blur()" ng-change="inputing()" >
+
+</textarea>
+
 <p>
     <span ng-if="data2Success==0">入力項目が必須</span>
     <button type="button" class="btn btn-default pull-right" ng-show="statementStatus.name == 'dissent'" ng-click="output2()" >次へ</button>

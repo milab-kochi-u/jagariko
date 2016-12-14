@@ -1,0 +1,47 @@
+<!--
+<div>
+    <div class="panel panel-default" ng-show="textStartInputingVal == 1">
+        <div class="panel-body">
+            <span ng-show="opposite_statementStatus.name == 'rebuttal'">
+                相手は今反駁しています......
+            </span>
+
+            <span ng-show="opposite_statementStatus.name == 'claim'">
+                相手は今立論しています......
+            </span>
+
+        </div>
+    </div>
+
+    <div class="panel panel-default" ng-show="textStartInputingVal == 0">
+        <div class="panel-body">
+            相手の主張と反駁をお待ちください
+        </div>
+    </div>
+
+</div>
+
+<hr/>
+-->
+<div>
+
+    <div class="panel panel-default" ng-show="opposite_statementData">
+        <div class="panel-heading">
+            <h3 class="panel-title">主張</h3>
+        </div>
+        <div class="panel-body">
+            {{opposite_statementData}}
+        </div>
+    </div>
+
+
+    <div class="panel panel-default" ng-repeat="(i,val) in opposite_rebuttalData track by $index">
+        <div class="panel-heading">
+            <h3 class="panel-title">反駁{{i+1}}</h3>
+        </div>
+        <div class="panel-body">
+            {{val.reply}}
+        </div>
+    </div>
+
+</div>

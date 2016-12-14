@@ -110,7 +110,7 @@ module.exports = {
                 res.end(JSON.stringify({error: 1, msg: "duplicated theme"}))
                 this.terminate()
             }else{
-                mongo.insert("debateMembers",{username:username,password:password,group:group,debateInvolve:false},function(_res){
+                mongo.insert("debateMembers",{username:username,password:password,group:group,debateInvolve:false,winNum:0,drawNum:0,lostNum:0,unDeterminNum:0},function(_res){
                         res.end(JSON.stringify({error: 0, msg: "ok"}))
                 })
             }

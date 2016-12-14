@@ -590,11 +590,7 @@
             console.log(arr)
             console.log("---------------------------")
         }
-
-
-
     });
-
 
 
     myApp.directive("myNavy",function(){
@@ -823,6 +819,8 @@
                         if(_res.data.err == 0){
                             scope.isReadonly = true;
                             scope.rateable = false
+                            scope.debateInfo.proRate = _res.data.data.proRate
+                            scope.debateInfo.conRate = _res.data.data.conRate
                         }
                     })
 
@@ -835,6 +833,21 @@
     })
 
     // end of process directive
+
+
+
+
+    myApp.directive("statementResultForNoAnalysis",function(){
+        return {
+            scope:false,
+            link:function(scope,element){
+
+            },
+
+            templateUrl:"/angularJSTemplate/public/statementResultForNoAnalysis.html"
+
+        }
+    })
 
     myApp.directive("statementResult",function($compile) {
         return {
@@ -1080,7 +1093,7 @@
         }
     })
 
-    myApp.directive("analysisResult2",function(coreSocket){
+    myApp.directive("analysisResult2",function(coreSocket,$compile){
       return{
           scope:false,
           link:function(scope,element){
@@ -1313,17 +1326,39 @@
 
                   var head = panel.append("div")
                   head.attr("class","panel-heading")
+                  var spanTitle = head.append("span")
+
                   if(type == "claim"){
-                      head.text("主張")
+                      spanTitle.text("主張")
                   }
 
                   if(type == "warrant"){
-                      head.text("論拠")
+                      spanTitle.text("論拠")
                   }
 
                   if(type == "evidence"){
-                      head.text("根拠")
+                      spanTitle.text("根拠")
                   }
+
+
+                  if(scope.debateInfo.status != 'appeal' && scope.debateInfo.status != 'lookup' && scope.debateInfo.status != 'kentou' && scope.debateInfo.status != 'check'){
+                      var edit = head.append("span")
+                      edit.attr("class","pull-right")
+                      var divId = "btn"+Math.round(Math.random()*10000)
+                      edit.attr("id",divId)
+
+
+                      if(scope.LAN == 'JP'){
+                          var html = '<a class="pull-right" ng-click="edit(\''+conf[0]+'\','+parseInt(conf[1])+','+parseInt(conf[2])+',\''+conf[3]+'\',\''+parseInt(conf[4])+'\')">編集</a>'
+                      }else{
+                          var html = '<a class="pull-right" ng-click="edit(\''+conf[0]+'\','+parseInt(conf[1])+','+parseInt(conf[2])+',\''+conf[3]+'\',\''+parseInt(conf[4])+'\')">修改</a>'
+                      }
+
+
+                      angular.element(document.getElementById(divId)).append($compile(html)(scope));
+                  }
+
+
 
 
                   var body = panel.append("div")
@@ -1337,8 +1372,13 @@
 
 
               function dealWithClick(foreignObject,conf,text){
+
+                  if(conf[3] == "claim"){
+                        return;
+                  }
                   if((scope.debateInfo.status == 'appeal' && scope.debateInfo.position == 2) || (scope.debateInfo.status == 'lookup' && scope.debateInfo.position == 1)){
                       foreignObject.on("click",function(){
+
                           var borderd = (parseInt(foreignObject.attr("borderd"))+1) % 2
                           foreignObject.attr("borderd",borderd)
                           if(borderd == 1){
@@ -2140,21 +2180,86 @@
         return {
             scope:false,
             link:function(scope,element){
+                if(scope.debateInfo.order > 0){
+                    //非第一次,有东西可以反驳
+                    scope.statementStatus = {name:"rebuttal",i:0}
+                }else{
+                    //第一次只能陈述没有什么可以反驳的
+                    scope.statementStatus = {name:"claim",i:0}
+                }
                 scope.submit = function(){
-                    coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
+                    coreSocket.emit("giveStatement",{rebuttalData:scope.rebuttalData,statementData:scope.statementData})
+                    scope.statementStatus.name = "wait"
+                }
+
+                scope.selectRebuttal = function(random,txt){
+
+                    if(scope.statementStatus.name == 'rebuttal' || scope.statementStatus.name == 'claim'){
+                            if(scope.debateInfo.position == 2) return //等待方点击后不会触发选择效果
+                    }else{
+                        return;
+                    }
+
+                    var elements = document.getElementsByClassName("rebuttalElement")
+                    for(var i=0;i<elements.length;i++){
+                        elements[i].style.border = ""
+                    }
+
+                    var borderStyle = "3px solid yellow"
+                    if(document.getElementById("rebuttal"+random).style.border == borderStyle){
+                        document.getElementById("rebuttal"+random).style.border = ""
+                    }else{
+                        document.getElementById("rebuttal"+random).style.border = borderStyle
+                    }
+
+                    //你选择了哪段内容进行反驳
+                    scope.selectedRandom = random
+                    scope.selectedTxt = txt
+
+                    scope.rebuttalData[scope.statementStatus.i].indexToStatement = scope.selectedRandom  //反驳 data
+
                 }
             },
             templateUrl:"/angularJSTemplate/process/noAnalysisStartDebate.html"
         }
     })
 
-
     myApp.directive("noAnalysisFuncAppealAndStateDebate",function(coreSocket){
         return {
             scope:false,
-            link:function(scope){
+            link:function(scope,element){
                 scope.submit = function(){
-                    coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
+                    coreSocket.emit("giveStatement",{rebuttalData:scope.rebuttalData,statementData:scope.statementData})
+                    scope.statementStatus.name = "wait"
+                }
+
+                scope.selectRebuttal = function(random,txt){
+
+
+                    if(scope.statementStatus.name == 'rebuttal' || scope.statementStatus.name == 'claim'){
+                            if(scope.debateInfo.position == 1) return; //等待方点击后不会触发选择效果
+                    }else{
+                        return;
+                    }
+
+
+                    var elements = document.getElementsByClassName("rebuttalElement")
+                    for(var i=0;i<elements.length;i++){
+                        elements[i].style.border = ""
+                    }
+
+                    var borderStyle = "3px solid yellow"
+                    if(document.getElementById("rebuttal"+random).style.border == borderStyle){
+                        document.getElementById("rebuttal"+random).style.border = ""
+                    }else{
+                        document.getElementById("rebuttal"+random).style.border = borderStyle
+                    }
+
+                    //你选择了哪段内容进行反驳
+                    scope.selectedRandom = random
+                    scope.selectedTxt = txt
+
+                    scope.rebuttalData[scope.statementStatus.i].indexToStatement = scope.selectedRandom  //反驳 data
                 }
             },
             templateUrl:"/angularJSTemplate/process/noAnalysisFuncAppealAndStateDebate.html"
@@ -2162,11 +2267,47 @@
     })
 
 
-    myApp.directive("noAnalysisFinishDebate",function(coreSocket){
+    myApp.directive("noAnalysisFinishDebate",function(myPost){
         return {
             scope:false,
             link:function(scope){
 
+                scope.conceptStatus = "judgeMent"
+
+                if(scope.debateInfo.position == 1){
+                    if(scope.debateInfo.proRate){
+                        scope.rateable = 0
+                    }else{
+                        scope.rateable = 1
+                    }
+                }
+
+                if(scope.debateInfo.position == 2){
+                    if(scope.debateInfo.conRate){
+                        scope.rateable = 0
+                    }else{
+                        scope.rateable = 1
+                    }
+
+                }
+
+                scope.determines = function(n){
+                    // 1 win
+                    // 2 draw
+                    // 3 lost
+
+
+                    myPost.postData("/release/rate",{rate:n}).then(function(_res){
+                        if(_res.data.err == 0){
+                            scope.isReadonly = true;
+                            scope.rateable = false
+                            scope.debateInfo.proRate = _res.data.data.proRate
+                            scope.debateInfo.conRate = _res.data.data.conRate
+                        }
+                    })
+
+
+                }
             },
             templateUrl:"/angularJSTemplate/process/noAnalysisfinishDebate.html"
         }
@@ -2730,12 +2871,175 @@
         }
     })
 
+    myApp.directive("oppositeStatementInfoForNoAnalysis",function(){
+        return{
+            scope:false,
+            link:function(scope,element,attrs){
+
+            },
+            templateUrl:"/angularJSTemplate/public/oppositeStatementInfoForNoAnalysis.html"
+        }
+    })
+
+
+    myApp.directive("inputTextAreaForNoAnalysis",function(coreSocket){
+        return{
+            scope:false,
+            link:function(scope){
+
+
+                if(scope.debateInfo.order == 0 && scope.debateInfo.status == 'noAnalysisStart'){
+                    //如果是第一次,那么只有立论
+                    scope.statementStatus = {name:"claim",i:0}  //目前是反驳状态还是立論的状态
+                    scope.rebuttalData = ""  //反驳 data
+                }else{
+                    //如果不是第一次,那么可以有反驳
+                    scope.statementStatus = {name:"rebuttal",i:0}  //目前是反驳状态还是立論的状态
+                    scope.rebuttalData = [{txt:scope.selectedTxt,reply:"",indexToStatement:0,random:Math.round(Math.random()*100000)}]  //反驳 data
+                }
+
+                //判断如果你现在是等待方
+
+                if(scope.debateInfo.position == 1 && scope.debateInfo.status == "noAnalysisFuncAppealAndState"){
+                    scope.statementStatus.name = "wait"
+                }
+
+                if(scope.debateInfo.position == 2 && scope.debateInfo.status == "noAnalysisStart"){
+                    scope.statementStatus.name = "wait"
+                }
+
+                scope.statementData = ""  //  立論 data
+                scope.output = function(){
+                        if(!scope._contents){
+                            scope.data2Success = 0
+                            return;
+                        }
+
+                        if(scope.statementStatus.name == 'rebuttal'){
+                            var i = scope.statementStatus.i
+                            scope.rebuttalData[i].reply = scope._contents
+
+                            //如果下一个rebuttal仍然存在的话
+                            if(scope.rebuttalData[i+1]){
+                                scope.statementStatus.name = 'rebuttal'
+                                scope.statementStatus.i = (i+1)
+                                scope._contents =  scope.rebuttalData[i+1].reply
+                            }else{
+                                scope.statementStatus.name = 'newRebuttal'
+                                scope._contents = ""
+                            }
+
+                        }
+
+                        if(scope.statementStatus.name == 'claim'){
+                            scope.statementData = scope._contents
+                            scope.statementStatus.name = "preview"
+                        }
+
+                        transportStatementInfo("textInputing")
+
+                }
+
+                scope.skipRebutal = function(){
+                        scope.statementStatus.name = "claim"
+                        scope._contents = scope.statementData || ""
+                }
+
+                scope.setNewRebuttal = function(){
+                    scope.statementStatus.name = "rebuttal"
+                    scope.statementStatus.i = (scope.statementStatus.i + 1)
+                    scope._contents = ""
+                    scope.rebuttalData.push({txt:scope.selectedTxt,reply:"",indexToStatement:scope.selectedRandom,random:Math.round(Math.random()*100000)})
+                }
+
+                scope.toClaim = function(){
+
+                    if(scope.debateInfo.preFinish){
+                        //
+                        scope.statementStatus.name = 'preview'
+                    }else{
+                        scope.statementStatus.name = 'claim'
+                        scope.statementStatus.i = 0
+                        scope._contents = scope.statementData || ""
+                    }
+
+                }
+
+
+                scope.edit = function(name,i){
+                    if(name == "rebuttal"){
+                        scope._contents = scope.rebuttalData[i].reply
+                        scope.statementStatus.name = name
+                        scope.statementStatus.i = i
+                    }
+                    if(name == "claim"){
+                        scope._contents = scope.statementData
+                        scope.statementStatus.name = "claim"
+                        scope.statementStatus.i = 0
+                    }
+                }
+
+                scope.drop = function(name,i){
+                    scope.rebuttalData.splice(i,1)
+                }
+
+
+                scope.inputing = function(){
+
+                    if(scope.statementStatus.name == "claim"){
+                        scope.statementData = scope._contents
+                    }
+
+                    if(scope.statementStatus.name == "rebuttal"){
+                        scope.rebuttalData[scope.statementStatus.i].reply = scope._contents
+                    }
+
+                    transportStatementInfo("textInputing")
+                }
+
+
+                scope.focus = function(){
+                    transportStatementInfo("textInputing")
+                }
+
+                scope.blur = function(){
+                    transportStatementInfo("textLeaveInputing")
+                }
+
+                function transportStatementInfo(event){
+                    coreSocket.emit(event,{content:scope._contents,statementData:scope.statementData,rebuttalData:scope.rebuttalData,statementStatus:scope.statementStatus})
+                }
+
+                scope.textStartInputingVal = 0
+
+                coreSocket.on("textInputing",function(_res){
+                    //opposite开头的代表对方正在输入的信息
+                    scope.opposite_textInputingContent = _res.content
+                    scope.opposite_statementData = _res.statementData
+                    scope.opposite_rebuttalData = _res.rebuttalData
+                    scope.opposite_statementStatus = _res.statementStatus
+                    console.log(_res)
+                })
+
+
+
+                coreSocket.on("textLeaveInputing",function(_res){
+                    scope.textStartInputingVal = 0
+                })
+
+
+
+            },
+            templateUrl:"/angularJSTemplate/public/inputTextAreaForNoAnalysis.html"
+        }
+    })
+
 
     myApp.directive("inputTextArea",function(coreSocket,$compile,$rootScope) {
         return {
             scope: false,
             link:function(scope, element, attrs){
-
+                /*
                     var TOP = 15   //最先画的方块距离顶端的距离
                     var LEFT = 80   //最先画的方块距离左边的距离
                     var DISSENTWIDTH = 250 //异议方块的长度
@@ -2757,7 +3061,7 @@
                     var LASTY = 0
                     var svg
 
-                    /*
+
                     setTimeout(function(){
                         svg = d3.select("#_mainSVG")
                         clearDraw()
@@ -2907,11 +3211,9 @@
                         coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
                     }
 
-                    function scrollTop(id,time,y){
-                            document.getElementById("statementResult").scrollTop = y
-                    }
 
 
+/*
                     function draw(){
                         LASTX = LEFT
                         LASTY = TOP
@@ -2970,7 +3272,6 @@
 
 
                     }
-
 
                     function clearDraw(){
                         svg.selectAll(".draw").remove()
@@ -3114,6 +3415,9 @@
                         }
 
                     }
+
+*/
+
             },
             templateUrl:"/angularJSTemplate/public/inputTextArea.html"
         }
@@ -3161,6 +3465,19 @@
         }
     })
 
+
+
+
+    myApp.directive("conceptForNoAnalysis",function(){
+        return {
+            scope:false,
+            link:function(scope,element){
+
+            },
+            templateUrl:"/angularJSTemplate/public/conceptForNoAnalysis.html"
+        }
+    })
+
     myApp.directive("infoAndStatementMap",function(){
         return {
             scope:false,
@@ -3198,7 +3515,7 @@
 
                 scope.expand = function(){
                     scope.expandVal = (scope.expandVal + 1 ) %2
-                   // $rootScope.$broadcast('reDrawMap',{});
+                    $rootScope.$broadcast('reDrawStatementMap',{});
                 }
 
                 scope.verticalExpand = function(){
@@ -4204,6 +4521,15 @@
                     drawLine(CONNECTLINE)
                 })
 
+
+                scope.$on("reDrawStatementMap",function(){
+                    setTimeout(function(){
+                        draw(scope.statementMapInformation.res.data)
+                        drawLine(CONNECTLINE)
+                    },500)
+                })
+
+
                 function define(){
                     var _width = element.find("div")[0].offsetWidth
                     LEFT = _width*0.05
@@ -4224,12 +4550,18 @@
                     svg = d3.select(element.find("svg")[0])
                     svg.attr("width","1200px")
                     svg.attr("height","4000px")
-
                 }
+
+
+                function clearDraw(){
+                    svg.selectAll(".statementMapData").remove()
+                }
+
 
 
                 function draw(data){
                     define()
+                    clearDraw()
                     if(scope.debateInfo.analysisFunc == 1){
                         //有分析功能的,肯定带有质疑功能
                         dealWithData(data)
@@ -4244,16 +4576,28 @@
 
                     if(scope.debateInfo.analysisFunc == 0){
                         //不带分析功能的肯定不带质疑功能
+                        dealWithData(data)
                         for(var i=0;i<data.length;i++){
+
+                            if((data[i].everyStatement.dissentExplain)){
+                                //rebuttal
+
+                                for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
+                                    appendRect(data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement)
+                                }
+                            }
+
                             appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0)
                         }
                     }
+
+
                 }
 
 
                 function drawLine(data){
-                    console.log(data)
                     for(var i in data) {
+                        if(!data[i].end) continue;
                         for(var j=0;j<data[i].end.length;j++){
                             var startX = data[i].startX
                             var startY = data[i].startY
@@ -4268,16 +4612,16 @@
                             bx = startX + (endX - startX)/zheXNum
                             cx = bx
                             dx = endX
-                            ay = startY
-                            by = startY
+                            ay = startY + j*RECTHEIGHT*0.08
+                            by = startY + j*RECTHEIGHT*0.08
                             cy = endY
                             dy = endY
 
-                            painDot(svg,startX,startY,5)
-                            painDot(svg,endX,endY,5)
-                            painLine(svg,ax,bx,ay,by,"#000")
-                            painLine(svg,bx,cx,by,cy,"#000")
-                            painLine(svg,cx,dx,cy,dy,"#000")
+                            painDot(svg,ax,ay,5)
+                            painDot(svg,dx,dy,5)
+                            painLine(svg,ax,bx,ay,by,"#000",i,j,"start")
+                            painLine(svg,bx,cx,by,cy,"#000",i,j,"middle")
+                            painLine(svg,cx,dx,cy,dy,"#000",i,j,"end")
 
                         }
                     }
@@ -4289,17 +4633,28 @@
                 }
 
 
-                function painLine(platform,x1,x2,y1,y2,color){
+                function painLine(platform,x1,x2,y1,y2,color,index,_index,type){
                     var svg = platform
                     var line = svg.append("line")
-                    line.attr("class","mapData")
                     line.attr("x1",x1)
                     line.attr("x2",x2)
                     line.attr("y1",y1)
                     line.attr("y2",y2)
                     line.attr("stroke",color)
                     line.attr("stroke-width",LINEWIDTH)
-                            .attr("class","arrow draw")
+                            .attr("class","arrow draw statementMapData connectLine a" + index + "b"+ _index)
+                    line.on("mouseover",function(){
+                        d3.selectAll(".connectLine").attr("stroke",color)
+                        d3.selectAll(".a"+index+"b"+_index).attr("stroke","yellow")
+                    })
+
+                    if(type == "end"){
+                        line.attr("marker-end","url(#arrow)")
+                    }
+
+                    line.on("mouseout",function(){
+                        d3.selectAll(".connectLine").attr("stroke",color)
+                    })
                 }
 
 
@@ -4309,6 +4664,7 @@
                     circle.attr("cy",y)
                     circle.attr("r",r)
                     circle.attr("fill","red")
+                    circle.attr("class","statementMapData")
                 }
 
 
@@ -4347,13 +4703,23 @@
 
                         //根据文字的实际长度来决定模块的高度
 
+                        if(text.length > 200){
+                            RECTHEIGHT = RECTWIDTH*1.4
+                        }else if(text.length >100 && text.length <=200){
+                            RECTHEIGHT = RECTWIDTH*1.2
+                        }else if(text.length > 50 && text.length <=100){
+                            RECTHEIGHT = RECTWIDTH*0.8
+                        }else{
+                            RECTHEIGHT = RECTWIDTH*0.6
+                        }
+
 
                         var foreignObject = svg.append("foreignObject")
                         foreignObject.attr("width",RECTWIDTH)
                         foreignObject.attr("height",RECTHEIGHT)
                         foreignObject.attr("x",_x)
                         foreignObject.attr("y",_y)
-
+                        foreignObject.attr("class","statementMapData")
 
                         //处理異議説明的连接线
                         if(dissent == 1){
@@ -4361,7 +4727,7 @@
 
                             //左右所在地不同,那么连接线的开始结束的方位也应该不同
 
-                            var __y = _y + RECTHEIGHT/6
+                            var __y = _y + RECTHEIGHT/8
                             if(position == 1){
                                 var __x = _x + RECTWIDTH
                             }else{
@@ -4422,18 +4788,21 @@
                     for(var s=0;s<data.length;s++){
 
                         var res = indexAndRandom(data[s].everyStatement.statementDataRandom)
+
                         if(res.res > 0){
                             scope.statementMapInformation.res.data[s].everyStatement.dissent = 1
                         }else{
                             scope.statementMapInformation.res.data[s].everyStatement.dissent = 0
                         }
 
-                        for(var k=0;k<data[s].everyStatement.dissentExplain.length;k++){
-                            var res = indexAndRandom(data[s].everyStatement.dissentExplain[k].random)
-                            if(res.res > 0){
-                                scope.statementMapInformation.res.data[s].everyStatement.dissentExplain[k].dissent = 1
-                            }else{
-                                scope.statementMapInformation.res.data[s].everyStatement.dissentExplain[k].dissent = 0
+                        if(data[s].everyStatement.dissentExplain){
+                            for(var k=0;k<data[s].everyStatement.dissentExplain.length;k++){
+                                var res = indexAndRandom(data[s].everyStatement.dissentExplain[k].random)
+                                if(res.res > 0){
+                                    scope.statementMapInformation.res.data[s].everyStatement.dissentExplain[k].dissent = 1
+                                }else{
+                                    scope.statementMapInformation.res.data[s].everyStatement.dissentExplain[k].dissent = 0
+                                }
                             }
                         }
 
@@ -4443,11 +4812,14 @@
                 function indexAndRandom(random){
                     var data = scope.statementMapInformation.res.data
                     for(var i=0;i<data.length;i++){
-                        for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
-                            if(data[i].everyStatement.dissentExplain[j].indexToStatement == random){
-                                return {res:1,i:i,j:j}
+                        if(data[i].everyStatement.dissentExplain){
+                            for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
+                                if(data[i].everyStatement.dissentExplain[j].indexToStatement == random){
+                                    return {res:1,i:i,j:j}
+                                }
                             }
                         }
+
                     }
                     return {res:0}
                 }
@@ -4559,7 +4931,6 @@
 
 
                 function painLine(platform,x1,x2,y1,y2,color){
-
                     var svg = platform
                     var line = svg.append("line")
                     line.attr("class","mapData")
@@ -4573,8 +4944,8 @@
 
                 function dealWithData(data){
                     for(var s=0;s<data.length;s++){
-
                         var res = indexAndRandom(data[s].everyStatement.statementDataRandom)
+
                         if(res.res > 0){
                             scope.statementMapInformation.res.data[s].everyStatement.dissent = 1
                         }else{

@@ -107,25 +107,28 @@
 
            </div>
 
-                <hr/>
 
-            <div class="row">
-                <div class="col-sm-offset-1 col-sm-3">時間制限</div>
-                <div class="col-sm-6">
-                    <label>
-                        <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled == 1" disabled name="timeLimit" value="1" >
-                        <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled != 1"  name="timeLimit" value="1" >
-                        ある
-                    </label>
+            <!--
+    <hr/>
 
-                    <label>
-                        <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled == 0" disabled  name="timeLimit" value="0" >
-                        <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled != 0"   name="timeLimit" value="0" >
-                        なし
-                    </label>
-                </div>
-            </div>
 
+<div class="row">
+    <div class="col-sm-offset-1 col-sm-3">時間制限</div>
+    <div class="col-sm-6">
+        <label>
+            <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled == 1" disabled name="timeLimit" value="1" >
+            <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled != 1"  name="timeLimit" value="1" >
+            ある
+        </label>
+
+        <label>
+            <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled == 0" disabled  name="timeLimit" value="0" >
+            <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled != 0"   name="timeLimit" value="0" >
+            なし
+        </label>
+    </div>
+</div>
+-->
             <div class="row" ng-if="timeLimit=='1'">
                 <div class="col-sm-6 col-sm-offset-4">
                     <select ng-model="timeLimitVal" class="form-control"  >
@@ -368,12 +371,12 @@
                     <div class="row">
 
                         <div class="col-sm-4">
-                            <img src="" alt="" width="80" height="80">
+                            <img src="/release/head.jpg" alt="" width="80" height="80">
                         </div>
                         <div class="col-sm-4">
-                            <p>状態:討論中</p>
-                            <p>勝利:4</p>
-                            <p>負け:4</p>
+                            <p class="row">未決着:{{unDeterminNum}}</p>
+                            <p class="row">勝利:{{winNum}}</p>
+                            <p class="row">負け:{{lostNum}}</p>
                         </div>
 
                     </div>
@@ -501,6 +504,10 @@
                         obj.rNum = _res.data.data.rNum
                         obj.status = _res.data.data.rNum
                         obj.LAN = _res.data.data.LAN
+                        obj.winNum = _res.data.data.winNum
+                        obj.drawNum = _res.data.data.drawNum
+                        obj.lostNum = _res.data.data.lostNum
+                        obj.unDeterminNum = _res.data.data.unDeterminNum
                         deferred.resolve({err:0,msg:"data acquired",obj:obj});
                     }else{
                         deferred.reject({err:1,msg:"data not acquired"});
@@ -582,6 +589,10 @@
             $scope.LAN = msg.obj.LAN
             $scope.group = msg.obj.group
             $scope.username = msg.obj.username
+            $scope.winNum = msg.obj.winNum
+            $scope.lostNum = msg.obj.lostNum
+            $scope.drawNum = msg.obj.drawNum
+            $scope.unDeterminNum = msg.obj.unDeterminNum
         })
 
 

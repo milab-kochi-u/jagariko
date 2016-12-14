@@ -1,0 +1,29 @@
+<div  style="height: 550px;overflow:auto;">
+
+
+
+    <div ng-show="statementStatus.name == 'rebuttal' || statementStatus.name == 'newRebuttal'"  class="panel panel-info" style="height: 100%">
+        <div class="panel-heading">現在反駁しているい内容
+        </div>
+        <div class="panel-body" id="inputExampleBody" style="height: 280px;overflow:auto;">
+            <div ng-show="selectedTxt" class="alert alert-info" role="alert">{{selectedTxt}}</div>
+            <div ng-show="!selectedTxt" class="alert alert-warning" role="alert">左の「相手の立論また反駁内容」に反駁したい部分を選んでください</div>
+        </div>
+    </div>
+
+    <div ng-show="statementStatus.name == 'claim' || statementStatus.name == 'preview' || statementStatus.name == 'wait'"  class="panel panel-info" >
+        <div class="panel-heading">立論
+        </div>
+        <div class="panel-body" id="inputExampleBody" style="height: 280px;overflow:auto;">
+            <p>論題に対する主張の全体像、基本的な考えを３つの論点(意見のポイント)で示す。
+                　肯定側は、現状の問題点、問題解決の具体的方法（プラン）、利点＝メリットを述べる。
+                　否定側は、現状の意義、肯定側プラン実施の困難、欠点＝デメリットを述べる。
+                　例) アルバイト自由化のプランでは、親の承諾や職業範囲などの条件を具体的に示す。
+            </p>
+        </div>
+    </div>
+
+
+
+
+</div>

@@ -59,6 +59,7 @@
     //分析機能がなし
 
   noAnalysisStart // pro start to give his/her statement
+
   noAnalysisFuncAppealAndState //con give the rebuttal and his/her statement
 
 

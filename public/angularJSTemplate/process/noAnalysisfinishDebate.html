@@ -3,15 +3,12 @@
 </div>
 
 
-
-
-
 <div>
     <div class="row">
         <div class="row" style="height: 350px;overflow:auto;">
             <div  class="panel panel-info">
                 <div class="panel-body" >
-                    <div class="row col-sm-7" style="height: 330px;overflow:auto;">
+                    <div class="row col-sm-8" style="height: 330px;overflow:auto;">
 
                         <div  class="panel panel-info" >
                             <div class="panel-heading">
@@ -20,20 +17,19 @@
                             <div class="panel-body">
                                 <div class="row" style="margin:0 auto" >
                                     <div class="btn-group" role="group" ng-show="rateable == 1">
-                                        <button type="button" ng-click="determines(0)" class="btn btn-default">勝つ</button>
-                                        <button type="button" ng-click="determines(1)" class="btn btn-default">引き分け</button>
-                                        <button type="button" ng-click="determines(2)" class="btn btn-default">負け</button>
+                                        <button type="button" ng-click="determines(1)" class="btn btn-default">勝つ</button>
+                                        <button type="button" ng-click="determines(2)" class="btn btn-default">引き分け</button>
+                                        <button type="button" ng-click="determines(3)" class="btn btn-default">負け</button>
                                     </div>
-
 
                                     <div class="row">
                                         <div class="row col-sm-5 col-sm-offset-1"  ng-show="!rateable && debateInfo.proRate">
                                             <span class="label label-info" >肯定側の自己評価</span>
 
 
-                                            <span ng-show="debateInfo.proRate == 0">勝つ</span>
-                                            <span ng-show="debateInfo.proRate == 1">引き分け</span>
-                                            <span ng-show="debateInfo.proRate == 2">負け</span>
+                                            <span ng-show="debateInfo.proRate == 1">勝つ</span>
+                                            <span ng-show="debateInfo.proRate == 2">引き分け</span>
+                                            <span ng-show="debateInfo.proRate == 3">負け</span>
 
 
                                         </div>
@@ -41,9 +37,9 @@
                                         <div class="row col-sm-5 col-sm-offset-1" ng-show="!rateable && debateInfo.conRate">
                                             <span class="label label label-success" >否定側の自己評価</span>
 
-                                            <span ng-show="debateInfo.conRate == 0">勝つ</span>
-                                            <span ng-show="debateInfo.conRate == 1">引き分け</span>
-                                            <span ng-show="debateInfo.conRate == 2">負け</span>
+                                            <span ng-show="debateInfo.conRate == 1">勝つ</span>
+                                            <span ng-show="debateInfo.conRate == 2">引き分け</span>
+                                            <span ng-show="debateInfo.conRate == 3">負け</span>
                                         </div>
                                     </div>
 
@@ -63,9 +59,9 @@
                                             <td class="active">Con自己判定</td>
                                             <td class="active">勝敗結果</td>
                                         </tr>
-                                        <tr ng-class="{'info':gameResult.order == 0,'':gameResult.order != 0}">
-                                            <td class="active">勝ち</td>
-                                            <td class="active">負け</td>
+                                        <tr class="active" >
+                                            <td>勝ち</td>
+                                            <td>負け</td>
                                             <td class="active">肯定側の勝ち</td>
                                         </tr>
 
@@ -114,7 +110,6 @@
 
 
                     </div>
-                    <div class="row col-sm-1" style="height: 330px;overflow:auto;"></div>
                     <div class="row col-sm-4" style="height: 330px;overflow:auto;">
                         <concept></concept>
                     </div>
