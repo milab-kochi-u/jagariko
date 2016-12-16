@@ -2,22 +2,29 @@
     <info></info>
 </div>
 
-
 <div>
     <div class="row">
         <div class="row" style="height: 350px;overflow:auto;">
             <div  class="panel panel-info">
                 <div class="panel-body" >
+
                     <div class="row col-sm-8" style="height: 330px;overflow:auto;">
+
 
                         <div  class="panel panel-info" >
                             <div class="panel-heading">
                                 <span>自己評価をしてください</span>
                             </div>
                             <div class="panel-body">
+
+                                <h3>討論が終わりました，お疲れ様でした.</h3>
+
+                                <h5 ng-show="!debateInfo.finish">下のボタンを押して自己評価してください．</h5>
+                                <h5 ng-show="debateInfo.finish">お互いの勝敗判定結果は下の通りに表示しています．</h5>
+
                                 <div class="row" style="margin:0 auto" >
                                     <div class="btn-group" role="group" ng-show="rateable == 1">
-                                        <button type="button" ng-click="determines(1)" class="btn btn-default">勝つ</button>
+                                        <button type="button" ng-click="determines(1)" class="btn btn-default">勝ち</button>
                                         <button type="button" ng-click="determines(2)" class="btn btn-default">引き分け</button>
                                         <button type="button" ng-click="determines(3)" class="btn btn-default">負け</button>
                                     </div>
@@ -27,9 +34,9 @@
                                             <span class="label label-info" >肯定側の自己評価</span>
 
 
-                                            <span ng-show="debateInfo.proRate == 1">勝つ</span>
+                                            <span ng-show="debateInfo.proRate == 1">自分の勝ち</span>
                                             <span ng-show="debateInfo.proRate == 2">引き分け</span>
-                                            <span ng-show="debateInfo.proRate == 3">負け</span>
+                                            <span ng-show="debateInfo.proRate == 3">自分の負け</span>
 
 
                                         </div>
@@ -37,9 +44,9 @@
                                         <div class="row col-sm-5 col-sm-offset-1" ng-show="!rateable && debateInfo.conRate">
                                             <span class="label label label-success" >否定側の自己評価</span>
 
-                                            <span ng-show="debateInfo.conRate == 1">勝つ</span>
+                                            <span ng-show="debateInfo.conRate == 1">自分の勝ち</span>
                                             <span ng-show="debateInfo.conRate == 2">引き分け</span>
-                                            <span ng-show="debateInfo.conRate == 3">負け</span>
+                                            <span ng-show="debateInfo.conRate == 3">自分の負け</span>
                                         </div>
                                     </div>
 
@@ -49,61 +56,6 @@
                                 <br/>
 
 
-
-                                <div>
-
-                                    <table class="table">
-
-                                        <tr class="default">
-                                            <td class="active">Pro自己判定</td>
-                                            <td class="active">Con自己判定</td>
-                                            <td class="active">勝敗結果</td>
-                                        </tr>
-                                        <tr class="active" >
-                                            <td>勝ち</td>
-                                            <td>負け</td>
-                                            <td class="active">肯定側の勝ち</td>
-                                        </tr>
-
-                                        <tr ng-class="{'info':gameResult.order == 1,'':gameResult.order != 1}">
-                                            <td class="active">負け</td>
-                                            <td class="active">勝ち</td>
-                                            <td class="active">否定側の勝ち</td>
-                                        </tr>
-
-                                        <tr ng-class="{'info':gameResult.order == 2,'':gameResult.order != 2}">
-                                            <td class="active">引き分け</td>
-                                            <td class="active">引き分け</td>
-                                            <td class="active">引き分け</td>
-                                        </tr>
-
-
-                                        <tr ng-class="{'info':gameResult.order == 3,'':gameResult.order != 3}">
-                                            <td class="active">勝ち</td>
-                                            <td class="active">勝ち／引き分け</td>
-                                            <td class="active" rowspan="3" align="center" valign="middle">
-                                                <br/><br/>
-                                                未決着
-                                            </td>
-                                        </tr>
-
-                                        <tr ng-class="{'info':gameResult.order == 3,'':gameResult.order != 3}">
-                                            <td class="active">負け</td>
-                                            <td class="active">負け／引き分け</td>
-                                        </tr>
-
-                                        <tr ng-class="{'info':gameResult.order == 3,'':gameResult.order != 3}">
-                                            <td class="active">引き分け</td>
-                                            <td class="active">勝ち／負け</td>
-                                        </tr>
-
-                                    </table>
-
-                                </div>
-
-
-
-
                             </div>
 
                         </div>
@@ -111,7 +63,7 @@
 
                     </div>
                     <div class="row col-sm-4" style="height: 330px;overflow:auto;">
-                        <concept></concept>
+                        <concept-for-no-analysis></concept-for-no-analysis>
                     </div>
 
                 </div>

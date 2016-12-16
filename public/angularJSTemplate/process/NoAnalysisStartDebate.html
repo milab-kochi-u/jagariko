@@ -19,22 +19,28 @@
 
                             <div class="panel-heading" ng-show="debateInfo.order > 0">
                                 <span ng-if="debateInfo.position == 2">相手の立論をお待ちください</span>
-                                <span ng-if="debateInfo.position == 1">立論出してください</span>
+                                <span ng-if="debateInfo.position == 1">立論してください</span>
                             </div>
 
 
                             <div class="panel-body" style="height: 280px;overflow:auto;">
 
-                                <p ng-if="debateInfo.position == 2">「相手の立論また反駁」</p>
-                                <p ng-if="debateInfo.position == 1">「自分の立論また反駁」</p>
 
+
+
+                                <p ng-if="debateInfo.position == 1 && everyStatementData.statementData">「相手の立論」</p>
+                                <p ng-if="debateInfo.position == 2 && everyStatementData.statementData">「自分の立論」</p>
 
                                 <div class="panel panel-default " style="cursor: pointer;height:60px;overflow: auto"  ng-show="everyStatementData.statementData">
+
                                     <div class="panel-body rebuttalElement" id="rebuttal{{everyStatementData.statementDataRandom}}" ng-click="selectRebuttal(everyStatementData.statementDataRandom,everyStatementData.statementData)">
-                                        <p>現在の立論:{{everyStatementData.statementData}}</p>
+                                        <p>立論:{{everyStatementData.statementData}}</p>
                                     </div>
                                 </div>
 
+
+                                <p ng-if="debateInfo.position == 1 && everyStatementData.dissentExplain[0].reply">「相手の反駁」</p>
+                                <p ng-if="debateInfo.position == 2 && everyStatementData.dissentExplain[0].reply">「自分の反駁」</p>
                                 <div class="panel panel-default " style="cursor: pointer;height:60px;overflow: auto"  ng-show="everyStatementData.dissentExplain[0].reply" ng-repeat="(i,val) in everyStatementData.dissentExplain track by $index">
                                     <div class="panel-body rebuttalElement" id="rebuttal{{val.random}}"  ng-click="selectRebuttal(val.random,val.reply)">
                                         <p>反駁:{{val.reply}}</p>
@@ -42,31 +48,7 @@
                                 </div>
 
 
-                                <hr/>
-                                <!-- 自己目前所输入的内容  -->
-
-                                <div ng-show="debateInfo.position == 1 && statementStatus.name != 'preview'">
-                                    <div class="panel panel-default" ng-show="statementData">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">主張</h3>
-                                        </div>
-                                        <div class="panel-body">
-                                            {{statementData}}
-                                        </div>
-                                    </div>
-
-                                    <div ng-show="rebuttalData[0].reply">
-                                        <div class="panel panel-default" ng-repeat="(i,val) in rebuttalData track by $index">
-                                            <div class="panel-heading">
-                                                <h3 class="panel-title">反駁{{i+1}}</h3>
-                                            </div>
-                                            <div class="panel-body">
-                                                {{val.reply}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
+                                <hr ng-show="everyStatementData.statementData || everyStatementData.dissentExplain[0].reply">
 
 
                                 <div ng-show="debateInfo.position == 1">
