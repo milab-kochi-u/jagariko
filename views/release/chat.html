@@ -2049,7 +2049,6 @@
                 }
 
 
-
                 //如果是在表明异议的阶段的话则在最下方画一个下一步的按钮,点击后进入下一阶段
                 if(($scope.debateInfo.status == 'appeal' && $scope.debateInfo.position == 2) || ($scope.debateInfo.status == 'lookup' && $scope.debateInfo.position == 1)){
                     addNextButton(LASTX,LASTY)
@@ -2071,9 +2070,7 @@
                         drawText("接下来进入质疑解释说明和原始阐述说明阶段....",x+RECTWIDTH+OFFSETLEFT+30,y-0.6*RECTHEIGHT,16)
                     }
 
-
                     var _div = foreignObject.append('xhtml:div')
-
 
                     var button = _div.append("button")
                     if($scope.LAN == 'JP'){
@@ -2219,7 +2216,8 @@
                     scope.statementStatus.name = "wait"
                 }
 
-                scope.selectRebuttal = function(random,txt){
+                scope.selectRebuttal = function(random,txt,type){
+
 
                     if(scope.debateInfo.position == 0){
                         //旁观者无触发
@@ -2248,7 +2246,22 @@
                     scope.selectedRandom = random
                     scope.selectedTxt = txt
 
+
                     scope.rebuttalData[scope.statementStatus.i].indexToStatement = scope.selectedRandom  //反驳 data
+
+
+
+                    if(type == "claim"){
+                        scope.rebuttalData[scope.statementStatus.i].level = 1 //第几反駁 反正也是从0加到1
+                        scope.selectedLevel = 1
+                    }else if(type == "rebuttal"){
+                        scope.rebuttalData[scope.statementStatus.i].level = scope.debateInfo.order + 1
+                        scope.selectedLevel = scope.debateInfo.order + 1 //选择的内容属于第几级
+                    }else{
+                        alert("t901")
+                    }
+
+
 
                 }
             },
@@ -2265,7 +2278,7 @@
                     scope.statementStatus.name = "wait"
                 }
 
-                scope.selectRebuttal = function(random,txt){
+                scope.selectRebuttal = function(random,txt,type){
 
 
                     if(scope.debateInfo.position == 0){
@@ -2297,6 +2310,15 @@
                     scope.selectedTxt = txt
 
                     scope.rebuttalData[scope.statementStatus.i].indexToStatement = scope.selectedRandom  //反驳 data
+                    if(type == "claim"){
+                        scope.rebuttalData[scope.statementStatus.i].level = 1 //第几反駁 反正也是从0加到1
+                        scope.selectedLevel = 1
+                    }else if(type == "rebuttal"){
+                        scope.rebuttalData[scope.statementStatus.i].level = scope.debateInfo.order + 1
+                        scope.selectedLevel = scope.debateInfo.order + 1//选择的内容属于第几级
+                    }else{
+                        alert("t902")
+                    }
                 }
             },
             templateUrl:"/angularJSTemplate/process/noAnalysisFuncAppealAndStateDebate.html"
@@ -2961,7 +2983,7 @@
                 }else{
                     //如果不是第一次,那么可以有反驳
                     scope.statementStatus = {name:"rebuttal",i:0}  //目前是反驳状态还是立論的状态
-                    scope.rebuttalData = [{txt:scope.selectedTxt,reply:"",indexToStatement:0,random:Math.round(Math.random()*100000)}]  //反驳 data
+                    scope.rebuttalData = [{txt:scope.selectedTxt,reply:"",indexToStatement:0,random:Math.round(Math.random()*100000),level:1}]  //反驳 data
                 }
 
                 //判断如果你现在是等待方
@@ -3015,7 +3037,8 @@
                     scope.statementStatus.name = "rebuttal"
                     scope.statementStatus.i = (scope.statementStatus.i + 1)
                     scope._contents = ""
-                    scope.rebuttalData.push({txt:scope.selectedTxt,reply:"",indexToStatement:scope.selectedRandom,random:Math.round(Math.random()*100000)})
+
+                    scope.rebuttalData.push({txt:scope.selectedTxt,reply:"",indexToStatement:scope.selectedRandom,random:Math.round(Math.random()*100000),level:scope.selectedLevel})
                 }
 
                 scope.toClaim = function(){
@@ -4634,9 +4657,9 @@
                         dealWithData(data)
                         for(var i=0;i<data.length;i++){
                             for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
-                                appendRect(data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement)
+                                appendRect(data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement,data[i].everyStatement.dissentExplain[j].level)
                             }
-                            appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0)
+                            appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0,0)
                         }
                     }
 
@@ -4650,11 +4673,11 @@
                                 //rebuttal
 
                                 for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
-                                    appendRect(data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement)
+                                    appendRect(data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement,data[i].everyStatement.dissentExplain[j].level)
                                 }
                             }
 
-                            appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0)
+                            appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0,0)
                         }
                     }
 
@@ -4754,7 +4777,7 @@
 
                 }
 
-                function appendRect(text,position,type,dissent,random,indexToStatement){
+                function appendRect(text,position,type,dissent,random,indexToStatement,level){
                         if(!text) return
                         var _x,_y
                         if(position == 1){
@@ -4843,7 +4866,8 @@
                         if(type == "construct"){
                             heading.text("立論")
                         }else{
-                            heading.text("異議説明")
+
+                            heading.text("第"+level+"反駁")
                         }
 
                         body.text(text)

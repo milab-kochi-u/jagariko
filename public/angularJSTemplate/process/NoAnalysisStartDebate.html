@@ -33,7 +33,7 @@
 
                                 <div class="panel panel-default " style="cursor: pointer;height:60px;overflow: auto"  ng-show="everyStatementData.statementData">
 
-                                    <div class="panel-body rebuttalElement" id="rebuttal{{everyStatementData.statementDataRandom}}" ng-click="selectRebuttal(everyStatementData.statementDataRandom,everyStatementData.statementData)">
+                                    <div class="panel-body rebuttalElement" id="rebuttal{{everyStatementData.statementDataRandom}}" ng-click="selectRebuttal(everyStatementData.statementDataRandom,everyStatementData.statementData,'claim')">
                                         <p>立論:{{everyStatementData.statementData}}</p>
                                     </div>
                                 </div>
@@ -42,7 +42,7 @@
                                 <p ng-if="debateInfo.position == 1 && everyStatementData.dissentExplain[0].reply">「相手の反駁」</p>
                                 <p ng-if="debateInfo.position == 2 && everyStatementData.dissentExplain[0].reply">「自分の反駁」</p>
                                 <div class="panel panel-default " style="cursor: pointer;height:60px;overflow: auto"  ng-show="everyStatementData.dissentExplain[0].reply" ng-repeat="(i,val) in everyStatementData.dissentExplain track by $index">
-                                    <div class="panel-body rebuttalElement" id="rebuttal{{val.random}}"  ng-click="selectRebuttal(val.random,val.reply)">
+                                    <div class="panel-body rebuttalElement" id="rebuttal{{val.random}}"  ng-click="selectRebuttal(val.random,val.reply,'rebuttal')">
                                         <p>反駁:{{val.reply}}</p>
                                     </div>
                                 </div>
