@@ -1,25 +1,57 @@
 
-<div ng-show="statementStatus.name == 'newRebuttal' && statementStatus.name != 'preview'">
+<div ng-show="(statementStatus.name == 'newRebuttal' || statementStatus.name == 'claim') && statementStatus.name != 'preview'">
     <!-- 每次问你有没有更多的反驳的时候,显示当前输入的内容 -->
     <p>現在あなたが入力した内容</p>
-    <div class="panel panel-default " style="cursor: pointer;height:60px;overflow: auto"  ng-show="statementData">
+
+    <!--<div class="panel panel-default " style="cursor: pointer;height:60px;overflow: auto"  ng-show="statementData">
         <div class="panel-body">
             <p>立論:{{statementData}}</p>
         </div>
-    </div>
+    </div>-->
 
-    <div class="panel panel-default " style="cursor: pointer;height:60px;overflow: auto"  ng-repeat="(i,val) in rebuttalData track by $index">
+    <div class="panel panel-default" style="cursor: pointer;height:120px;overflow: auto"  ng-repeat="(i,val) in rebuttalData track by $index">
+        <div class="panel-heading">あなたの反駁
+            <a href="" class="pull-right" style="margin-right: 5px;" ng-show="rebuttalData.length > 1" ng-click="drop('rebuttal',i)">削除</a>
+            <span class="pull-right">&nbsp;&nbsp;</span>
+            <a href="" class="pull-right"  ng-click="edit('rebuttal',i)">修正</a>
+        </div>
+
         <div class="panel-body">
             <p>反駁:{{val.reply}}
-                <a href="" class="pull-right" style="margin-right: 5px;" ng-click="drop('rebuttal',i)">削除</a>
-                <span class="pull-right">&nbsp;&nbsp;</span>
-                <a href="" class="pull-right"  ng-click="edit('rebuttal',i)">修正</a>
             </p>
         </div>
     </div>
 
-
 </div>
+
+<div ng-show="statementStatus.name == 'rebuttal' && statementStatus.name != 'preview'">
+    <!-- 每次问你有没有更多的反驳的时候,显示当前输入的内容 -->
+
+        <p ng-show="rebuttalData.length > 1">現在あなたが入力した内容</p>
+
+        <!--<div class="panel panel-default " style="cursor: pointer;height:60px;overflow: auto"  ng-show="statementData">
+            <div class="panel-body">
+                <p>立論:{{statementData}}</p>
+            </div>
+        </div>-->
+        <div ng-repeat="(i,val) in rebuttalData track by $index">
+        <div class="panel panel-default " ng-show="i < (rebuttalData.length -1 )" style="cursor: pointer;height:120px;overflow: auto"  >
+            <div class="panel-heading">
+                あなたの反駁
+                <a href="" class="pull-right" style="margin-right: 5px;" ng-click="drop('rebuttal',i)">削除</a>
+                <span class="pull-right">&nbsp;&nbsp;</span>
+                <a href="" class="pull-right"  ng-click="edit('rebuttal',i)">修正</a>
+            </div>
+
+            <div class="panel-body" >
+                <p>反駁:{{val.reply}}
+                </p>
+            </div>
+        </div>
+        </div>
+</div>
+
+
 
 
 <div ng-show="statementStatus.name == 'rebuttal' || statementStatus.name == 'claim'">
@@ -35,11 +67,10 @@
     </div>
 
     <!--
-
     <div ng-show="statementStatus.name == 'claim'" class=" col-sm-12 alert alert-warning"   role="alert">
         <p class="alert-link">立論してください</p>
     </div>
--->
+    -->
 
 
     <div ng-show="statementStatus.name == 'claim' || (statementStatus.name == 'rebuttal' && selectedRandom)">
@@ -52,6 +83,16 @@
     <div>
         <p>
             <button type="button" ng-show="(statementStatus.name == 'rebuttal' && selectedRandom) || statementStatus.name == 'claim'" class="btn btn-default pull-right" ng-click="output()" >送信して次へ進む</button>
+            <button type="button" ng-show="(statementStatus.name == 'rebuttal' && selectedRandom)" class="btn btn-default pull-right" ng-click="modoru()" >戻る</button>
+
+            <!-- 已经有了反驳数据的话则可以跳过了,至于跳到哪个阶段则看是order=0,跳到立论阶段 或者order>0,没有立论阶段直接提交
+            <button type="button" ng-show="(statementStatus.name == 'rebuttal' && !selectedRandom) && rebuttalData.length>1 && debateInfo.order == 0" class="btn btn-default pull-right">立論入力へ進む</button>
+            <button type="button" ng-show="(statementStatus.name == 'rebuttal' && selectedRandom) && rebuttalData.length>1 && debateInfo.order == 0" class="btn btn-default pull-right">立論入力へ進む</button>
+
+
+            <button type="button" ng-show="(statementStatus.name == 'rebuttal' && !selectedRandom) && rebuttalData.length>1 && debateInfo.order > 0" class="btn btn-default pull-right">立論入力へ進む</button>
+            <button type="button" ng-show="(statementStatus.name == 'rebuttal' && selectedRandom) && rebuttalData.length>1 && debateInfo.order > 0" class="btn btn-default pull-right">立論入力へ進む</button>
+-->
             <!--
             <button type="button" ng-show="statementStatus.name == 'rebuttal' && !debateInfo.preFinish"  class="btn btn-default pull-right" ng-click="skipRebutal()" >反駁をスキップして立論入力へ進む</button>
             <button type="button" ng-show="statementStatus.name == 'rebuttal' && debateInfo.preFinish"  class="btn btn-default pull-right" ng-click="submit()" >この反駁をスキップして次へ進む</button>

@@ -1,15 +1,15 @@
-<div class="panel panel-default" ng-show="rebuttalData.length>0" ng-repeat="(i,val) in rebuttalData track by $index">
+<div class="panel panel-default" style="cursor: pointer;height:120px;overflow: auto" ng-show="rebuttalData.length>0" ng-repeat="(i,val) in rebuttalData track by $index">
     <div class="panel-heading">あなたの反駁
         <a href="" class="pull-right" ng-click="edit('rebuttal',i)">修正</a>
         <span class="pull-right" >&nbsp;</span>
-        <a href="" class="pull-right" ng-click="drop('rebuttal',i)">削除</a>
+        <a href="" class="pull-right" ng-show="rebuttalData.length>1" ng-click="drop('rebuttal',i)">削除</a>
     </div>
     <div class="panel-body">
        {{val.reply}}
     </div>
 </div>
 
-<div class="panel panel-default" ng-show="statementData">
+<div class="panel panel-default" ng-show="statementData" style="cursor: pointer;height:120px;overflow: auto">
     <div class="panel-heading">
         あなたの立論
         <a href="" class="pull-right" ng-click="edit('claim',0)">修正</a>
