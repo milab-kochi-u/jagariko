@@ -32,7 +32,6 @@ module.exports = {
     },
 
     loginController:function(req,res){
-
         console.log("session")
         console.log(req.session)
         res.render("release/login.html")
@@ -79,7 +78,8 @@ module.exports = {
                                 res.end(JSON.stringify({error:0,msg:"successful",cookieId:cookieId,debating:true}))
                                 return;
                             }else{
-                                res.end(JSON.stringify({error:1,msg:"involved debate not finished yet but no debate log has been found"}))
+                                req.session.debateLogin = {username:result[0].username,password:result[0].password,type:result[0].type,group:result[0].group,debateInvolve:false}
+                                res.end(JSON.stringify({error:1,msg:"involved debate not finished yet but no debate log has been found",cookieId:cookieId}))
                                 return;
                             }
                         }))
@@ -187,6 +187,7 @@ module.exports = {
         var timeLimitVal = req.body.timeLimitVal
         var analysisFunc = req.body.analysisFunc
         var mapFunc = req.body.mapFunc
+        var totalNum = req.body.totalNum
 
         if(analysisFunc == 0){
             //如果没有分析功能的话,那么肯定没有地图功能
@@ -202,9 +203,9 @@ module.exports = {
 
 
         if(position == 1){
-            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:startStatus,preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal,analysisFunc:analysisFunc,mapFunc:mapFunc}
+            var newRoom = {title:title,pro:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:startStatus,preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal,analysisFunc:analysisFunc,mapFunc:mapFunc,totalNum:totalNum}
         }else{
-            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:startStatus,preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal,analysisFunc:analysisFunc,mapFunc:mapFunc}
+            var newRoom = {title:title,con:req.session.debateLogin.username,num:num,rNum:rNum,finish:false,status:startStatus,preStatus:null,group:req.session.debateLogin.group,order:0,timeLimit:timeLimit,timeLimitVal:timeLimitVal,analysisFunc:analysisFunc,mapFunc:mapFunc,totalNum:totalNum}
         }
 
 
@@ -466,144 +467,5 @@ module.exports = {
                 //只有是在开始阶段,如果对方空缺
             }))
         })()
-    },
-    rateController:function(req,res){
-
-        var num = req.session.debateLogin.num
-        var rNum = req.session.debateLogin.rNum
-        var position = req.session.debateLogin.position
-        var rate = req.body.rate
-        var _update
-        var debateResult
-        var pro,con,group
-        var proUpdate = {}
-        var conUpdate = {}
-        steps(function(){
-            mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
-                if(result.length == 0) return;
-
-                pro = result[0].pro
-                con = result[0].con
-                group = result[0].group
-
-                if(result[0].status == "finish" || result[0].status == "noAnalysisfinish"){
-                    if(position == 1){
-
-                        debateResult = determine(rate,result[0].conRate)
-
-                        if(!result[0].proRate){
-                            //如果你是正方,且还没有对自己做评价,那么接下来对自己做评价
-                            if(debateResult != "wait" && debateResult != "unknow"){
-                                _update = {$set:{proRate:rate,debateResult:debateResult,finish:true}}
-                            }else{
-                                _update = {$set:{proRate:rate,debateResult:debateResult}}
-                            }
-
-                        }
-                    }else if(position == 2){
-
-                        debateResult = determine(result[0].proRate,rate)
-                        if(!result[0].conRate){
-                            //如果你是反方,且还没有对自己做评价,那么接下来对自己做评价
-
-                            if(debateResult != "wait" && debateResult != "unknow"){
-                                _update = {$set:{conRate:rate,debateResult:debateResult,finish:true}}
-                            }else{
-                                _update = {$set:{conRate:rate,debateResult:debateResult}}
-                            }
-
-                        }
-                    }else{
-                        this.terminate()
-                    }
-                }
-            }))
-        },function(){
-            mongo.update("debateStatus",{num:num,rNum:rNum},_update,{},this.hold(function(_result){
-
-            }))
-        },function(){
-
-            if(debateResult != "wait" && debateResult != "unknow"){
-                if(debateResult == "proWin"){
-                    proUpdate = {$inc:{winNum:1}}
-                    conUpdate = {$inc:{lostNum:1}}
-                }
-
-                if(debateResult == "conWin"){
-                    proUpdate = {$inc:{lostNum:1}}
-                    conUpdate = {$inc:{winNum:1}}
-                }
-
-                if(debateResult == "draw"){
-                    proUpdate = {$inc:{drawNum:1}}
-                    conUpdate = {$inc:{drawNum:1}}
-                }
-
-                if(debateResult == "unable"){
-                    proUpdate = {$inc:{unDeterminNum:1}}
-                    conUpdate = {$inc:{unDeterminNum:1}}
-                }
-
-            }
-
-        },function(){
-            //update pro
-           /*
-            mongo.update("debateMembers",{username:pro,group:group},proUpdate,{},this.hold(function(){
-
-            }))
-
-            */
-
-        },function(){
-            //update con
-            /*
-            mongo.update("debateMembers",{username:con,group:group},conUpdate,{},this.hold(function(){
-
-            }))
-            */
-        },function(){
-            mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
-                res.end(JSON.stringify({err:0,data:{proRate:result[0].proRate,conRate:result[0].conRate}}))
-            }))
-        })()
-
-
-
-        function determine(proRes,conRes){
-            if(!proRes || !conRes){
-                return "wait"
-            }
-
-            if(proRes == 1 && conRes == 3){
-                return "proWin"
-            }
-
-            if(proRes == 3 && conRes == 1){
-                return "conWin"
-            }
-
-            if(proRes == 2 && conRes == 2){
-                return "draw"
-            }
-
-            if(proRes == 1 && (conRes == 1 || conRes == 2)){
-                return "unable"
-            }
-
-            if(proRes == 3 && (conRes == 2 || conRes == 3)){
-                return "unable"
-            }
-
-            if(proRes == 2 && (conRes == 1 || conRes == 3)){
-                return "unable"
-            }
-
-            return "unknow"
-
-        }
-
-
     }
 }

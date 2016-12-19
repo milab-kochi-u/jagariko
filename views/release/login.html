@@ -221,27 +221,20 @@
                         var cookieId = res.data.cookieId
                         setCookie("cookieId",cookieId,7)
 
-
                         if(res.data.debating){
-                            if($scope.LAN == 'JP'){
                                 $window.location = "/release/chat"
-                            }else{
-                                $window.location = "/releaseCN/chat"
-                            }
                         }else{
-                            if($scope.LAN == 'JP'){
                                 $window.location = "/release/group#/theme"
-                            }else{
-                                $window.location = "/releaseCN/group#/theme"
-                            }
                         }
-
-
-
 
                     })
                 }else{
-                    $window.alert(res.data.msg)
+                    $timeout(function(){
+                        var cookieId = res.data.cookieId
+                        setCookie("cookieId",cookieId,7)
+                        $window.location = "/release/group"
+                    })
+                    //$window.alert(res.data.msg)
                 }
             })
         }

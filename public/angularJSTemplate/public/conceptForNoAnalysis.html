@@ -3,13 +3,25 @@
 
     <div ng-show="debateInfo.status == 'noAnalysisStart' || debateInfo.status == 'noAnalysisFuncAppealAndState'">
         <div ng-show="statementStatus.name == 'rebuttal' || statementStatus.name == 'newRebuttal'"  class="panel panel-info" style="height: 70%">
-        <div class="panel-heading">現在反駁している内容
+            <!--
+            <div class="panel-heading">現在反駁している内容
+            </div>
+            <div class="panel-body" id="inputExampleBody" style="height: 280px;overflow:auto;">
+                <div ng-show="selectedTxt" class="alert alert-info" role="alert">{{selectedTxt}}</div>
+                <div ng-show="!selectedTxt" class="alert alert-warning" role="alert">左の「相手の立論また反駁内容」に反駁したい部分を選んでください</div>
+            </div>
+            -->
+            <div class="panel-heading">ヒント
+            </div>
+            <div class="panel-body" id="inputExampleBody" style="height: 280px;overflow:auto;">
+                <p>反駁とは，相手の意見の中の異議がある部分について、判断や反論の意見を述べること。
+                </p>
+
+                <p>再反駁とは，相手の反駁に反論し、自分の立場を守ること。
+                </p>
+            </div>
+
         </div>
-        <div class="panel-body" id="inputExampleBody" style="height: 280px;overflow:auto;">
-            <div ng-show="selectedTxt" class="alert alert-info" role="alert">{{selectedTxt}}</div>
-            <div ng-show="!selectedTxt" class="alert alert-warning" role="alert">左の「相手の立論また反駁内容」に反駁したい部分を選んでください</div>
-        </div>
-    </div>
 
         <div ng-show="statementStatus.name == 'claim' || statementStatus.name == 'preview' || statementStatus.name == 'wait'" style="height:70%"  class="panel panel-info" >
         <div class="panel-heading">ヒント

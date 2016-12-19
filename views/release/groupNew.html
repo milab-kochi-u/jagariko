@@ -128,7 +128,7 @@
         </label>
     </div>
 </div>
--->
+
             <div class="row" ng-if="timeLimit=='1'">
                 <div class="col-sm-6 col-sm-offset-4">
                     <select ng-model="timeLimitVal" class="form-control"  >
@@ -142,6 +142,32 @@
 
                 <div class="row col-sm-11 col-sm-offset-1" style="color:red">
                     時間制限がある場合、時間制限いないに反応がない方は自動的に降参に判定される
+                </div>
+            </div>
+-->
+
+            <div class="row">
+                <div class="col-sm-offset-1 col-sm-3">回数</div>
+                <div class="col-sm-6" ng-show="observer == 0">
+                    <label>
+                        <input type="radio"  ng-model="totalNum" name="totalNum" ng-disabled="totalNumSelected == 1"  value="1" >
+                        1回
+                    </label>
+
+                    <label>
+                        <input type="radio"  ng-model="totalNum" name="totalNum" ng-disabled="totalNumSelected == 1"  value="2" >
+                        2回
+                    </label>
+
+                    <label>
+                        <input type="radio"  ng-model="totalNum" name="totalNum" ng-disabled="totalNumSelected == 1"  value="3" >
+                        3回
+                    </label>
+
+                    <label>
+                        <input type="radio"  ng-model="totalNum" name="totalNum" ng-disabled="totalNumSelected == 1"  value="4" >
+                        4回
+                    </label>
                 </div>
             </div>
 
@@ -253,11 +279,11 @@
 
                                     <span ng-if="_val.pro == username || _val.con == username" ng-click="backToRoom(_val._id)" style="font-size:23px;line-height: 36px;cursor: pointer;" class="glyphicon glyphicon-home" aria-hidden="true"></span>
                                     <span ng-if="_val.pro != username && _val.con != username && (!_val.pro || !_val.con)" >
-                                        <button ng-if="_val.pro" ng-click="participateRoom(_val.num,_val.rNum,2,_val.timeLimit,_val.analysisFunc,_val.mapFunc)"  class="label label-success" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
-                                        <button ng-if="_val.con" ng-click="participateRoom(_val.num,_val.rNum,1,_val.timeLimit,_val.analysisFunc,_val.mapFunc)"  class="label label-info" style="height: 30px;margin-top:10px;"><span style="font-size:23px;line-height:18px;font-size:23px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
+                                        <button ng-if="_val.pro" ng-click="participateRoom(_val.num,_val.rNum,2,_val.timeLimit,_val.analysisFunc,_val.mapFunc,_val.totalNum)"  class="label label-success" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
+                                        <button ng-if="_val.con" ng-click="participateRoom(_val.num,_val.rNum,1,_val.timeLimit,_val.analysisFunc,_val.mapFunc,_val.totalNum)"  class="label label-info" style="height: 30px;margin-top:10px;"><span style="font-size:23px;line-height:18px;font-size:23px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
                                     </span>
                                     <span ng-if="_val.pro != username && _val.con != username && (_val.pro && _val.con)" >
-                                       <button ng-click="participateRoom(_val.num,_val.rNum,0,_val.timeLimit,_val.analysisFunc,_val.mapFunc)"  class="label label-default" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
+                                       <button ng-click="participateRoom(_val.num,_val.rNum,0,_val.timeLimit,_val.analysisFunc,_val.mapFunc,_val.totalNum)"  class="label label-default" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
                                     </span>
 
                                 </div>
@@ -340,14 +366,6 @@
                 </div>
 
 
-
-
-
-
-
-
-
-
             </div>
 
 
@@ -402,10 +420,7 @@
                             総回数:1回
                             </p>
                             <p>
-                            今の段階:{{val.order}}回
-                            </p>
-                            <p>
-                            時間制限:{{val.timeLimit}}
+                            今の段階:第{{val.order}}回
                             </p>
                             <p>
                                 <a ng-click="backToRoom(val._id)">ルームに戻る</a>
@@ -538,13 +553,13 @@
             })
         }
 
-        $scope.participateRoom = function(num,rNum,position,timeLimit,analysisFunc,mapFunc){
+        $scope.participateRoom = function(num,rNum,position,timeLimit,analysisFunc,mapFunc,totalNum){
             $uibModal.open({
                 controller: 'ruleConfirmCtrl',
                 templateUrl: 'ruleConfirmCtrl.html',
                 resolve: {
                     items: function () {
-                        return {num:num,rNum:rNum,position:position,status:"participate",timeLimit:timeLimit,analysisFunc:analysisFunc,mapFunc:mapFunc}
+                        return {num:num,rNum:rNum,position:position,status:"participate",timeLimit:timeLimit,analysisFunc:analysisFunc,mapFunc:mapFunc,totalNum:totalNum}
                     }
                 }
             })
@@ -618,6 +633,11 @@
         $scope.observer = 0
 
 
+        $scope.totalNum = items.totalNum || 1
+        if(items.totalNum){
+            $scope.totalNumSelected = 1
+        }
+
         if(items.analysisFunc == undefined){
             $scope.analysisFunc = 1
         }else{
@@ -673,16 +693,12 @@
                             timeLimit:parseInt($scope.timeLimit),
                             timeLimitVal:parseInt($scope.timeLimitVal),
                             analysisFunc:parseInt($scope.analysisFunc),
-                            mapFunc:parseInt($scope.mapFunc)
+                            mapFunc:parseInt($scope.mapFunc),
+                            totalNum:parseInt($scope.totalNum)
                             }
                 myPost.postData("/release/createNewRoom",obj).then(function(_res){
                     if(parseInt(_res.data.err) == 0){
-                        if($scope.LAN == 'JP'){
                             location = "/release/chat"
-                        }else{
-                            location = "/release/chat"
-                        }
-
                     }else{
 
                     }
@@ -692,11 +708,7 @@
             if(items.status == "participate"){
                 myPost.postData("/release/participateRoom",{num:items.num,rNum:items.rNum,position:parseInt(items.position)}).then(function(_res){
                     if(parseInt(_res.data.err) == 0){
-                        if($scope.LAN == 'JP'){
                             location = "/release/chat"
-                        }else{
-                            location = "/release/chat"
-                        }
                     }else{
                         alert(_res.data.msg)
                     }

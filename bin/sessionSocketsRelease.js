@@ -5,7 +5,7 @@
 
 
 var connectionList = {}; //存储当前连接信息
-
+var tool = require("../controller/tool.js");
 
 
 var sessionSockets = function(sessionSockets,steps,mongo,io) {
@@ -59,14 +59,15 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
 
         socket.on("giveStatement",function(msg){
 
-            var totalNum = 1
-
+            //var totalNum = 1
+            var totalNum
             if(session.debateLogin.analysisFunc == 0){
                 var order
                 steps(function(){
                     mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
                             var _update = {}
                             order = _res[0].order
+                            totalNum = _res[0].totalNum
 
                             if(_res[0].status == "noAnalysisStart"){
 
@@ -129,11 +130,13 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
 
             if(session.debateLogin.analysisFunc == 1){
             var order
+            var totalNum
             steps(function(){
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
 
                     var _update = {}
                     order = _res[0].order
+                    totalNum = _res[0].totalNum
 
                     if(_res[0].status == "start"){
                         _update = {$set:{status:"analysis",preStatus:_res[0].status,time:Date.parse(new Date())}}
@@ -401,20 +404,28 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
 
             },function(){
                 //update pro
-                /*
-                 mongo.update("debateMembers",{username:pro,group:group},proUpdate,{},this.hold(function(){
 
-                 }))
+                console.log(proUpdate)
+                console.log(conUpdate)
 
-                 */
+                if(!tool.isEmpty(proUpdate)){
+
+                    mongo.update("debateMembers",{username:pro,group:group},proUpdate,{},this.hold(function(){
+
+                    }))
+                }
+
+
 
             },function(){
                 //update con
-                /*
-                 mongo.update("debateMembers",{username:con,group:group},conUpdate,{},this.hold(function(){
 
-                 }))
-                 */
+                if(!tool.isEmpty(conUpdate)){
+                    mongo.update("debateMembers",{username:con,group:group},conUpdate,{},this.hold(function(){
+
+                    }))
+                }
+
             },function(){
                 mongo.find("debateStatus",{num:num,rNum:rNum},{},this.hold(function(result){
                     socket.emit("rated",{err:0,data:{proRate:result[0].proRate,conRate:result[0].conRate}})

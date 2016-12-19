@@ -34,14 +34,16 @@
                             <span ng-if="debateInfo.position == 1">主張を出してください</span>
 
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body" id="_statementResultMapSVG">
                             <div ng-show="debateInfo.position == 1">
                                 <div ng-show="statementStatus.name != 'preview'">
                                     <input-text-area></input-text-area>
                                 </div>
                                 <div ng-show="statementStatus.name == 'preview'">
-                                    <div style="height: 220px;overflow: auto">
+                                    <div style="height: 220px;overflow: auto" >
                                         <statement-result></statement-result>
+                                        <hr>
+                                        <statement-result2></statement-result2>
                                     </div>
                                     <div style="height:20px">
                                         <button class="btn btn-default pull-right" ng-click="submit()">送信</button>

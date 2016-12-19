@@ -19,14 +19,18 @@
 
                                 <h3>討論が終わりました，お疲れ様でした.</h3>
 
+                                <div ng-show="statementStatus.name == 'claim'" class=" col-sm-12 alert alert-warning"   role="alert">
+                                    <p class="alert-link">討論の勝者が誰であるか，下のボタンを押して自己判定してください</p>
+                                </div>
+
                                 <h5 ng-show="!debateInfo.finish">下のボタンを押して自己評価してください．</h5>
                                 <h5 ng-show="debateInfo.finish">お互いの勝敗判定結果は下の通りに表示しています．</h5>
 
                                 <div class="row" style="margin:0 auto" >
                                     <div class="btn-group" role="group" ng-show="rateable == 1">
-                                        <button type="button" ng-click="determines(1)" class="btn btn-default">勝ち</button>
+                                        <button type="button" ng-click="determines(1)" class="btn btn-default">自分の勝ち</button>
                                         <button type="button" ng-click="determines(2)" class="btn btn-default">引き分け</button>
-                                        <button type="button" ng-click="determines(3)" class="btn btn-default">負け</button>
+                                        <button type="button" ng-click="determines(3)" class="btn btn-default">自分の負け</button>
                                     </div>
 
                                     <div class="row">

@@ -876,6 +876,124 @@
         }
     })
 
+
+    myApp.directive("statementResult2",function($compile){
+        return{
+            scope:false,
+            link:function(scope,element){
+                var TOP //最先画的方块距离顶端的距离
+                var LEFT //最先画的方块距离左边的距离
+                var RIGHT
+                var DISSENTWIDTH //异议方块的长度
+                var DISSENTHEIGHT //异议方块的高度
+                var DISSENTX //异议方块的X坐标
+
+                var EXPLAINWIDTH
+                var EXPLAINHEIGHT
+                var EXPLAINX //解释方块的横坐标
+
+                var DISSENTANDEXPLAINSPACE//异议方块距离右边的赛解释说明方块的横向距离
+
+                var DISSENTANDLINESPACEY //异议方块距离下面虚线的纵向距离
+                var DOTTEDLINEX1,DOTTEDLINEX2,DOTTEDLINEX3,DOTTEDLINEX4
+                var DOTTEDLINEANDCONSTRUCTSPACE //虚线距离下面方块的纵向距离
+
+                var CONSTRUCTWIDTH //结论方块的长度
+                var CONSTRUCTHEIGHT //结论方块的高度
+                var CONSTRUCTX  //X坐标
+                var LASTY //升降机
+
+                var svg = d3.select(element.find("svg")[0])
+
+                define()
+                draw()
+                function define() {
+                    var _width = document.getElementById("_statementResultMapSVG").offsetWidth
+                    TOP = 15
+                    LEFT = _width*0.05
+                    RIGHT = LEFT
+                    DISSENTWIDTH = (_width - LEFT - RIGHT)/3
+                    DISSENTHEIGHT = DISSENTWIDTH*0.7
+                    DISSENTX = LEFT
+
+                    DISSENTANDEXPLAINSPACE = (_width - LEFT - RIGHT)*0.25
+
+                    EXPLAINWIDTH = DISSENTWIDTH
+                    EXPLAINHEIGHT = EXPLAINWIDTH*0.7
+                    EXPLAINX = DISSENTX + DISSENTWIDTH + DISSENTANDEXPLAINSPACE
+
+                    DISSENTANDLINESPACEY = 40
+                    DOTTEDLINEX1 = LEFT + 10
+                    DOTTEDLINEX2 = DOTTEDLINEX1 + (_width - LEFT - RIGHT)/3
+                    DOTTEDLINEX4 = _width - RIGHT - 10
+                    DOTTEDLINEX3 = DOTTEDLINEX4 - (_width - LEFT - RIGHT)/3
+                    DOTTEDLINEANDCONSTRUCTSPACE = 40
+                    CONSTRUCTWIDTH = (_width - LEFT - RIGHT)*0.8
+                    CONSTRUCTHEIGHT = CONSTRUCTWIDTH * 0.6
+                    CONSTRUCTX = LEFT
+                    LASTY = TOP  //升降机初始位置
+                }
+
+
+                function clearDraw(){
+                    svg.selectAll(".draw").remove()
+                    LASTY = TOP  //升降机回归到初始位置
+                }
+
+                function draw(){
+                    appendRect(scope.statementData)
+                }
+
+                function appendStatementRect(txt,x,y,font){
+                    var text = svg.insert("text")
+                    text.text(txt)
+                    text.attr("x",x)
+                            .attr("y",y)
+                            .attr("font-size",font)
+                            .attr("fill","#8a6d3b")
+                            .attr("class","draw")
+                }
+
+                function drawDottedLine(x1,y1,x2,y2){
+                    var line = svg.insert("line")
+                            .attr("x1",x1)
+                            .attr("y1",y1)
+                            .attr("x2",x2)
+                            .attr("y2",y2)
+                            .attr("stroke","#000")
+                            .attr("stroke-width",3)
+                            .attr("class","arrow draw")
+                            .attr("stroke-dasharray","4,10")
+                }
+
+                function appendStatementRect(text){
+                    var foreignObject = svg.append("foreignObject")
+                    foreignObject.attr("width",CONSTRUCTWIDTH)
+                    foreignObject.attr("height",CONSTRUCTHEIGHT)
+
+                    foreignObject.attr("x",CONSTRUCTX)
+                    foreignObject.attr("y",LASTY)
+                    foreignObject.attr("class","draw")
+
+                    var _div = foreignObject.append('xhtml:div')
+                    var div = _div.append("div")
+                    div.attr("class","alert alert-warning  row")
+                    div.attr("role","alert")
+                    div.attr("style","height: "+ CONSTRUCTHEIGHT*0.6 +"px; overflow: auto;margin-bottom:1px")
+
+
+                    var p = div.append("p")
+                    p.html(text)
+
+
+                }
+
+
+            },
+            templateUrl:"/angularJSTemplate/public/_statementResult.html"
+        }
+    })
+
     myApp.directive("statementResult",function($compile) {
         return {
             scope: false,
@@ -2235,11 +2353,18 @@
                         elements[i].style.border = ""
                     }
 
+                    var elements = document.getElementsByClassName("gk")
+                    for(var i=0;i<elements.length;i++){
+                        elements[i].style.display = "none"
+                    }
+
                     var borderStyle = "3px solid yellow"
                     if(document.getElementById("rebuttal"+random).style.border == borderStyle){
                         document.getElementById("rebuttal"+random).style.border = ""
+                        document.getElementById("gk"+random).style.display = "none"
                     }else{
                         document.getElementById("rebuttal"+random).style.border = borderStyle
+                        document.getElementById("gk"+random).style.display = "block"
                     }
 
                     //你选择了哪段内容进行反驳
@@ -2298,11 +2423,20 @@
                         elements[i].style.border = ""
                     }
 
+
+                    var elements = document.getElementsByClassName("gk")
+                    for(var i=0;i<elements.length;i++){
+                        elements[i].style.display = "none"
+                    }
+
+
                     var borderStyle = "3px solid yellow"
                     if(document.getElementById("rebuttal"+random).style.border == borderStyle){
                         document.getElementById("rebuttal"+random).style.border = ""
+                        document.getElementById("gk"+random).style.display = "none"
                     }else{
                         document.getElementById("rebuttal"+random).style.border = borderStyle
+                        document.getElementById("gk"+random).style.display = "block"
                     }
 
                     //你选择了哪段内容进行反驳

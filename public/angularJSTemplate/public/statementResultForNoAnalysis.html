@@ -1,6 +1,7 @@
 <div class="panel panel-default" ng-show="rebuttalData.length>0" ng-repeat="(i,val) in rebuttalData track by $index">
-    <div class="panel-heading">反駁{{i+1}}
-        <a href="" class="pull-right" ng-click="edit('rebuttal',i)">編集</a>|
+    <div class="panel-heading">あなたの反駁
+        <a href="" class="pull-right" ng-click="edit('rebuttal',i)">修正</a>
+        <span class="pull-right" >&nbsp;</span>
         <a href="" class="pull-right" ng-click="drop('rebuttal',i)">削除</a>
     </div>
     <div class="panel-body">
@@ -10,10 +11,14 @@
 
 <div class="panel panel-default" ng-show="statementData">
     <div class="panel-heading">
-        立論
-        <a href="" class="pull-right" ng-click="edit('claim',0)">編集</a>
+        あなたの立論
+        <a href="" class="pull-right" ng-click="edit('claim',0)">修正</a>
     </div>
     <div class="panel-body">
         {{statementData}}
     </div>
+</div>
+
+<div  class=" col-sm-12 alert alert-warning"   role="alert">
+    <p class="alert-link">この内容でよければ「送信」を押してください。</p>
 </div>

@@ -11,8 +11,9 @@
     <div class="panel panel-default " style="cursor: pointer;height:60px;overflow: auto"  ng-repeat="(i,val) in rebuttalData track by $index">
         <div class="panel-body">
             <p>反駁:{{val.reply}}
-                <a href="" class="pull-right" ng-click="edit('rebuttal',i)">編集</a>|
-                <a href="" class="pull-right" ng-click="drop('rebuttal',i)">削除</a>
+                <a href="" class="pull-right" style="margin-right: 5px;" ng-click="drop('rebuttal',i)">削除</a>
+                <span class="pull-right">&nbsp;&nbsp;</span>
+                <a href="" class="pull-right"  ng-click="edit('rebuttal',i)">修正</a>
             </p>
         </div>
     </div>
@@ -30,13 +31,15 @@
     </div>
 
     <div ng-show="statementStatus.name == 'rebuttal' && !selectedRandom" class=" col-sm-12 alert alert-warning"   role="alert">
-        <p class="alert-link">反駁したい内容を選択してください</p>
+        <p class="alert-link">上の相手の意見に対し，反駁したいものを選択してください。</p>
     </div>
+
+    <!--
 
     <div ng-show="statementStatus.name == 'claim'" class=" col-sm-12 alert alert-warning"   role="alert">
         <p class="alert-link">立論してください</p>
     </div>
-
+-->
 
 
     <div ng-show="statementStatus.name == 'claim' || (statementStatus.name == 'rebuttal' && selectedRandom)">
@@ -49,8 +52,10 @@
     <div>
         <p>
             <button type="button" ng-show="(statementStatus.name == 'rebuttal' && selectedRandom) || statementStatus.name == 'claim'" class="btn btn-default pull-right" ng-click="output()" >送信して次へ進む</button>
+            <!--
             <button type="button" ng-show="statementStatus.name == 'rebuttal' && !debateInfo.preFinish"  class="btn btn-default pull-right" ng-click="skipRebutal()" >反駁をスキップして立論入力へ進む</button>
             <button type="button" ng-show="statementStatus.name == 'rebuttal' && debateInfo.preFinish"  class="btn btn-default pull-right" ng-click="submit()" >この反駁をスキップして次へ進む</button>
+            -->
         </p>
     </div>
 
@@ -70,12 +75,12 @@
         </div>
 
 
-        <div class=" col-sm-6"  ng-show="!debateInfo.preFinish" >
+        <div class=" col-sm-6"  ng-show="debateInfo.order ==0" >
             <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="toClaim()">もう反駁したいことはないので立論入力へ進む</button>
         </div>
 
 
-        <div class=" col-sm-6"  ng-show="debateInfo.preFinish " >
+        <div class=" col-sm-6"  ng-show="debateInfo.order > 0 " >
         <button type="button" class="btn-lg btn btn-default pull-left" ng-click="submit()" >もう反駁したいことはないので次へ進む</button>
         </div>
     </div>
