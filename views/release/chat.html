@@ -1944,7 +1944,6 @@
                       scope.inputStatus.name = type
                       scope.analysisObject.target = category
 
-                      scope.topArticleChangeTabVal = 0
                   }else if(category == "dissentExplain"){
                       scope.analysisObject.i = parseInt(dissentExplainI)
                       scope.analysisObject.target = category
@@ -1952,7 +1951,6 @@
                       scope.inputStatus.j = j
                       scope.inputStatus.name = type
 
-                      //scope.topArticleChangeTabVal = parseInt(dissentExplainI)+1
                   }else{
 
                   }
@@ -2503,7 +2501,6 @@
                         $scope.inputStatus.name = type
                         $scope.analysisObject.target = category
 
-                        $scope.topArticleChangeTabVal = 0
                     }else if(category == "dissentExplain"){
                         $scope.analysisObject.i = parseInt(dissentExplainI)
                         $scope.analysisObject.target = category
@@ -2511,7 +2508,6 @@
                         $scope.inputStatus.j = j
                         $scope.inputStatus.name = type
 
-                        //$scope.topArticleChangeTabVal = parseInt(dissentExplainI)+1
                     }else{
 
                     }
@@ -2800,33 +2796,12 @@
             link:function($scope){
                 $scope.conceptStatus = "analysis"   //concept directive controller
 
-                $scope.topArticleChangeTabVal = 0
 
 
 
                 transportInputInfo("FormInputing")
 
-                $scope.$watch("analysisObject.target",function(val,preVal){
-                    //从 construct变成dissentExplain
-                    if(val == "dissentExplain" && preVal == "construct"){
-                        $scope.topArticleChangeTabVal = 1
-                        //$rootScope.$broadcast('topArticleChangeTab',{topArticleChangeTabVal:1});
-                    }
 
-                    if(val == "construct" && preVal == "dissentExplain"){
-                        $scope.topArticleChangeTabVal = 0
-                        ///$rootScope.$broadcast('topArticleChangeTab',{topArticleChangeTabVal:0});
-                    }
-
-                })
-
-                $scope.$watch("analysisObject.i",function(val,preVal){
-                    //从 dissentExplain[preVal] 变dissentExplain[val]
-                    if($scope.analysisObject.target == "dissentExplain"){
-                        $scope.topArticleChangeTabVal = $scope.topArticleChangeTabVal + 1
-                        //$rootScope.$broadcast('topArticleChangeTab',{topArticleChangeTabVal:val+1});
-                   }
-                })
 
 
                 function addIntoAnalysisData(name){
@@ -3282,7 +3257,7 @@
                 }
 
                 function transportInputInfo(event){
-                    coreSocket.emit(event,{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData,analysisObject:$scope.analysisObject,inputStatus:$scope.inputStatus,topArticleChangeTabVal:$scope.topArticleChangeTabVal})
+                    coreSocket.emit(event,{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData,analysisObject:$scope.analysisObject,inputStatus:$scope.inputStatus})
                 }
 
                 $scope.formStartInputingVal = 0
@@ -3291,7 +3266,6 @@
                     $scope.opposite_analysisData = _res.analysisData
                     $scope.opposite_analysisDissentExplainData = _res.analysisDissentExplainData
                     $scope.opposite_analysisObject = _res.analysisObject
-                    $scope.opposite_topArticleChangeTabVal = _res.topArticleChangeTabVal
                     $scope.opposite_inputStatus = _res.inputStatus
                 })
 
@@ -4128,7 +4102,7 @@
 
                 var svg = d3.select(element.find("svg")[0])
 
-                svg.attr("width","1200px")
+                svg.attr("width","1800px")
                 svg.attr("height","4000px")
                 svg.style("background","#bdf")
 
@@ -4192,10 +4166,10 @@
 
                 function define(){
                     var _width = element.find("div")[0].offsetWidth
-                    LEFT = _width*0.05
+                    LEFT = _width*0.3
                     TOP = 35
 
-                    CLAIMWIDTH = (_width-2*LEFT)*0.4  //占据除去两个边距后5分之4的位置
+                    CLAIMWIDTH = (_width)*0.4  //占据除去两个边距后5分之4的位置
 
                     CLAIMHEIGHT = CLAIMWIDTH*1.2;
                     CLAIMXINTERVAL = (_width-2*LEFT)*0.2 //间距占据除去两个编剧后5分之1的位置

@@ -3,8 +3,7 @@
         <div>
             <p class="alert alert-warning" style="margin-bottom:2px;">相手の意見を主張,根拠,論拠に分析してください</p>
             <div>
-                    <div class="panel-body" style="padding: 1px"  ng-show="topArticleChangeTabVal == 0" id="claimBody" >
-
+                    <div class="panel-body" style="padding: 1px"  ng-show="analysisObject.target == 'construct'" id="claimBody" >
                     <!--<div class="alert alert-default" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>-->
                     <span>相手の立論:</span>
                     <div class="panel panel-default" style="margin-bottom:3px;padding:1px;overflow: auto;">
@@ -12,7 +11,7 @@
                     </div>
                     </div>
 
-                    <div class="panel-body" style="padding:1px;" ng-show="topArticleChangeTabVal == (i+1)"  ng-repeat="(i,val) in everyStatementData.dissentExplain track by $index">
+                    <div class="panel-body" style="padding:1px;" ng-show="analysisObject.target == 'dissentExplain'"  ng-repeat="(i,val) in everyStatementData.dissentExplain track by $index">
                     <span>相手の反駁:</span>
                     <div class="panel panel-default" style="margin-bottom:3px;padding:1px;">
                     <br/>{{everyStatementData.dissentExplain[i].reply}}
