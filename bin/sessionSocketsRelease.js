@@ -284,7 +284,6 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                 sendObj = msg
                 sendObj.position = session.debateLogin.position
 
-                console.log(msg)
                 socket.emit("receiveUpdateAnalysis",{everyAnalysisData:sendObj})
                 socket.to(session.debateLogin.rNum).broadcast.emit("receiveUpdateAnalysis",{everyAnalysisData:sendObj})
             },function(){

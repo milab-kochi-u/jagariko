@@ -12,7 +12,6 @@
 
 
 
-
 <div>
     <info-and-analysis-map mapId="stateMap"></info-and-analysis-map>
 </div>
@@ -24,12 +23,15 @@
 
             <div class="row col-sm-8" style="height: 330px;overflow:auto;">
 
-                <div  class="panel panel-info" >
+                <div  class="panel panel-info" id="">
                     <div class="panel-heading">
                         <span ng-if="debateInfo.position == 1">相手の反駁をお待ちください</span>
-                        <span ng-if="debateInfo.position == 2">反駁してください</span>
+                        <span ng-if="debateInfo.position == 2">
+                            <span ng-show="statementStatus.name=='dissent'">反駁してください</span>
+                            <span ng-show="statementStatus.name=='claim'">立論してください</span>
+                        </span>
                     </div>
-                    <div class="panel-body">
+                    <div class="panel-body" id="analysisResult">
                         <div ng-show="debateInfo.position == 2">
                             <div ng-show="statementStatus.name != 'preview'">
                             <input-text-area></input-text-area>
@@ -38,7 +40,9 @@
                             <div ng-show="statementStatus.name == 'preview'">
 
                                 <div style="height: 220px;overflow: auto">
-                                    <statement-result></statement-result>
+                                    <statement-result2></statement-result2>
+                                    <hr>
+                                    <!--<statement-result></statement-result>-->
                                 </div>
                                 <div style="height:20px">
                                     <button class="btn btn-default pull-right" ng-click="submit()">送信</button>

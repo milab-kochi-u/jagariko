@@ -119,6 +119,7 @@
 <body ng-app="myApp" ng-init="LAN='JP'">
 
 <div  class="container" ng-controller="myController" >
+
     <wait-debate ng-if="statusController.waitDebate"></wait-debate>
     <start-debate ng-if="statusController.startDebate"></start-debate>
     <analysis-debate ng-if="statusController.analysisDebate"></analysis-debate>
@@ -300,7 +301,6 @@
         })
 
         coreSocket.on("receiveUpdateAnalysis",function(_res){
-
             $scope.currentAnalysis = _res.everyAnalysisData
             $rootScope.$broadcast('reDrawMap');
         })
@@ -811,18 +811,17 @@
         }
     })
 
-    myApp.directive("finishDebate",function(myPost){
+    myApp.directive("finishDebate",function(coreSocket){
         return{
             scope:false,
             link:function(scope,element){
 
                 scope.conceptStatus = "judgeMent"
-
                 if(scope.debateInfo.position == 1){
                     if(scope.debateInfo.proRate){
-                       scope.rateable = 0
+                        scope.rateable = 0
                     }else{
-                       scope.rateable = 1
+                        scope.rateable = 1
                     }
                 }
 
@@ -835,24 +834,36 @@
 
                 }
 
-
                 scope.determines = function(n){
-                    // 0 win
-                    // 1 draw
-                    // 2 lost
 
 
-                    myPost.postData("/release/rate",{rate:n}).then(function(_res){
-                        if(_res.data.err == 0){
-                            scope.isReadonly = true;
-                            scope.rateable = false
-                            scope.debateInfo.proRate = _res.data.data.proRate
-                            scope.debateInfo.conRate = _res.data.data.conRate
-                        }
-                    })
-
+                    coreSocket.emit("rate",{rate:n})
 
                 }
+
+                coreSocket.on("rated",function(msg){
+                    if(msg.err == 0){
+                        scope.debateInfo.proRate = msg.data.proRate
+                        scope.debateInfo.conRate = msg.data.conRate
+                        if(scope.debateInfo.position == 1 && scope.debateInfo.proRate){
+                            scope.isReadonly = true;
+                            scope.rateable = false
+                        }
+
+                        if(scope.debateInfo.position == 2 && scope.debateInfo.conRate){
+                            scope.isReadonly = true;
+                            scope.rateable = false
+                        }
+
+
+
+
+                        if(scope.debateInfo.proRate && scope.debateInfo.conRate){
+                            scope.debateInfo.finish = true;
+                        }
+                    }
+
+                })
 
             },
             templateUrl:"/angularJSTemplate/process/finishDebate.html"
@@ -894,21 +905,27 @@
 
                 var DISSENTANDEXPLAINSPACE//异议方块距离右边的赛解释说明方块的横向距离
 
+
                 var DISSENTANDLINESPACEY //异议方块距离下面虚线的纵向距离
                 var DOTTEDLINEX1,DOTTEDLINEX2,DOTTEDLINEX3,DOTTEDLINEX4
                 var DOTTEDLINEANDCONSTRUCTSPACE //虚线距离下面方块的纵向距离
 
                 var CONSTRUCTWIDTH //结论方块的长度
                 var CONSTRUCTHEIGHT //结论方块的高度
+
+                var CONSTRUCTANDDISSENTINTERVALY = 20 //结论方块异议方块垂直距离
+                var DISSENTANDDISSENTINTERVALY = 20  //异议方块之间的垂直距离
+
+
                 var CONSTRUCTX  //X坐标
                 var LASTY //升降机
 
+                var ARROW = [] //箭头坐标
                 var svg = d3.select(element.find("svg")[0])
 
-                define()
-                draw()
+
                 function define() {
-                    var _width = document.getElementById("_statementResultMapSVG").offsetWidth
+                    var _width = document.getElementById("analysisResult").offsetWidth
                     TOP = 15
                     LEFT = _width*0.05
                     RIGHT = LEFT
@@ -928,11 +945,17 @@
                     DOTTEDLINEX4 = _width - RIGHT - 10
                     DOTTEDLINEX3 = DOTTEDLINEX4 - (_width - LEFT - RIGHT)/3
                     DOTTEDLINEANDCONSTRUCTSPACE = 40
-                    CONSTRUCTWIDTH = (_width - LEFT - RIGHT)*0.8
+                    CONSTRUCTWIDTH = (_width - LEFT - RIGHT)*0.9
                     CONSTRUCTHEIGHT = CONSTRUCTWIDTH * 0.6
-                    CONSTRUCTX = LEFT
+                    CONSTRUCTX = LEFT + (_width - LEFT - RIGHT)*0.05
                     LASTY = TOP  //升降机初始位置
                 }
+
+                scope.$on('_drawStatementResult',function(){
+                    define()
+                    clearDraw()
+                    draw()
+                });
 
 
                 function clearDraw(){
@@ -941,50 +964,217 @@
                 }
 
                 function draw(){
-                    appendRect(scope.statementData)
+
+                    for(var i = 0;i<scope.dissentData.length;i++){
+                        appendDissentAndExplainRect(scope.dissentData[i].txt,scope.dissentData[i].reply,i)
+
+                        //处理箭头
+                        appendIntoArrow(i)
+                        //调整升降机
+
+                        if(scope.dissentData[i].reply){
+                            if(DISSENTHEIGHT > EXPLAINHEIGHT){
+                                LASTY += (DISSENTHEIGHT + DISSENTANDDISSENTINTERVALY)
+                            }else{
+                                LASTY += (EXPLAINHEIGHT + DISSENTANDDISSENTINTERVALY)
+                            }
+                        }
+
+                    }
+
+                    drawConnectArrow()
+
+                    //非第一次不会有立论出现
+                    if(scope.statementData){
+                        LASTY += (CONSTRUCTANDDISSENTINTERVALY)
+                        appendStatementRect(scope.statementData)
+                    }
+
+
                 }
 
-                function appendStatementRect(txt,x,y,font){
-                    var text = svg.insert("text")
-                    text.text(txt)
-                    text.attr("x",x)
-                            .attr("y",y)
-                            .attr("font-size",font)
-                            .attr("fill","#8a6d3b")
-                            .attr("class","draw")
+                function appendIntoArrow(i){
+                    ARROW[i] = {}
+                    ARROW[i].startX = DISSENTX + DISSENTWIDTH
+                    ARROW[i].endX = EXPLAINX
+
+                    if(DISSENTHEIGHT > EXPLAINHEIGHT){
+                        ARROW[i].Y = LASTY + EXPLAINHEIGHT/2
+                    }else{
+                        ARROW[i].Y = LASTY + DISSENTHEIGHT/2
+                    }
                 }
 
-                function drawDottedLine(x1,y1,x2,y2){
-                    var line = svg.insert("line")
+                function drawConnectArrow(){
+                    for(var i=0;i<ARROW.length;i++){
+                        drawArrow(ARROW[i].startX,ARROW[i].endX-10,ARROW[i].Y,ARROW[i].Y)
+                    }
+                }
+
+
+                function drawArrow(x1,x2,y1,y2){
+
+                    var line = svg.insert("line",":first-child")
                             .attr("x1",x1)
                             .attr("y1",y1)
                             .attr("x2",x2)
                             .attr("y2",y2)
-                            .attr("stroke","#000")
+                            .attr("stroke","#9acfea")
                             .attr("stroke-width",3)
                             .attr("class","arrow draw")
-                            .attr("stroke-dasharray","4,10")
+                            .attr("marker-end","url(#arrow)")
                 }
+
 
                 function appendStatementRect(text){
                     var foreignObject = svg.append("foreignObject")
                     foreignObject.attr("width",CONSTRUCTWIDTH)
+                    if(text.length < 20){
+                        CONSTRUCTHEIGHT = 30
+                    }else if(text.length >=20 && text.length < 50){
+                        CONSTRUCTHEIGHT = 100
+                    }else if(text.length >=50 && text.length < 100){
+                        CONSTRUCTHEIGHT = 140
+                    }else if(text.length <200){
+                        CONSTRUCTHEIGHT = 280
+                    }else{
+                        CONSTRUCTHEIGHT = 380
+                    }
+
                     foreignObject.attr("height",CONSTRUCTHEIGHT)
 
                     foreignObject.attr("x",CONSTRUCTX)
+
+
+
+                    foreignObject.attr("y",LASTY)
+                    foreignObject.attr("class","draw")
+
+
+                    var _div = foreignObject.append('xhtml:div')
+                    var div = _div.append("div")
+                    div.attr("class","row")
+
+
+                    div.attr("class","panel panel-default")
+                    div.attr("style","height: "+ CONSTRUCTHEIGHT*0.9 +"px; overflow: auto;margin-bottom:1px")
+
+
+                    var head = div.append("div")
+                    head.attr("class","panel-heading")
+                    var title = head.append("span")
+                    title.text("あなたの立論")
+                    var edit = head.append("span")
+                    edit.attr("class","pull-right")
+                    edit.style("cursor","pointer")
+
+
+                    var divId = "btn"+Math.round(Math.random()*10000)
+                    edit.attr("id",divId)
+                    var html = '<span ng-click="edit2(\'claim\')">編集</span>'
+                    angular.element(document.getElementById(divId)).append($compile(html)(scope));
+
+
+                    var body = div.append("div")
+                    body.attr("class","panel-body")
+
+                    var p = body.append("p")
+                    p.text(text)
+                }
+
+                function appendDissentAndExplainRect(text,reply,i){
+                    //先画左边的dissent
+
+                    if(text.length < 20){
+                        DISSENTHEIGHT = 130
+                    }else if(text.length >=20 && text.length < 50){
+                        DISSENTHEIGHT = 200
+                    }else if(text.length >=50 && text.length < 100){
+                        DISSENTHEIGHT = 250
+                    }else if(text.length <200){
+                        DISSENTHEIGHT = 390
+                    }else{
+                        DISSENTHEIGHT = 490
+                    }
+
+                    var foreignObject = svg.append("foreignObject")
+                    foreignObject.attr("width",DISSENTWIDTH)
+                    foreignObject.attr("height",DISSENTHEIGHT)
+                    foreignObject.attr("x",DISSENTX)
                     foreignObject.attr("y",LASTY)
                     foreignObject.attr("class","draw")
 
                     var _div = foreignObject.append('xhtml:div')
                     var div = _div.append("div")
-                    div.attr("class","alert alert-warning  row")
-                    div.attr("role","alert")
-                    div.attr("style","height: "+ CONSTRUCTHEIGHT*0.6 +"px; overflow: auto;margin-bottom:1px")
+                    div.attr("class","row")
 
 
-                    var p = div.append("p")
-                    p.html(text)
+                    div.attr("class","panel panel-default")
+                    div.attr("style","height: "+ DISSENTHEIGHT*0.9 +"px; overflow: auto;margin-bottom:1px")
 
+                    var head = div.append("div")
+                    head.attr("class","panel-heading")
+                    var title = head.append("span")
+                    title.text("異議")
+
+                    var body = div.append("div")
+                    body.attr("class","panel-body")
+
+                    var p = body.append("p")
+                    p.text(text)
+
+                    //再画右边的explain
+
+
+
+                    if(reply.length < 20){
+                        EXPLAINHEIGHT = 130
+                    }else if(text.length >=20 && text.length < 50){
+                        EXPLAINHEIGHT = 200
+                    }else if(text.length >=50 && text.length < 100){
+                        EXPLAINHEIGHT = 250
+                    }else if(text.length <200){
+                        EXPLAINHEIGHT = 390
+                    }else{
+                        EXPLAINHEIGHT = 490
+                    }
+
+                    var foreignObject = svg.append("foreignObject")
+                    foreignObject.attr("width",EXPLAINWIDTH)
+                    foreignObject.attr("height",EXPLAINHEIGHT)
+                    foreignObject.attr("x",EXPLAINX)
+                    foreignObject.attr("y",LASTY)
+                    foreignObject.attr("class","draw")
+
+                    var _div = foreignObject.append('xhtml:div')
+                    var div = _div.append("div")
+                    div.attr("class","row")
+
+
+                    div.attr("class","panel panel-default")
+                    div.attr("style","height: "+ EXPLAINHEIGHT*0.9 +"px; overflow: auto;margin-bottom:1px")
+
+                    var head = div.append("div")
+                    head.attr("class","panel-heading")
+                    var title = head.append("span")
+                    title.text("反駁")
+                    var edit = head.append("span")
+                    edit.attr("class","pull-right")
+                    edit.style("cursor","pointer")
+
+
+
+                    var divId = "btn"+Math.round(Math.random()*10000)
+                    edit.attr("id",divId)
+                    var num = i
+                    var html = '<span ng-click="edit2(\'dissent\',' + num + ')">編集</span>'
+                    angular.element(document.getElementById(divId)).append($compile(html)(scope));
+
+                    var body = div.append("div")
+                    body.attr("class","panel-body")
+
+                    var p = body.append("p")
+                    p.text(reply)
 
                 }
 
@@ -1039,19 +1229,13 @@
                         appendRect(scope.dissentData[i].txt,1,LASTX,LASTY,DISSENTWIDTH,DISSENTHEIGHT,"dissent"+i)
                         if(scope.dissentData[i].reply){
 
-
                             drawArrow(LASTX+DISSENTWIDTH,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE,LASTY+DISSENTHEIGHT/2,LASTY+DISSENTHEIGHT/2)
-
 
                             if(scope.LAN == 'JP'){
                                 drawText("この異議の説明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
                             }else{
                                 drawText("这里是对质疑的说明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
                             }
-
-
-
-
 
                             appendRect(scope.dissentData[i].reply,0,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE+5,LASTY,EXPLAINWIDTH,EXPLAINHEIGHT,"explain"+i)
                         }else{
@@ -1242,6 +1426,7 @@
       return{
           scope:false,
           link:function(scope,element){
+
                scope.$on("drawAnalysisResult",function(){
                    startDraw()
                })
@@ -1283,7 +1468,6 @@
               var NEXTBUTTONX
 
               var svg
-
 
               startDraw()
               function startDraw(){
@@ -1373,13 +1557,15 @@
 
 
               function paintFromData(category,data,dissentExplainI,dissentTxt){
-                  var mainArrowStart
-                  var mainArrowEnd = []
+
                   if(dissentTxt){
                       //如果category == dissentExplain 那么说明这里需要显示是对哪条质疑的解释
                       appendDissentTxt(dissentTxt,DISSENTTXTX,LASTY)
                   }
                   for(var i=0;i<data.length;i++){
+                      var mainArrowStart // 每一个claim,单独画它和它的support的连接箭头
+                      var mainArrowEnd = []
+
                       if(!data[i].claim) return;
                       mainArrowStart = appendClaim(data[i].claim,[category,i,0,"claim",dissentExplainI])
                       dealWithLastY("claim",data,i,0)
@@ -1396,15 +1582,21 @@
                           if(data[i].support[j].evidence){
                               mainArrowEnd.push(appendEvidence(data[i].support[j].evidence,[category,i,j,"evidence",dissentExplainI]))
                               dealWithLastY("evidence",data,i,j)
+                          }else{
+                              //如果support不存在的话不管如何升降机往下
+                              LASTY += MOKUAIANDMOKUAIINTERVALY + RECTHEIGHT
                           }
 
                       }
 
+                      if(mainArrowEnd.length>0){
+                          drawMainArrow(mainArrowStart,mainArrowEnd)
+                      }
+
+
                   }
 
-                  if(mainArrowEnd.length>0){
-                      drawMainArrow(mainArrowStart,mainArrowEnd)
-                  }
+
 
               }
 
@@ -1461,8 +1653,8 @@
                   foreignObject.attr("y",y)
 
                   var div = foreignObject.append('xhtml:div')
-                  div.style("width",RECTWIDTH+"px")
-                  div.style("height",RECTHEIGHT+"px")
+                  div.style("width",RECTWIDTH*0.95+"px")
+                  div.style("height",RECTHEIGHT*0.95+"px")
 
                   var panel = div.append("div")
                   panel.attr("borderd",0)
@@ -1491,20 +1683,9 @@
                       edit.attr("class","pull-right")
                       var divId = "btn"+Math.round(Math.random()*10000)
                       edit.attr("id",divId)
-
-
-                      if(scope.LAN == 'JP'){
-                          var html = '<a class="pull-right" ng-click="edit(\''+conf[0]+'\','+parseInt(conf[1])+','+parseInt(conf[2])+',\''+conf[3]+'\',\''+parseInt(conf[4])+'\')">編集</a>'
-                      }else{
-                          var html = '<a class="pull-right" ng-click="edit(\''+conf[0]+'\','+parseInt(conf[1])+','+parseInt(conf[2])+',\''+conf[3]+'\',\''+parseInt(conf[4])+'\')">修改</a>'
-                      }
-
-
+                      var html = '<span style="cursor: pointer" class="pull-right" ng-click="edits(\''+conf[0]+'\','+parseInt(conf[1])+','+parseInt(conf[2])+',\''+conf[3]+'\',\''+parseInt(conf[4])+'\')">編集</span>'
                       angular.element(document.getElementById(divId)).append($compile(html)(scope));
                   }
-
-
-
 
                   var body = panel.append("div")
                   body.attr("class","panel-body")
@@ -1537,8 +1718,6 @@
                   }
 
               }
-
-
 
 
               function toNextStep(){
@@ -1656,7 +1835,7 @@
 
                   var head = panel.append("div")
                   head.attr("class","panel-heading")
-                  head.text("いかの内容に対する異議説明")
+                  head.text("反駁内容")
 
                   var body = panel.append("div")
                   body.attr("class","panel-body")
@@ -1676,7 +1855,7 @@
                   if(type == "construct"){
                           drawText("立論の分析結果",TITLEX,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
                   }else{
-                          drawText("異議説明文の分析結果",TITLEX,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
+                          drawText("反駁の分析結果",TITLEX,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
                   }
 
                   //右边部分的虚线
@@ -1716,7 +1895,6 @@
                   for(var i=0;i<end.length;i++){
                       drawArrow(start.x,end[i].x,end[i].y,end[i].y)
                   }
-
               }
 
               function drawArrow(x1,x2,y1,y2){
@@ -1752,6 +1930,59 @@
                       console.log(scope.addDissentArr)
                       toNextStep()
                   })
+              }
+
+
+
+
+              scope.edits = function(category,i,j,type,dissentExplainI){
+
+
+                  if(category == "construct"){
+                      scope.inputStatus.i = i
+                      scope.inputStatus.j = j
+                      scope.inputStatus.name = type
+                      scope.analysisObject.target = category
+
+                      scope.topArticleChangeTabVal = 0
+                  }else if(category == "dissentExplain"){
+                      scope.analysisObject.i = parseInt(dissentExplainI)
+                      scope.analysisObject.target = category
+                      scope.inputStatus.i = i
+                      scope.inputStatus.j = j
+                      scope.inputStatus.name = type
+
+                      //scope.topArticleChangeTabVal = parseInt(dissentExplainI)+1
+                  }else{
+
+                  }
+
+                  checkIfOriginalDataExists()
+                  //让textarea显示相应的内容
+              }
+
+
+
+              function checkIfOriginalDataExists(){
+                  var status = scope.inputStatus.name
+                  var target = scope.analysisObject.target
+                  if(target == "construct"){
+                      var data = scope.analysisData.analysisResult
+                  }else{
+                      var data = scope.analysisDissentExplainData[scope.analysisObject.i].analysisResult
+                  }
+                  var i = scope.inputStatus.i
+                  var j = scope.inputStatus.j
+
+                  if(status == "claim"){
+                      scope._contents = data[i].claim
+                  }else if(status == "evidence"){
+                      scope._contents = data[i].support[j].evidence
+                  }else if(status == "warrant"){
+                      scope._contents = data[i].support[j].warrant
+                  }else{
+
+                  }
 
               }
 
@@ -2263,19 +2494,24 @@
                 }
 
 
-                $scope.edit = function(category,i,j,type,dissentExplainI){
+                $scope.edits = function(category,i,j,type,dissentExplainI){
+
+
                     if(category == "construct"){
                         $scope.inputStatus.i = i
                         $scope.inputStatus.j = j
                         $scope.inputStatus.name = type
                         $scope.analysisObject.target = category
 
+                        $scope.topArticleChangeTabVal = 0
                     }else if(category == "dissentExplain"){
                         $scope.analysisObject.i = parseInt(dissentExplainI)
                         $scope.analysisObject.target = category
                         $scope.inputStatus.i = i
                         $scope.inputStatus.j = j
                         $scope.inputStatus.name = type
+
+                        //$scope.topArticleChangeTabVal = parseInt(dissentExplainI)+1
                     }else{
 
                     }
@@ -2516,23 +2752,7 @@
                 }
 
                 scope.determines = function(n){
-                    // 1 win
-                    // 2 draw
-                    // 3 lost
-/*
-                    myPost.postData("/release/rate",{rate:n}).then(function(_res){
-                        if(_res.data.err == 0){
-                            scope.isReadonly = true;
-                            scope.rateable = false
-                            scope.debateInfo.proRate = _res.data.data.proRate
-                            scope.debateInfo.conRate = _res.data.data.conRate
 
-                            if(scope.debateInfo.proRate && scope.debateInfo.conRate){
-                                scope.debateInfo.finish = true;
-                            }
-                        }
-                    })
-*/
 
                     coreSocket.emit("rate",{rate:n})
 
@@ -2608,6 +2828,7 @@
                    }
                 })
 
+
                 function addIntoAnalysisData(name){
                     var i = $scope.inputStatus.i
                     var j = $scope.inputStatus.j
@@ -2677,11 +2898,6 @@
 
                     }
 
-                    //让滚动条到最底端
-                    $("#ak47").animate({scrollTop: 1000}, "slow")
-
-                    //$("body").animate({scrollTop: $target.offset().top}, "slow");
-                    //画图
 
                     $rootScope.$broadcast('click',{});
 
@@ -3326,25 +3542,37 @@
 
 
                     scope.inputing = function(){
+
+                        if(scope.statementStatus.name == "claim"){
+                            scope.statementData = scope.statement
+                        }
+
+                        if(scope.statementStatus.name == "dissent"){
+                            scope.dissentData[scope.statementStatus.i].reply = scope.statement
+                        }
+
                         transportStatementInfo("textInputing")
                     }
 
 
                     scope.focus = function(){
+                        transportStatementInfo("textInputing")
                         transportStatementInfo("textStartInputing")
                     }
 
                     scope.blur = function(){
+                        transportStatementInfo("textInputing")
                         transportStatementInfo("textLeaveInputing")
                     }
 
                     function transportStatementInfo(event){
-                        coreSocket.emit(event,{content:scope.statement,statementData:scope.statementData,dissentData:scope.dissentData})
+                        coreSocket.emit(event,{content:scope.statement,statementData:scope.statementData,dissentData:scope.dissentData,status:scope.statementStatus})
                     }
 
                     scope.textStartInputingVal = 0
 
                     coreSocket.on("textInputing",function(_res){
+                        console.log(_res)
                         //opposite开头的代表对方正在输入的信息
                         scope.opposite_textInputingContent = _res.content
                         scope.opposite_statementData = _res.statementData
@@ -3386,7 +3614,16 @@
                         if(scope.statementStatus.name == "claim"){
                             scope.statementData = scope.statement
 
-                            scope.statementStatus.name = "submit"
+                            scope.statementStatus.name = "preview"
+                            scope.conceptStatus = "noberu"
+                            transportStatementInfo("textInputing")
+                            $rootScope.$broadcast('drawStatementResult');
+                            $rootScope.$broadcast('_drawStatementResult');
+                            //submit()
+
+                            scope.statement = ""
+                            //清空输入框
+
                         }else if(scope.statementStatus.name == "dissent"){
                             scope.dissentData[i].reply = scope.statement
                                 if(i<scope.dissentData.length-1){
@@ -3403,6 +3640,7 @@
                                         scope.conceptStatus = "noberu"
                                         transportStatementInfo("textInputing")
                                         $rootScope.$broadcast('drawStatementResult');
+                                        $rootScope.$broadcast('_drawStatementResult');
                                         //submit()
 
                                         scope.statement = ""
@@ -3417,11 +3655,11 @@
 
                                 }
                         }else{
-
                             scope.statementStatus.name = "preview"
                             scope.conceptStatus = "noberu"
                             transportStatementInfo("textInputing")
                             $rootScope.$broadcast('drawStatementResult');
+                            $rootScope.$broadcast('_drawStatementResult');
                             //submit()
 
                             scope.statement = ""
@@ -4002,8 +4240,23 @@
 
                 function dealWithData() {
 
-                    if(scope.currentAnalysis){
-                        scope.analysisMapInformation.res.data[scope.analysisMapInformationLen] = scope.currentAnalysis
+                    /*
+                    if(!scope.currentAnalysis) {
+
+                        if(scope.everyAnalysisData){
+                            scope.currentAnalysis = scope.everyAnalysisData
+                        }
+
+                    }
+
+    */
+
+
+                    if(scope.debateInfo.status == "analysis" || scope.debateInfo.status == "check" || scope.debateInfo.status == "kentou" || scope.debateInfo.status == "bunseki"){
+                        if(scope.currentAnalysis){
+                            //正在分析的时候,或者说是最新的一个分析结果还没有被确定的时候,在最后一项里加入最新的分析结果,因为没有被确认,所以没有被放入分析结果的数据库里
+                            scope.analysisMapInformation.res.data[scope.analysisMapInformationLen] = scope.currentAnalysis
+                        }
                     }
 
                     scope.mapData = {pro:[],con:[]}
@@ -4264,13 +4517,7 @@
                     }
                 }
 
-
-
                 function _drawMainArrow(data,color){
-                    console.log("htcasdas")
-                    console.log(data)
-
-
                     for(var i in data){
                         if(data[i].startY && data[i].endY){
                             //只有等起点和终点同时存在时
@@ -4278,13 +4525,9 @@
                         }
 
                     }
-
-
                 }
 
-
                 function painLine(platform,x1,x2,y1,y2,color){
-
                     var svg = platform
                     var line = svg.append("line")
                     line.attr("class","mapData")
@@ -4313,7 +4556,6 @@
                 }
 
 
-
                 function drawClaim(I,recursionI,data,position,currentX){
                     //I代表第几轮主张
                     //主轴是以原始claim为模块进行描画的
@@ -4328,7 +4570,12 @@
                             position == 1?mainLeftArrow.pro[I].push({x:(currentX-MAINARROWLEFTOFFSET),startY:LASTY[position] + ELEMENTHEIGHT/2}):mainLeftArrow.con[I].push({x:(currentX-10),startY:LASTY[position] + ELEMENTHEIGHT/2})
                             //连接和左边mainLine的连线
                             var color = position == 1?PROCOLOR:CONCOLOR
-                            painLine(svg,currentX-MAINARROWLEFTOFFSET-LINEWIDTH/2,currentX,LASTY[position] + ELEMENTHEIGHT/2,LASTY[position] + ELEMENTHEIGHT/2,color)
+
+                            if(data[j].support[0].evidence){
+                                //只有这个claim下面的evidence存在才会画连接左边轴线的连接箭头
+                                painLine(svg,currentX-MAINARROWLEFTOFFSET-LINEWIDTH/2,currentX,LASTY[position] + ELEMENTHEIGHT/2,LASTY[position] + ELEMENTHEIGHT/2,color)
+                            }
+
                         }else{
                             //说明这里的claim不是原始的claim而是異議説明的claim
                             var indexToAnalysis = data[j].indexToAnalysis
@@ -4593,10 +4840,12 @@
                         button.text(text)
                         button.style("font-size",FONTSIZE+"px")
                         button.style("height",ELEMENTHEIGHT*0.95+"px")
+                        button.style("width",ELEMENTWIDTH*0.95+"px")
 
                         if(dissent == 1){
                             var span = button.append("span")
                             span.attr("class","glyphicon glyphicon-star")
+                            button.style("font-size",(FONTSIZE-2)+"px")
                         }
 
                         var _id = "element"+Math.round(Math.random()*10000)

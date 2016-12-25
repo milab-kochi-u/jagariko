@@ -1,4 +1,4 @@
-<div>
+<!--<div>
     <div class="panel panel-default" ng-show="textStartInputingVal == 1">
         <div class="panel-body">
             相手は今入力しています......
@@ -17,13 +17,14 @@
         </div>
     </div>
 </div>
+-->
 
 
 <div>
 
     <div class="panel panel-default" ng-show="opposite_statementData">
         <div class="panel-heading">
-            <h3 class="panel-title">主張</h3>
+            <h3 class="panel-title">相手の立論</h3>
         </div>
         <div class="panel-body">
             {{opposite_statementData}}
@@ -33,10 +34,10 @@
 
     <div class="panel panel-default" ng-repeat="(i,val) in opposite_dissentData track by $index">
         <div class="panel-heading">
-            <h3 class="panel-title">これに対して異議あり:{{val.txt}}</h3>
+            <h3 class="panel-title">相手の異議:{{val.txt}}</h3>
         </div>
         <div class="panel-body">
-            {{val.reply}}
+            相手の反駁:{{val.reply}}
         </div>
     </div>
 

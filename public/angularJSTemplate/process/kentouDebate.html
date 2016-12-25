@@ -35,7 +35,8 @@
             <div  class="panel panel-info">
                 <div class="panel-body" >
 
-                    <div class="row col-sm-8" style="height:330px;overflow: auto" ng-if="debateInfo.position ==2">
+                    <div id="analysisResult" class="row col-sm-8">
+                    <div  style="height:330px;overflow: auto" ng-if="debateInfo.position ==2">
 
 
 
@@ -43,7 +44,7 @@
                             <div class="panel-heading">
                                 正しく分析されているか確認してください
                             </div>
-                            <div class="panel-body" id="analysisResult">
+                            <div class="panel-body">
                                 <div class="row" style="height:200px;overflow: auto" >
                                     <analysis-result2></analysis-result2>
                                     <analysis-result></analysis-result>
@@ -56,18 +57,19 @@
 
                     </div>
 
-                    <div class="row col-sm-8"  style="height:330px;overflow: auto"  ng-if="debateInfo.position ==1">
+                    <div   style="height:330px;overflow: auto"  ng-if="debateInfo.position ==1">
                         <div  class="panel panel-info" >
                             <div class="panel-heading">
                                 相手はあなたが正しく分析しているかを確認しています
                             </div>
-                            <div class="panel-body" id="analysisResult" style="height:270px;overflow: auto" >
+                            <div class="panel-body"  style="height:270px;overflow: auto" >
                                 <analysis-result2></analysis-result2>
                                 <analysis-result></analysis-result>
                             </div>
                         </div>
                     </div>
 
+                    </div>
 
                     <div class="row col-sm-4">
                         <concept></concept>

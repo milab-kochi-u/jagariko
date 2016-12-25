@@ -30,23 +30,38 @@
 
                     <div  class="panel panel-info" >
                         <div class="panel-heading">
-                            <span ng-if="debateInfo.position == 2">相手の主張をお待ちください</span>
-                            <span ng-if="debateInfo.position == 1">主張を出してください</span>
+                            <span ng-if="debateInfo.position == 2">
+                                討論相手が立論を書いていますのでお待ちください
+                                <span ng-show="textStartInputingVal == 1">入力しています...</span>
+                            </span>
+                            <span ng-if="debateInfo.position == 1">
+                                <span ng-show="statementStatus.name == 'claim'">立論してください</span>
+                                <span ng-show="statementStatus.name == 'dissent'">反駁してください</span>
+                            </span>
 
+                            <span ng-show="statementStatus.name == 'preview'">
+                                立論の内容を確認してください
+                            </span>
                         </div>
-                        <div class="panel-body" id="_statementResultMapSVG">
+                        <div class="panel-body" id="analysisResult">
                             <div ng-show="debateInfo.position == 1">
                                 <div ng-show="statementStatus.name != 'preview'">
                                     <input-text-area></input-text-area>
                                 </div>
                                 <div ng-show="statementStatus.name == 'preview'">
                                     <div style="height: 220px;overflow: auto" >
-                                        <statement-result></statement-result>
-                                        <hr>
                                         <statement-result2></statement-result2>
+                                        <hr>
+                                        <statement-result></statement-result>
                                     </div>
                                     <div style="height:20px">
-                                        <button class="btn btn-default pull-right" ng-click="submit()">送信</button>
+                                        <div  class=" col-sm-10">
+                                            <span>この内容でよければ「送信」を押してください。</span>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <button class="btn btn-default pull-right" ng-click="submit()">送信</button>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>

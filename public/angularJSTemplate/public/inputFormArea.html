@@ -1,19 +1,21 @@
-<div  class="panel panel-info" ng-show="LAN == 'JP'" id="analysisResult">
-    <div ng-show="analysisObject.target!='preview'"  class="panel" style="height:326px;" ng-show="everyStatementData">
-        <div style="height: 40%;overflow: auto">
+<div  class="panel panel-info"  id="analysisResult">
+    <div ng-show="analysisObject.target!='preview'"   ng-show="everyStatementData">
+        <div>
             <p class="alert alert-warning" style="margin-bottom:2px;">相手の意見を主張,根拠,論拠に分析してください</p>
             <div>
                     <div class="panel-body" style="padding: 1px"  ng-show="topArticleChangeTabVal == 0" id="claimBody" >
 
                     <!--<div class="alert alert-default" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>-->
-                    <div class="panel panel-default" style="margin-bottom:3px;padding:1px;height: 80px;overflow: auto;">
-                    <p>相手の意見:{{everyStatementData.statementData}}</p>
+                    <span>相手の立論:</span>
+                    <div class="panel panel-default" style="margin-bottom:3px;padding:1px;overflow: auto;">
+                    <p>{{everyStatementData.statementData}}</p>
                     </div>
                     </div>
 
                     <div class="panel-body" style="padding:1px;" ng-show="topArticleChangeTabVal == (i+1)"  ng-repeat="(i,val) in everyStatementData.dissentExplain track by $index">
-                    <div class="panel panel-default" style="margin-bottom:3px;padding:1px;height: 80px;overflow: auto;">
-                    相手の意見:<br/>{{everyStatementData.dissentExplain[i].reply}}
+                    <span>相手の反駁:</span>
+                    <div class="panel panel-default" style="margin-bottom:3px;padding:1px;">
+                    <br/>{{everyStatementData.dissentExplain[i].reply}}
                     </div>
                     </div>
                     </div>
@@ -22,17 +24,17 @@
         <div style="height:60%;overflow: auto" id="ak47">
             <div ng-show="analysisObject.target == 'construct'">
                                                                    <div ng-show="analysisData.analysisResult[inputStatus.i].claim">
-                                                                   <div ng-class="(inputStatus.name == 'evidence' || inputStatus.name == 'newEvidence')?'panel alert-warning col-sm-12':'panel panel-default col-sm-12'" style="margin-bottom:3px;padding:1px;height: 80px;overflow: auto;" >
+                                                                   <div ng-class="(inputStatus.name == 'evidence' || inputStatus.name == 'newEvidence')?'panel alert-warning col-sm-12':'panel panel-default col-sm-12'" style="margin-bottom:3px;padding:1px;" >
                                                                    主張:{{analysisData.analysisResult[inputStatus.i].claim}}
                                                                    </div>
 
                                                                    <div ng-repeat="(n,val) in analysisData.analysisResult[inputStatus.i].support track by $index">
-                                                                   <div ng-show="val.warrant" class="panel panel-default col-sm-11 col-sm-offset-1"  style="margin-bottom:3px;padding:1px;height: 80px;overflow: auto;">
+                                                                   <div ng-show="val.warrant" class="panel panel-default col-sm-11 col-sm-offset-1"  style="margin-bottom:3px;padding:1px;">
                                                                    論拠:{{val.warrant}}
                                                                    </div>
 
 
-                                                                   <div ng-show="val.evidence"  ng-class="(inputStatus.name == 'warrant' && inputStatus.j == n)?'panel alert-warning col-sm-10 col-sm-offset-2':'panel panel-default col-sm-10 col-sm-offset-2'" style="margin-bottom:3px;padding:1px;height: 80px;overflow: auto;">
+                                                                   <div ng-show="val.evidence"  ng-class="(inputStatus.name == 'warrant' && inputStatus.j == n)?'panel alert-warning col-sm-10 col-sm-offset-2':'panel panel-default col-sm-10 col-sm-offset-2'" style="margin-bottom:3px;padding:1px;">
                                                                    根拠:{{val.evidence}}
                                                                    </div>
                                                                    </div>
@@ -64,11 +66,11 @@
                                                                                                  <!--  第一个claim -->
                                                                                                  <div class="row col-sm-12">
                                                                                                  <label  ng-if="analysisObject.target == 'construct'">
-                                                                                                 相手の意見の主張をあげてください
+                                                                                                 相手の立論の主張をあげてください
                                                                                                  </label>
 
                                                                                                  <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                                                 相手の異議説明({{(analysisObject.i+1)}})の主張をあげてください
+                                                                                                 相手の{{(analysisObject.i+1)}}番目反駁の主張をあげてください
                                                                                                  </label>
                                                                                                  </div>
                                                                                                  </div>
@@ -77,11 +79,11 @@
                                                                                                  <!-- 非第一个claim -->
                                                                                                  <div class="row col-sm-7">
                                                                                                  <label  ng-if="analysisObject.target == 'construct'">
-                                                                                                 相手の意見の主張をあげてください
+                                                                                                 相手の立論の主張をあげてください
                                                                                                  </label>
 
                                                                                                  <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                                                 相手の異議説明({{(analysisObject.i+1)}})の主張をあげてください
+                                                                                                 相手の{{(analysisObject.i+1)}}番目反駁の主張をあげてください
                                                                                                  </label>
                                                                                                  </div>
 
@@ -94,11 +96,11 @@
             <div class="panel-body" ng-if="inputStatus.name == 'evidence'">
                                                                               <div class="row col-sm-9">
                                                                               <label  ng-if="analysisObject.target == 'construct'">
-                                                                              相手の意見に書かれているこの主張の根拠をあげてください
+                                                                              相手の立論に書かれているこの主張の根拠をあげてください
                                                                               </label>
 
                                                                               <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                              相手の異議説明({{(analysisObject.i+1)}})に書かれているこの主張の根拠をあげてください
+                                                                              相手の{{(analysisObject.i+1)}}番目反駁に書かれているこの主張の根拠をあげてください
                                                                               </label>
                                                                               </div>
 
@@ -111,11 +113,11 @@
             <div class="panel-body" ng-if="inputStatus.name == 'warrant'">
                                                                              <div class="row col-sm-9">
                                                                              <label  ng-if="analysisObject.target == 'construct'">
-                                                                             相手の意見に書かれているこの根拠の論拠をあげてください
+                                                                             相手の立論に書かれているこの根拠の論拠をあげてください
                                                                              </label>
 
                                                                              <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                             相手の異議説明({{(analysisObject.i+1)}})に書かれているこの根拠の論拠をあげてください
+                                                                             相手の{{(analysisObject.i+1)}}番目反駁に書かれているこの根拠の論拠をあげてください
                                                                              </label>
                                                                              </div>
 
@@ -129,11 +131,11 @@
 
                                                                                  <div class="row col-sm-12">
                                                                                  <label  ng-if="analysisObject.target == 'construct'">
-                                                                                 相手の意見に書かれているこの主張に新しい根拠あればあげてください
+                                                                                 相手の立論に書かれているこの主張に新しい根拠あればあげてください
                                                                                  </label>
 
                                                                                  <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                                 相手の異議説明({{(analysisObject.i+1)}})に書かれている主張に新しい根拠があればあげてください
+                                                                                 相手の{{(analysisObject.i+1)}}番目反駁に書かれている主張に新しい根拠があればあげてください
                                                                                  </label>
                                                                                  </div>
 
@@ -156,11 +158,11 @@
             <div class="panel-body" ng-if="inputStatus.name == 'newClaim'">
                                                                               <div class="row col-sm-12">
                                                                               <label  ng-if="analysisObject.target == 'construct'">
-                                                                              相手の意見に新しい主張があればあげてください
+                                                                              相手の立論に新しい主張があればあげてください
                                                                               </label>
 
                                                                               <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                              相手の異議説明({{(analysisObject.i+1)}})に新しい主張があればあげてください
+                                                                              相手の{{(analysisObject.i+1)}}番目反駁に新しい主張があればあげてください
                                                                               </label>
                                                                               </div>
 
@@ -195,9 +197,9 @@
     </div>
 
     <div ng-show="analysisObject.target=='preview'"  class="panel" >
-        <div class="row" class="analysisResult" style="height: 326px;width:96%;margin:0 auto;overflow: auto">
+        <div class="row" class="analysisResult" style="height: 320px;width:96%;margin:0 auto;overflow: auto">
             <analysis-result2></analysis-result2>
-            <analysis-result></analysis-result>
+            <!--<analysis-result></analysis-result>-->
         </div>
 
         <div class="row" style="width:96%;margin: 0 auto">
@@ -392,184 +394,5 @@
 
 
 
-                <div  class="panel panel-info" ng-show="LAN == 'CN'">
-                    <div class="panel-heading"><span style="cursor:pointer" ng-click="changeInputTab()">输入</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="cursor:pointer"  ng-click="changeInputTab()">请求对方再次陈述说明</span></div>
-                    <div class="panel-body" id="inputBody" ng-show="inputFormAreachangeInputTabVal == 1">
-                        <div  ng-if="inputStatus.name == 'claim' && inputStatus.i == 0">
-
-                            <div class=" col-sm-12  alert alert-warning"   role="alert">
-                                <a href="#" class="alert-link">
-
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        请先分析原始阐述说明
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        请分析质疑阐述说明({{(analysisObject.i+1)}})
-                                    </label>
-                                    |
-                                    您找到这段文字中的主张了吗
-                                </a>
-                            </div>
-
-                            <div class=" col-sm-3">
-                                <!--<button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noClaim()">主張なし</button>-->
-                            </div>
-
-                        </div>
-
-                        <div  ng-if="inputStatus.name == 'claim' && inputStatus.i != 0">
-
-                            <div class=" col-sm-7  alert alert-warning"   role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        请先分析原始阐述说明
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        请分析质疑阐述说明({{(analysisObject.i+1)}})
-                                    </label>
-                                    |
-                                    您找到这段文字中的主张了吗</a>
-                            </div>
-
-                            <div class=" col-sm-5">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noFirstClaim()">放弃这个主张</button>
-                            </div>
-
-                        </div>
-
-
-
-
-                        <div ng-if="inputStatus.name == 'evidence'">
-                            <div class=" col-sm-9 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        请先分析原始阐述说明
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        请分析质疑阐述说明({{(analysisObject.i+1)}})
-                                    </label>
-                                    |
-                                    您找到这段文字中的证据了吗</a>
-                            </div>
-                            <div class=" col-sm-3">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noCurrentEvidence()">没有找到证据</button>
-                            </div>
-                        </div>
-
-
-
-                        <div ng-if="inputStatus.name == 'warrant'">
-                            <div class=" col-sm-9 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        请先分析原始阐述说明
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        请分析质疑阐述说明({{(analysisObject.i+1)}})
-                                    </label>
-                                    |
-                                    你找到连接刚刚的主张和证据的理由了吗,如果有请从原文中摘选,如果没有你可以通过自己的思考补充</a>
-                            </div>
-                            <div class=" col-sm-3">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noCurrentWarrant()">没有找到理由</button>
-                            </div>
-                        </div>
-
-                        <div ng-if="inputStatus.name == 'newEvidence'">
-                            <div class=" col-sm-12 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        请先分析原始阐述说明
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        请分析质疑阐述说明({{(analysisObject.i+1)}})
-                                    </label>
-                                    |
-                                    阐述说明中还有新的证据吗?</a>
-                            </div>
-
-                            <div class=" col-sm-6">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="setNewEvidence()">还有</button>
-                            </div>
-
-
-                            <div class=" col-sm-6">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noEvidence()">没有了</button>
-                            </div>
-                        </div>
-
-                        <div ng-if="inputStatus.name == 'newClaim'">
-                            <div class=" col-sm-12 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        请先分析原始阐述说明
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        请分析质疑阐述说明({{(analysisObject.i+1)}})
-                                    </label>
-                                    |
-                                    阐述说明中还有新的主张吗?</a>
-                            </div>
-
-
-                            <div class=" col-sm-6">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="setNewClaim()">还有</button>
-                            </div>
-
-
-                            <div class=" col-sm-6">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noClaim()">没有了,进行下一步</button>
-                            </div>
-                        </div>
-
-
-                        <div style="clear: both"></div>
-                        <div ng-show="inputStatus.name != 'newClaim' && inputStatus.name != 'newEvidence'">
-
-                            <label  ng-if="inputStatus.name == 'claim'">主张:</label>
-                            <label  ng-if="inputStatus.name == 'evidence' || inputStatus.name == 'newEvidence'">证据:</label>
-                            <label  ng-if="inputStatus.name == 'warrant'">理由:</label>
-
-                            <textarea class="form-control" rows="7" ng-model="_contents" ></textarea>
-                            <p>
-                                <span ng-if="data1Success==0">输入必须项</span>
-                                <button type="button" class="btn btn-default pull-right" ng-click="output()" >下一步</button>
-                            </p>
-                        </div>
-
-
-
-                    </div>
-                    <div class="panel-body" id="inputBody2" ng-show="inputFormAreachangeInputTabVal == 0">
-
-                        <div >
-                            <div class=" col-sm-12 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">您要请求对方再次阐述说明吗?</a>
-                            </div>
-
-                        </div>
-
-
-                        <div style="clear: both"></div>
-                        <div>
-                            <label>请填写请求对方再次阐述说明的理由:</label>
-                            <textarea class="form-control" rows="7" ng-model="requestContentReason" ></textarea>
-                            <p>
-                                <span ng-if="data1Success==0">输入必须项</span>
-                                <button type="button" class="btn btn-default pull-right" ng-click="requestTwiceStatement()" >发送</button>
-                            </p>
-                        </div>
-
-
-
-                    </div>
-                </div>
 
 

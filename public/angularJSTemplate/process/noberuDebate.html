@@ -30,7 +30,7 @@
                         <span ng-if="debateInfo.position == 1">反駁してください</span>
                     </div>
 
-                    <div class="panel-body">
+                    <div class="panel-body" id="analysisResult">
                         <div ng-show="debateInfo.position == 1">
                             <div ng-show="statementStatus.name != 'preview'">
                                 <input-text-area></input-text-area>
@@ -38,6 +38,8 @@
 
                             <div ng-show="statementStatus.name == 'preview'">
                                 <div style="height: 220px;overflow: auto">
+                                    <statement-result2></statement-result2>
+                                    <hr>
                                     <statement-result></statement-result>
                                 </div>
                                 <div style="height:20px">

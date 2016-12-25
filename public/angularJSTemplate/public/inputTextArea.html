@@ -5,20 +5,22 @@
 
 
 <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'dissent'"  role="alert">
-    <a href="#" class="alert-link">まず異議の部分を説明してください</a>
+    <!--<a href="#" class="alert-link">まず異議の部分を反駁してください</a>-->
     <p>異議:</p>
     <p style="color: red">{{dissentTxt}}</p>
 </div>
 
+<!--
 <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'claim'"  role="alert">
-    <a href="#" class="alert-link">あなたの意見を主張してください</a>
+    <a href="#" class="alert-link">あなたの立論を述べてください</a>
 </div>
+-->
 
 <div class=" col-sm-12 alert alert-warning" ng-show="statementStatus.name == 'submit'"  role="alert">
     <a href="#" class="alert-link">以上の立論を送信しますか</a>
 </div>
 
-<label ng-show="statementStatus.name == 'dissent'" >説明:</label>
+<label ng-show="statementStatus.name == 'dissent'" >反駁:</label>
 <label ng-show="statementStatus.name == 'claim'" >立論:</label>
 
 
