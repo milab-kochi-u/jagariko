@@ -11,28 +11,28 @@
             <div class="panel-body" >
 
                 <div id="analysisResult" class="row col-sm-8">
-                <div class="" style="height:330px;overflow: auto" ng-show="debateInfo.position ==1">
+                <div class="" style="height:290px;overflow: auto" ng-show="debateInfo.position ==1">
 
                     <div class="panel panel-info" >
                         <div class="panel-heading">
-                            正しく分析されているか確認してください
+                            相手があなたの意見を分析しました。正しく分析されているか確認してください。
                         </div>
                         <div class="panel-body" >
-                            <div class="row" id="analysisResult"  style="height:200px;overflow: auto" >
+                            <div class="row" id="analysisResult"  style="height:160px;overflow: auto" >
                                 <analysis-result2></analysis-result2>
                                 <!--<analysis-result></analysis-result>-->
                             </div>
-                            <div class="row" style="height:80px;overflow: auto">
+                            <div class="row">
                                 <exam-analysis-result></exam-analysis-result>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class=""  style="height:330px;overflow: auto"  ng-show="debateInfo.position ==2">
+                <div class=""  style="height:290px;overflow: auto"  ng-show="debateInfo.position ==2">
                     <div  class="panel panel-info" >
                         <div class="panel-heading">
-                            相手はあなたが正しく分析しているかを確認しています
+                            相手はあなたが分析した内容を確認しています
                         </div>
                         <div class="panel-body"  style="height:270px;overflow: auto" >
                             <analysis-result2></analysis-result2>
@@ -42,7 +42,7 @@
                 </div>
                 </div>
 
-                <div class="row col-sm-4">
+                <div class="row col-sm-4" style="height:290px;overflow: auto">
                     <concept></concept>
                 </div>
             </div>

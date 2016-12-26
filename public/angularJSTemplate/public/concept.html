@@ -1,75 +1,41 @@
 <div ng-if="LAN=='JP'" style="height: 100%">
-<div  ng-if="conceptStatus=='analysis'">
-<div  class="panel panel-info" ng-if="inputStatus.name == 'claim' || inputStatus.name == 'newClaim'">
-    <div class="panel-heading">主張</div>
+<div  ng-if="conceptStatus=='analysis'" style="height: 100%">
+<div  class="panel panel-info" style="height: 100%;overflow: auto">
+    <div class="panel-heading">ヒント</div>
     <div class="panel-body" id="inputExampleBody">
-        <p>根拠から展開されたひとつの主張です。最も言いたいことです。相手の話を聞いて何が言いたいのかわからない場合は、主張をしていないからです。そして、主張を引き出すためには、「だから何だろう？」と質問をしてみましょう。すると相手が本当に言いたいことが解ります。</p>
+        <p>主張：その立場としての意見や考えの中で最も言いたいこと、あるいは結論。</p>
+        <p>根拠：主張の正当性を支える事実。</p>
+        <p>論拠：根拠が主張を支えている理由、あるいは暗黙の前提。(必ずしも明示的には示されていない)</p>
         <p>
+        <p>例）「Aくんは中高時代に米国で暮らしていた。よって、Aくんは英語が話せる。」</p>
+        <p>この場合の「主張」「論拠」「根拠」は以下のようになる。</p>
         <ul>
-            <li>根拠：TシャツAの価格は、100,000円である
-            </li>
-            <li class="_border">主張：誰も買わない</li>
-            <li>論拠：Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。</li>
+            <li>主張：Aくんは英語が話せる</li>
+            <li>根拠：Aくんは中高時代に米国で暮らしていた</li>
+            <li>論拠：海外で暮らしていたのだから、当然現地の人たちと英語で話していたのに違いない</li>
         </ul>
         </p>
     </div>
 </div>
 
 
-
-<div  class="panel panel-info" ng-if="inputStatus.name == 'evidence' || inputStatus.name == 'newEvidence'">
-    <div class="panel-heading">根拠</div>
-    <div class="panel-body" id="inputExampleBody">
-        <p>(より確かな)事実です。100%正しい事実ではありません。（そんなものは存在しません）。ディベートの試合ではどちらの発言が、より事実に近いかがポイントになります。相手の話を聞くときは、「なんでそうなるんですか？」「本当にそうですか？」と事実や理由を探る態度でいてください。</p>
-        <p>
-        <ul>
-            <li class="_border">根拠：TシャツAの価格は、100,000円である
-            </li>
-            <li>主張：誰も買わない</li>
-            <li>論拠：Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。</li>
-        </ul>
-        </p>
-    </div>
 </div>
+<div ng-if="conceptStatus=='statement'" style="height: 100%">
 
-
-
-
-<div  class="panel panel-info" ng-if="inputStatus.name == 'warrant' || inputStatus.name == 'newWarrant'">
-    <div class="panel-heading">論拠</div>
-    <div class="panel-body" id="inputExampleBody">
-        <p>根拠が主張を支えている理由です。論拠は、必ずしも明示的に示されていません。暗黙の前提とも言います。詳しくは、論拠とは何者か？の記事を参照下さい。</p>
-        <p>
-        <ul>
-            <li>根拠：TシャツAの価格は、100,000円である
-            </li>
-            <li>主張：誰も買わない</li>
-            <li class="_border">論拠：Tシャツの相場は、500円から高くても4000円。対して、100,000円のTシャツなんて誰も買うわけがない。同じお金があれば、コート、カバン、時計、アクセサリーを買うに違いない。</li>
-        </ul>
-        </p>
-    </div>
-</div>
-
-</div>
-
-
-<div ng-if="conceptStatus=='statement'">
-
-    <div class="panel panel-info" ng-if="statementStatus.name == 'dissent'">
+    <div class="panel panel-info" ng-if="statementStatus.name == 'dissent'" >
         <div class="panel-heading">ヒント</div>
-        <div class="panel-body" style="height: 315px;overflow: auto"  id="inputExampleBody">
-            <p>立論とは，自分の立場の主張を認めさせるための意見を述べることです。</p>
-        </div>
-    </div>
-
-    <div class="panel panel-info" ng-if="statementStatus.name != 'dissent'">
-        <div class="panel-heading">ヒント</div>
-        <div class="panel-body" style="height: 315px;overflow: auto"  id="inputExampleBody">
-            <p>立論とは，自分の立場の主張を認めさせるための意見を述べることです。</p>
+        <div class="panel-body" style="height: 280px;overflow: auto"  id="inputExampleBody">
+            反駁とは，相手の意見の中の異議がある部分について、判断や反論の意見を述べること。
         </div>
     </div>
 
 
+    <div class="panel panel-info" ng-if="statementStatus.name != 'dissent'" >
+        <div class="panel-heading">ヒント</div>
+        <div class="panel-body" style="height: 280px;overflow: auto"  id="inputExampleBody">
+            <p>立論とは，自分の立場の主張を認めさせるための意見を述べることです。</p>
+        </div>
+    </div>
 
 
 
@@ -78,11 +44,11 @@
 
     <div ng-if="conceptStatus=='judgeMent'" style="height: 100%">
 
-        <div  class="panel panel-info" style="height: 100%">
+        <div  class="panel panel-info" style="height: 100%;overflow: auto">
             <div class="panel-heading">
                 勝敗判定ルール
             </div>
-            <div class="panel-body" style="height: 280px;overflow:auto;">
+            <div class="panel-body" >
                 <table class="table">
 
                     <tr class="default">
@@ -134,30 +100,50 @@
     </div>
 
 
-
     <div ng-if="conceptStatus=='noberu'" style="height: 100%">
 
-        <div  class="panel panel-info" style="height: 100%">
+        <div  class="panel panel-info" style="height: 100%;overflow: auto">
             <div class="panel-heading">ヒント
             </div>
             <div class="panel-body" id="inputExampleBody">
-                <p>主張:根拠から展開されたひとつの主張です。最も言いたいことです</p>
-                <p>論拠:根拠が主張を支えている理由です。論拠は、必ずしも明示的に示されていません。暗黙の前提とも言います。</p>
-                <p>根拠:事実や理由を探る態度でいてください</p>
+                <p>反駁とは，相手の意見の中の異議がある部分について、判断や反論の意見を述べること。</p>
             </div>
         </div>
 
     </div>
 
-    <div ng-if="conceptStatus=='check'" style="height: 100%">
 
-        <div  class="panel panel-info" style="height: 100%">
+    <div ng-if="conceptStatus=='state'" style="height: 100%">
+
+        <div  class="panel panel-info" style="height: 100%;overflow: auto">
             <div class="panel-heading">ヒント
             </div>
             <div class="panel-body" id="inputExampleBody">
-                <p>主張:根拠から展開されたひとつの主張です。最も言いたいことです</p>
-                <p>論拠:根拠が主張を支えている理由です。論拠は、必ずしも明示的に示されていません。暗黙の前提とも言います。</p>
-                <p>根拠:事実や理由を探る態度でいてください</p>
+                <p>反駁とは，相手の意見の中の異議がある部分について、判断や反論の意見を述べること。</p>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div ng-if="conceptStatus=='check'" style="height: 100%">
+
+        <div  class="panel panel-info" style="height: 100%;overflow: auto"">
+            <div class="panel-heading">ヒント
+            </div>
+            <div class="panel-body" id="inputExampleBody">
+                <p>主張：その立場としての意見や考えの中で最も言いたいこと、あるいは結論。</p>
+                <p>根拠：主張の正当性を支える事実。</p>
+                <p>論拠：根拠が主張を支えている理由、あるいは暗黙の前提。(必ずしも明示的には示されていない)</p>
+                <p>
+                <p>例）「Aくんは中高時代に米国で暮らしていた。よって、Aくんは英語が話せる。」</p>
+                <p>この場合の「主張」「論拠」「根拠」は以下のようになる。</p>
+                <ul>
+                    <li>主張：Aくんは英語が話せる</li>
+                    <li>根拠：Aくんは中高時代に米国で暮らしていた</li>
+                    <li>論拠：海外で暮らしていたのだから、当然現地の人たちと英語で話していたのに違いない</li>
+                </ul>
+                </p>
             </div>
         </div>
 
@@ -165,13 +151,22 @@
 
     <div ng-if="conceptStatus=='kentou'" style="height: 100%">
 
-        <div  class="panel panel-info" style="height: 100%">
+        <div  class="panel panel-info" style="height: 100%;overflow: auto">
             <div class="panel-heading">ヒント
             </div>
             <div class="panel-body" id="inputExampleBody">
-                <p>主張:根拠から展開されたひとつの主張です。最も言いたいことです</p>
-                <p>論拠:根拠が主張を支えている理由です。論拠は、必ずしも明示的に示されていません。暗黙の前提とも言います。</p>
-                <p>根拠:事実や理由を探る態度でいてください</p>
+                <p>主張：その立場としての意見や考えの中で最も言いたいこと、あるいは結論。</p>
+                <p>根拠：主張の正当性を支える事実。</p>
+                <p>論拠：根拠が主張を支えている理由、あるいは暗黙の前提。(必ずしも明示的には示されていない)</p>
+                <p>
+                <p>例）「Aくんは中高時代に米国で暮らしていた。よって、Aくんは英語が話せる。」</p>
+                <p>この場合の「主張」「論拠」「根拠」は以下のようになる。</p>
+                <ul>
+                    <li>主張：Aくんは英語が話せる</li>
+                    <li>根拠：Aくんは中高時代に米国で暮らしていた</li>
+                    <li>論拠：海外で暮らしていたのだから、当然現地の人たちと英語で話していたのに違いない</li>
+                </ul>
+                </p>
             </div>
         </div>
 

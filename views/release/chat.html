@@ -324,6 +324,7 @@
 
             promise.then(function(msg){
                 checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+                $rootScope.$broadcast("drawAnalysisResult",{})
             })
         })
 
@@ -411,6 +412,8 @@
                     $scope.everyStatementData = _res.data.everyStatement
                     $scope.debateInfo.analysisFunc = _res.data.analysisFunc
                     $scope.debateInfo.mapFunc = _res.data.mapFunc
+                    $scope.examAnalysisResultComment = _res.data.examAnalysisResultComment
+                    $scope.kyaka = _res.data.kyaka
 
                     if($scope.debateInfo.analysisFunc == 1){
                         //如果有分析功能的话那么处理分析数据的框架
@@ -1030,15 +1033,15 @@
                     var foreignObject = svg.append("foreignObject")
                     foreignObject.attr("width",CONSTRUCTWIDTH)
                     if(text.length < 20){
-                        CONSTRUCTHEIGHT = 30
+                        CONSTRUCTHEIGHT = 160
                     }else if(text.length >=20 && text.length < 50){
-                        CONSTRUCTHEIGHT = 100
+                        CONSTRUCTHEIGHT = 260
                     }else if(text.length >=50 && text.length < 100){
-                        CONSTRUCTHEIGHT = 140
+                        CONSTRUCTHEIGHT = 300
                     }else if(text.length <200){
-                        CONSTRUCTHEIGHT = 280
+                        CONSTRUCTHEIGHT = 440
                     }else{
-                        CONSTRUCTHEIGHT = 380
+                        CONSTRUCTHEIGHT = 540
                     }
 
                     foreignObject.attr("height",CONSTRUCTHEIGHT)
@@ -1431,7 +1434,6 @@
                    startDraw()
                })
 
-
               var TOP  //顶端的边距
               var LEFT  //左边距
               var RIGHT //右边距
@@ -1529,6 +1531,25 @@
 
               function draw(){
                   clearDraw()
+
+                  if(scope.kyaka == 1){
+                      //说明是被回退的
+                      if(scope.debateInfo.status == "analysis" || scope.debateInfo.status == "bunseki"){
+                          drawText("あなたの分析結果が同意されてませんでした、分析しなおしてください",LEFT,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
+                          LASTY += 30
+                          drawText("相手のコメント:"+scope.examAnalysisResultComment,LEFT,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
+                          LASTY += TITLEANDRECTINTERVALY
+                      }
+
+
+                  }
+
+                  if((scope.debateInfo.status == "lookup" && scope.debateInfo.position == 1) || (scope.debateInfo.status == "appeal" && scope.debateInfo.position == 2)){
+                      drawText("反駁する方法:まずは異議があると思う論拠また根拠をクリックして異議付けてください",LEFT,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
+                      LASTY += 30
+                  }
+
+
                   if(scope.debateInfo.preFinish){
                       //如果是准结束阶段,那么只有異議説明可以分析
                   }else{
@@ -1854,8 +1875,10 @@
 
                   if(type == "construct"){
                           drawText("立論の分析結果",TITLEX,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
-                  }else{
+                  }else if(type == "dissentExplain"){
                           drawText("反駁の分析結果",TITLEX,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
+                  }else{
+
                   }
 
                   //右边部分的虚线
@@ -4149,16 +4172,15 @@
                 analysisMapInformation.then(function(msg){
                     scope.analysisMapInformation = msg
                     scope.analysisMapInformationLen = scope.analysisMapInformation.res.data.length
-
                     dealWithData()
                     dealWithDraw()
+
                 })
 
 
                 scope.$on("reDrawMap",function(){
                     setTimeout(function(){
                             dealWithData()
-                            console.log(scope.mapData)
                             dealWithDraw()
                     },500)
                 })
@@ -4168,6 +4190,7 @@
                     var _width = element.find("div")[0].offsetWidth
                     LEFT = _width*0.3
                     TOP = 35
+                    document.getElementById("heiheihei").scrollLeft = _width*0.2
 
                     CLAIMWIDTH = (_width)*0.4  //占据除去两个边距后5分之4的位置
 

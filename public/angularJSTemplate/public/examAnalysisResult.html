@@ -2,7 +2,6 @@
 
 
 
-
 <div>
 
                         <div class="row">
@@ -15,11 +14,11 @@
 
 
                         <div class="form-group col-sm-8" ng-show="examAnalysisResultTabVal == 1">
-                            <input type="text" class="form-control" ng-model="examAnalysisResultComment" placeholder="うまく分析できましたよね">
+                            <input type="hidden" class="form-control" ng-model="examAnalysisResultComment" placeholder="うまく分析できましたよね">
                         </div>
 
-                        <div class="form-group col-sm-8" ng-show="examAnalysisResultTabVal == 2">
-                            <input type="text" class="form-control" ng-model="examAnalysisResultComment" placeholder="私の想像したものとずれている">
+                        <div class="form-group col-sm-8" ng-show="examAnalysisResultTabVal == 2">コメント（同意できない箇所をお書きください）
+                            <input type="text" class="form-control" ng-model="examAnalysisResultComment" placeholder="例）私の主張には「XX」という根拠が書かれていると思います。">
                         </div>
 
                         <div class="form-group col-sm-4">

@@ -40,7 +40,10 @@ router.post("/getThemesList",adminController.getThemesListController,checkAdminS
 router.post('/increaseThemes',adminController.increaseThemesController,checkAdminSession);
 router.post("/deleteThemes",adminController.deleteThemesController,checkAdminSession)
 router.post("/getThemes",adminController.getThemesController,checkAdminSession)
+router.post("/getMembers",adminController.getMembersController,checkAdminSession)
 router.post("/updateThemes",adminController.updateThemesController,checkAdminSession)
+router.post("/updateMembers",adminController.updateMembersController,checkAdminSession)
+
 
 
 module.exports = router;

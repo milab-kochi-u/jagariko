@@ -54,6 +54,12 @@
                                             <span ng-show="debateInfo.conRate == 3">自分の負け</span>
                                         </div>
                                     </div>
+                                    <br/>
+
+                                    <div class=" col-sm-12 alert alert-info"   role="alert" ng-show="debateInfo.proRate && debateInfo.conRate">
+                                        <a ng-show="debateInfo.analysisFunc == 1" target="_blank" href="https://goo.gl/MGLEAO" class="alert-link">討論の勝者が誰であるか，下のボタンを押して自己判定してください</a>
+                                        <a ng-show="debateInfo.analysisFunc == 0" target="_blank" href="https://goo.gl/e5ZuF3" class="alert-link">討論の勝者が誰であるか，下のボタンを押して自己判定してください</a>
+                                    </div>
 
 
                                 </div>

@@ -274,7 +274,7 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
         })
 
 
-        //随时把分析的现阶段结果存入数据库的everyAnalysisData字段,以便让自己和对方在地图里面随时可以看到目前的地图
+        //随时把分析的现阶段结果,以便让自己和对方在地图里面随时可以看到目前的地图
 
 
 
@@ -297,30 +297,7 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
 
         })
 
-        socket.on("refuseAnalysisResult",function(msg){
-            steps(function(){
-                mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
-                    return  _res[0].status
-                }))
-            },function(status){
-                if(status == "check"){
-                    //从check回到上一步analysis的状态
-                    var update = {$set:{preStatus:status,status:"analysis",time:Date.parse(new Date())}}
-                }else if(status == "kentou"){
-                    //从kentou回到上一步bunseki的状态
-                    var update = {$set:{preStatus:status,status:"bunseki",time:Date.parse(new Date())}}
-                }else{
 
-                }
-
-
-                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},update,this.hold(function(){
-                    socket.emit("refuseAnalysisResultFinish",{})
-                    socket.to(session.debateLogin.rNum).broadcast.emit("refuseAnalysisResultFinish",{})
-                }))
-
-            })()
-        })
 
         socket.on("rate",function(msg){
             var num = session.debateLogin.num
@@ -489,11 +466,11 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                     if(preFinish){
                         var update = {$set:{preStatus:status,status:"finish",finish:true,time:Date.parse(new Date())}}
                     }else{
-                        var update = {$set:{preStatus:status,status:"appeal",time:Date.parse(new Date())}}
+                        var update = {$set:{preStatus:status,status:"appeal",kyaka:0,time:Date.parse(new Date())}}
                     }
 
                 }else if(status == "kentou"){
-                    var update = {$set:{preStatus:status,status:"lookup",time:Date.parse(new Date())}}
+                    var update = {$set:{preStatus:status,status:"lookup",kyaka:0,time:Date.parse(new Date())}}
                 }else{
 
                 }
@@ -509,10 +486,57 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                 everyAnalysisData.num = session.debateLogin.num
                 everyAnalysisData.pro = pro
                 everyAnalysisData.con = con
+                everyAnalysisData.confirm = 1 //这里一定要加以区别
                 mongo.insert("analysisLog",everyAnalysisData,{},this.hold(function(_res){
 
                 }))
             })()
+        })
+
+        socket.on("refuseAnalysisResult",function(msg){
+            var pro
+            var con
+            var everyAnalysisData
+            var preFinish
+            var examAnalysisResultComment = msg.comment
+            steps(function(){
+                mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
+                    pro = _res[0].pro
+                    con = _res[0].con
+                    everyAnalysisData = _res[0].everyAnalysisData
+                    preFinish = _res[0].preFinish
+
+                    return  _res[0].status
+                }))
+            },function(status){
+                if(status == "check"){
+                    //从check回到上一步analysis的状态
+                    var update = {$set:{preStatus:status,status:"analysis",examAnalysisResultComment:examAnalysisResultComment,kyaka:1,time:Date.parse(new Date())}}
+                }else if(status == "kentou"){
+                    //从kentou回到上一步bunseki的状态
+                    var update = {$set:{preStatus:status,status:"bunseki",examAnalysisResultComment:examAnalysisResultComment,kyaka:1,time:Date.parse(new Date())}}
+                }else{
+
+                }
+
+
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},update,this.hold(function(){
+                    socket.emit("refuseAnalysisResultFinish",{})
+                    socket.to(session.debateLogin.rNum).broadcast.emit("refuseAnalysisResultFinish",{})
+                }))
+
+            },function(){
+                everyAnalysisData.rNum = session.debateLogin.rNum
+                everyAnalysisData.num = session.debateLogin.num
+                everyAnalysisData.pro = pro
+                everyAnalysisData.con = con
+                everyAnalysisData.confirm = 0 //这里一定要加以区别
+                everyAnalysisData.examAnalysisResultComment = examAnalysisResultComment
+                mongo.insert("analysisLog",everyAnalysisData,{},this.hold(function(_res){
+
+                }))
+            })()
+
         })
 
 

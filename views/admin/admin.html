@@ -51,9 +51,9 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-12">
-                    <group ng-if="changeTabVal == 'group'"></group>
-                    <member ng-if="changeTabVal == 'member'"></member>
-                    <theme ng-if="changeTabVal == 'theme'"></theme>
+                    <group ng-show="changeTabVal == 'group'"></group>
+                    <member ng-show="changeTabVal == 'member'"></member>
+                    <theme ng-show="changeTabVal == 'theme'"></theme>
                 </div>
             </div>
         </div>
@@ -144,17 +144,22 @@
         return {
             scope:false,
             link:function(scope,element){
+
+                scope.editVal = 0
+                //表单处于添加状态
+
                 scope.getMembersList()
-                scope._submit = function(){
+                scope._submits = function(){
+                    var username = scope.username
+                    var password = scope.password
                     var name = scope.name
-                    var password = scope.name
                     var group = scope.group
 
-                    if(!name || !group || !password){
+                    if(!name || !group || !password || !name){
                         return;
                     }
 
-                    myPost.postData("/admin/increaseMembers",{name:name,password:password,group:group}).then(function(res){
+                    myPost.postData("/admin/increaseMembers",{username:username,name:name,password:password,group:group}).then(function(res){
                         scope.getMembersList()
                     })
 
@@ -162,12 +167,54 @@
 
 
 
-                scope.delete = function(_id){
+                scope.deletes = function(_id){
                     myPost.postData("/admin/deleteMembers",{_id:_id}).then(function(res){
                         if(res.error == 1) alert(res.msg)
                         scope.getMembersList()
                     })
                 }
+
+
+                scope.edits = function(_id){
+                    myPost.postData("/admin/getMembers",{_id:_id}).then(function(res){
+
+
+                        if(res.data.error == 1) alert(res.msg)
+                        if(res.data.error == 0){
+                            scope.editVal = 1
+                            scope.usernameVal = res.data.data.username
+                            scope.name = res.data.data.name
+                            scope.groupVal = res.data.data.group
+                            scope.passwordVal = res.data.data.password
+                            scope.edit_id = _id
+                            //表单处于编辑状态
+                        }
+
+                    })
+                }
+
+                scope.backs = function(){
+                    scope.editVal = 0
+                }
+
+
+                scope._updates = function(){
+                    var username = scope.usernameVal
+                    var password = scope.passwordVal
+                    var name = scope.nameVal
+                    var group = scope.groupVal
+
+                    if(!username || !group || !password || !name){
+                        return;
+                    }
+
+                    myPost.postData("/admin/updateMembers",{_id:scope.edit_id,username:username,name:name,password:password,group:group}).then(function(res){
+                        scope.getMembersList()
+                    })
+
+                }
+
+
             },
             templateUrl:"/angularJSTemplate/admin/member.html"
         }

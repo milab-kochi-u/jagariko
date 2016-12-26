@@ -1,7 +1,7 @@
 <div  class="panel panel-info"  id="analysisResult">
     <div ng-show="analysisObject.target!='preview'"   ng-show="everyStatementData">
         <div>
-            <p class="alert alert-warning" style="margin-bottom:2px;">相手の意見を主張,根拠,論拠に分析してください</p>
+            <p class="alert alert-warning" style="margin-bottom:2px;">相手の意見を「主張」,「根拠」,「論拠」に分析してください</p>
             <div>
                     <div class="panel-body" style="padding: 1px"  ng-show="analysisObject.target == 'construct'" id="claimBody" >
                     <!--<div class="alert alert-default" role="alert">{{everyStatementData.dissentExplain[i].reply}}</div>-->
@@ -65,11 +65,13 @@
                                                                                                  <!--  第一个claim -->
                                                                                                  <div class="row col-sm-12">
                                                                                                  <label  ng-if="analysisObject.target == 'construct'">
-                                                                                                 相手の立論の主張をあげてください
+                                                                                                 まずは、相手の立論の「主張」をあげてください。<br/>
+                                                                                                     主張が複数ある場合は一つ目の主張を書いてください。あとで追加できます。
                                                                                                  </label>
 
                                                                                                  <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                                                 相手の{{(analysisObject.i+1)}}番目反駁の主張をあげてください
+                                                                                                     まずは、相手の{{(analysisObject.i+1)}}番目の反駁の「主張」をあげてください。<br/>
+                                                                                                     主張が複数ある場合は一つ目の主張を書いてください。あとで追加できます。
                                                                                                  </label>
                                                                                                  </div>
                                                                                                  </div>
@@ -78,16 +80,18 @@
                                                                                                  <!-- 非第一个claim -->
                                                                                                  <div class="row col-sm-7">
                                                                                                  <label  ng-if="analysisObject.target == 'construct'">
-                                                                                                 相手の立論の主張をあげてください
+                                                                                                     相手の立論の「主張」をあげてください。<br/>
+                                                                                                     主張がまだ複数ある場合は一つずつ主張を書いてください。あとで追加できます。
                                                                                                  </label>
 
                                                                                                  <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                                                 相手の{{(analysisObject.i+1)}}番目反駁の主張をあげてください
+                                                                                                     相手の{{(analysisObject.i+1)}}番目の反駁の「主張」をあげてください。<br/>
+                                                                                                     主張がまだ複数ある場合は一つずつ主張を書いてください。あとで追加できます。
                                                                                                  </label>
                                                                                                  </div>
 
                                                                                                  <div class="row col-sm-5">
-                                                                                                 <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noFirstClaim()">主張締め</button>
+                                                                                                 <button  type="button" class=" btn btn-default pull-left" ng-click="noFirstClaim()">キャンセル</button>
                                                                                                  </div>
                                                                                                  </div>
 
@@ -95,16 +99,18 @@
             <div class="panel-body" ng-if="inputStatus.name == 'evidence'">
                                                                               <div class="row col-sm-9">
                                                                               <label  ng-if="analysisObject.target == 'construct'">
-                                                                              相手の立論に書かれているこの主張の根拠をあげてください
+                                                                              次に、この主張の「根拠」をあげてください。<br/>
+                                                                                  根拠が複数ある場合は一つずつ根拠を書いてください。あとで追加できます。
                                                                               </label>
 
                                                                               <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                              相手の{{(analysisObject.i+1)}}番目反駁に書かれているこの主張の根拠をあげてください
+                                                                              次に、この主張の「根拠」をあげてください。<br/>
+                                                                                  根拠が複数ある場合は一つずつ根拠を書いてください。あとで追加できます。
                                                                               </label>
                                                                               </div>
 
                                                                               <div class="row col-sm-3">
-                                                                              <button type="button" class="btn-lg btn btn-default pull-left" ng-click="noCurrentEvidence()">根拠締め</button>
+                                                                              <button type="button" class=" btn btn-default pull-left" ng-click="noCurrentEvidence()">この主張に「根拠」は無い</button>
                                                                               </div>
                                                                               </div>
 
@@ -112,16 +118,18 @@
             <div class="panel-body" ng-if="inputStatus.name == 'warrant'">
                                                                              <div class="row col-sm-9">
                                                                              <label  ng-if="analysisObject.target == 'construct'">
-                                                                             相手の立論に書かれているこの根拠の論拠をあげてください
+                                                                             続いて、この根拠の「論拠」をあげてください。<br/>
+                                                                                 （論拠は追加で複数記入できませんので、この欄に全てをご記入ください）
                                                                              </label>
 
                                                                              <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                             相手の{{(analysisObject.i+1)}}番目反駁に書かれているこの根拠の論拠をあげてください
+                                                                             続いて、この根拠の「論拠」をあげてください<br/>
+                                                                                 （論拠は追加で複数記入できませんので、この欄に全てをご記入ください）
                                                                              </label>
                                                                              </div>
 
                                                                              <div class="row col-sm-3">
-                                                                             <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noCurrentWarrant()">論拠締め</button>
+                                                                             <button  type="button" class=" btn btn-default pull-left" ng-click="noCurrentWarrant()">この根拠に「論拠」は無い</button>
                                                                              </div>
 
                                                                              </div>
@@ -130,23 +138,23 @@
 
                                                                                  <div class="row col-sm-12">
                                                                                  <label  ng-if="analysisObject.target == 'construct'">
-                                                                                 相手の立論に書かれているこの主張に新しい根拠あればあげてください
+                                                                                 この主張の「根拠」が他にありますか？<br/>
                                                                                  </label>
 
                                                                                  <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                                 相手の{{(analysisObject.i+1)}}番目反駁に書かれている主張に新しい根拠があればあげてください
+                                                                                     この主張の「根拠」が他にありますか？<br/>
                                                                                  </label>
                                                                                  </div>
 
                                                                                  <div class="row col-sm-12">
 
                                                                                  <div class=" col-sm-6">
-                                                                                 <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="setNewEvidence()">またある</button>
+                                                                                 <button  type="button" class="btn btn-default pull-left" ng-click="setNewEvidence()">まだある</button>
                                                                                  </div>
 
 
                                                                                  <div class=" col-sm-6">
-                                                                                 <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noEvidence()">なし</button>
+                                                                                 <button  type="button" class="btn btn-default pull-left" ng-click="noEvidence()">もうない</button>
                                                                                  </div>
 
                                                                                  </div>
@@ -157,23 +165,23 @@
             <div class="panel-body" ng-if="inputStatus.name == 'newClaim'">
                                                                               <div class="row col-sm-12">
                                                                               <label  ng-if="analysisObject.target == 'construct'">
-                                                                              相手の立論に新しい主張があればあげてください
+                                                                              相手の立論に新しい主張はありますか？
                                                                               </label>
 
                                                                               <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                                                              相手の{{(analysisObject.i+1)}}番目反駁に新しい主張があればあげてください
+                                                                              相手の{{(analysisObject.i+1)}}番目の反駁に新しい主張はありますか？
                                                                               </label>
                                                                               </div>
 
                                                                               <div class="row col-sm-12">
 
                                                                               <div class=" col-sm-6">
-                                                                              <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="setNewClaim()">またある</button>
+                                                                              <button  type="button" class="btn btn-default pull-left" ng-click="setNewClaim()">まだある</button>
                                                                               </div>
 
 
                                                                               <div class=" col-sm-6">
-                                                                              <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noClaim()">なし</button>
+                                                                              <button  type="button" class="btn btn-default pull-left" ng-click="noClaim()">もうない</button>
                                                                               </div>
 
                                                                               </div>
@@ -196,7 +204,8 @@
     </div>
 
     <div ng-show="analysisObject.target=='preview'"  class="panel" >
-        <div class="row" class="analysisResult" style="height: 320px;width:96%;margin:0 auto;overflow: auto">
+
+        <div class="row" class="analysisResult" style="height: 250px;width:96%;margin:0 auto;overflow: auto">
             <analysis-result2></analysis-result2>
             <!--<analysis-result></analysis-result>-->
         </div>
@@ -207,185 +216,6 @@
 
     </div>
 
-<!--
-                    <div class="panel-body" id="inputBody">
-                        <div  ng-if="inputStatus.name == 'claim' && inputStatus.i == 0">
-
-                            <div class="col-sm-12  alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">
-
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        相手の意見の主張をあげてください
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        相手の異議説明({{(analysisObject.i+1)}})の主張をあげてください
-                                    </label>
-                                </a>
-                            </div>
-
-                            <div class=" col-sm-3">
-                            </div>
-
-                        </div>
-
-                        <div  ng-if="inputStatus.name == 'claim' && inputStatus.i != 0">
-
-                            <div class=" col-sm-7  alert alert-warning"   role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        立論を分析してください
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        異議説明({{(analysisObject.i+1)}}) を分析してください
-                                    </label>
-                                    |
-                                    相手の意見に主張を見つかりませんか</a>
-                            </div>
-
-                            <div class=" col-sm-5">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noFirstClaim()">主張締め</button>
-                            </div>
-
-                        </div>
-
-
-
-
-                        <div ng-if="inputStatus.name == 'evidence'">
-                            <div class=" col-sm-9 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        立論を分析してください
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        異議説明({{(analysisObject.i+1)}}) を分析してください
-                                    </label>
-                                    |
-                                    相手の意見に根拠を見つかりませんか
-                                    </a>
-                            </div>
-                            <div class=" col-sm-3">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noCurrentEvidence()">根拠締め</button>
-                            </div>
-                        </div>
-
-
-
-                        <div ng-if="inputStatus.name == 'warrant'">
-                            <div class=" col-sm-9 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        立論を分析してください
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        请分析质疑阐述说明({{(analysisObject.i+1)}})
-                                    </label>
-                                    |
-                                    どうしてその根拠が理由として主張を支えていますか?論拠を文章から掘り出してくださいまた自分で考えてください</a>
-                            </div>
-                            <div class=" col-sm-3">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noCurrentWarrant()">論拠締め</button>
-                            </div>
-                        </div>
-
-                        <div ng-if="inputStatus.name == 'newEvidence'">
-                            <div class=" col-sm-12 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        立論を分析してください
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        请分析质疑阐述说明({{(analysisObject.i+1)}})
-                                    </label>
-                                    |
-                                    この文章に新しい根拠がまたありますか?</a>
-                            </div>
-
-                            <div class=" col-sm-6">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="setNewEvidence()">またある</button>
-                            </div>
-
-
-                            <div class=" col-sm-6">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noEvidence()">なし</button>
-                            </div>
-                        </div>
-
-                        <div ng-if="inputStatus.name == 'newClaim'">
-                            <div class=" col-sm-12 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">
-                                    <label  ng-if="analysisObject.target == 'construct'">
-                                        立論を分析してください
-                                    </label>
-
-                                    <label  ng-if="analysisObject.target == 'dissentExplain'">
-                                        请分析质疑阐述说明({{(analysisObject.i+1)}})
-                                    </label>
-                                    |
-                                    この文章に新しい主張がまたありますか?</a>
-                            </div>
-
-
-                            <div class=" col-sm-6">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="setNewClaim()">またある</button>
-                            </div>
-
-
-                            <div class=" col-sm-6">
-                                <button  type="button" class="btn-lg btn btn-default pull-left" ng-click="noClaim()">なし</button>
-                            </div>
-                        </div>
-
-
-                        <div style="clear: both"></div>
-                        <div ng-show="inputStatus.name != 'newClaim' && inputStatus.name != 'newEvidence'">
-
-                            <label  ng-if="inputStatus.name == 'claim'">主張:</label>
-                            <label  ng-if="inputStatus.name == 'evidence' || inputStatus.name == 'newEvidence'">根拠:</label>
-                            <label  ng-if="inputStatus.name == 'warrant'">論拠:</label>
-
-
-
-
-                            <textarea class="form-control" rows="7" ng-model="_contents" ></textarea>
-                            <p>
-                                <span ng-if="data1Success==0">入植必須</span>
-                                <button type="button" class="btn btn-default pull-right" ng-click="output()" >次へ</button>
-                            </p>
-                        </div>
-
-
-
-                    </div>
-                    <div class="panel-body" id="inputBody2" ng-show="inputFormAreachangeInputTabVal == 0">
-
-                        <div >
-                            <div class=" col-sm-12 alert alert-warning"  role="alert">
-                                <a href="#" class="alert-link">相手の立論を再投稿をお願いしますか?</a>
-                            </div>
-
-                        </div>
-
-
-                        <div style="clear: both"></div>
-                        <div>
-                            <label>投稿お願いの理由を書いてください:</label>
-                            <textarea class="form-control" rows="7" ng-model="requestContentReason" ></textarea>
-                            <p>
-                                <span ng-if="data1Success==0">入力項目が必須</span>
-                                <button type="button" class="btn btn-default pull-right" ng-click="requestTwiceStatement()" >送信</button>
-                            </p>
-                        </div>
-
-
-
-                    </div>
--->
 </div>
 
 

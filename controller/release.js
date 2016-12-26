@@ -349,7 +349,7 @@ module.exports = {
     getDebateAnalysisMapInformationController:function(req,res){
         var status
         steps(function(){
-            mongo.find("analysisLog",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum},{},this.hold(function(_res){
+            mongo.find("analysisLog",{num:req.session.debateLogin.num,rNum:req.session.debateLogin.rNum,confirm:1},{},this.hold(function(_res){
                 /*
                 //只有在分析阶段才会从debateStatus数据表取analysisData
 

@@ -8,18 +8,22 @@
     <table class="table">
         <tr>
             <td class="active">No</td>
+            <td class="success">学籍番号</td>
             <td class="success">名前</td>
             <td class="warning">グループ</td>
             <td class="danger">試合状態</td>
             <td class="info" >削除</td>
+            <td class="info">編集</td>
         </tr>
 
-        <tr ng-repeat="(i,val) in membersList">
+        <tr ng-repeat="(i,val) in membersList track by $index">
             <td class="active">{{i}}</td>
             <td class="success">{{val.username}}</td>
+            <td class="success">{{val.name}}</td>
             <td class="warning">{{val.group}}</td>
             <td class="danger"><button class="btn btn-warning"><span ng-if="val.debateInvolve">討論中</span><span ng-if="!val.debateInvolve">自由</span></button></td>
-            <td class="info"><button class="btn btn-danger" ng-click="delete(val._id)">削除</buttonc></td>
+            <td class="info"><button class="btn btn-danger" ng-click="deletes(val._id)">削除</button></td>
+            <td class="info"><button class="btn btn-danger" ng-click="edits(val._id)">編集</button></td>
         </tr>
     </table>
 
@@ -27,8 +31,13 @@
     </table>
 
 </div>
-<div class="row">
+<div class="row" ng-show="editVal == 0">
     <form name="groupform">
+        <div class="form-group">
+            <label>学籍番号 </label>
+            <input  class="form-control" name="name" ng-model="username"  placeholder="学籍番号" required>
+        </div>
+
         <div class="form-group">
             <label>名前 </label>
             <input  class="form-control" name="name" ng-model="name"  placeholder="名前" required>
@@ -46,8 +55,47 @@
             </select>
         </div>
     </form>
-    <button  class="btn btn-default" ng-click="_submit()">登録</button>
+    <button  class="btn btn-default" ng-click="_submits()">登録</button>
 
+    <div ng-show="groupform.username.$error.required">学籍番号を入力してください</div>
+    <div ng-show="groupform.name.$error.required">名前を入力してください</div>
+    <div ng-show="groupform.password.$error.required">パスワードを入力してください</div>
+    <div ng-show="groupform.group.$error.required">所属グループを入力してください</div>
+
+</div>
+
+
+<div class="row" ng-show="editVal == 1">
+    <div class="">
+        <button class="btn btn-info" ng-click="backs()">戻る</button>
+    </div>
+
+    <form name="groupform">
+        <div class="form-group">
+            <label>学籍番号 </label>
+            <input  class="form-control" name="username" ng-model="usernameVal"  placeholder="学籍番号" required>
+        </div>
+
+        <div class="form-group">
+            <label>名前 </label>
+            <input  class="form-control" name="name" ng-model="nameVal"  placeholder="名前" required>
+        </div>
+
+        <div class="form-group">
+            <label>パスワード </label>
+            <input  class="form-control" name="password" ng-model="passwordVal"  placeholder="パスワード" required>
+        </div>
+
+        <div class="form-group" required>
+            <label for="">所属グループ</label>
+            <select name="group" ng-model="groupVal" class="form-control">
+                <option ng-repeat="val in groupList" value="{{val.name}}">{{val.name}}</option>
+            </select>
+        </div>
+    </form>
+    <button  class="btn btn-default" ng-click="_updates()">修正</button>
+
+    <div ng-show="groupform.username.$error.required">学籍番号を入力してください</div>
     <div ng-show="groupform.name.$error.required">名前を入力してください</div>
     <div ng-show="groupform.password.$error.required">パスワードを入力してください</div>
     <div ng-show="groupform.group.$error.required">所属グループを入力してください</div>

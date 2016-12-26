@@ -89,13 +89,13 @@ module.exports = {
         })()
     },
 
-
     increaseMembersController:function(req,res){
-        var username = req.body.name
+        var username = req.body.username
+        var name = req.body.name
         var password = req.body.password
         var group = req.body.group
 
-        if(!username || !password || !group) return;
+        if(!username || !password || !group || !name) return;
         steps(function(){
             mongo.createIfNotExists("debateMembers",this.hold(function(res){
                 console.log(res)
@@ -110,7 +110,7 @@ module.exports = {
                 res.end(JSON.stringify({error: 1, msg: "duplicated theme"}))
                 this.terminate()
             }else{
-                mongo.insert("debateMembers",{username:username,password:password,group:group,debateInvolve:false,winNum:0,drawNum:0,lostNum:0,unDeterminNum:0},function(_res){
+                mongo.insert("debateMembers",{username:username,password:password,name:name,group:group,debateInvolve:false,winNum:0,drawNum:0,lostNum:0,unDeterminNum:0},function(_res){
                         res.end(JSON.stringify({error: 0, msg: "ok"}))
                 })
             }
@@ -136,13 +136,25 @@ module.exports = {
 
 
     getThemesListController: function (req, res) {
-
         steps(function () {
             mongo.find("themes", {}, {}, this.hold(function (_res) {
                 res.end(JSON.stringify({error: 0, msg: "successful", data: _res}))
             }))
         })()
+    },
 
+    getMembersController:function(req,res){
+        var _id = req.body._id
+        if(!_id) return;
+        var objectId = new mongodb.ObjectID(_id)
+        mongo.find("debateMembers",{_id:objectId},{},function(result){
+            console.log(result)
+            if(result.length == 0){
+                res.end(JSON.stringify({error: 1, msg: "related data not found"}))
+            }else{
+                res.end(JSON.stringify({error: 0, data:result[0]}))
+            }
+        })
     },
 
     getThemesController:function(req,res){
@@ -170,6 +182,23 @@ module.exports = {
 
 
         mongo.update("themes",{_id:objectId},{$set:{theme:theme,desc:desc,group:group}},function(result){
+            res.end(JSON.stringify({error: 0}))
+        })
+
+    },
+
+
+    updateMembersController:function(req,res){
+        var username = req.body.username
+        var name = req.body.name
+        var password = req.body.password
+        var group = req.body.group
+        var _id = req.body._id
+        var objectId = new mongodb.ObjectID(_id)
+        if(!username || !name || !group || !password) return
+
+
+        mongo.update("debateMembers",{_id:objectId},{$set:{username:username,name:name,password:password}},function(result){
             res.end(JSON.stringify({error: 0}))
         })
 
