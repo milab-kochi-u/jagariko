@@ -11,6 +11,17 @@
                     <div class="row col-sm-8" style="height: 330px;overflow:auto;">
 
 
+                        <div>
+                            <p ng-if="debateInfo.position == 2 && everyStatementData.dissentExplain[0].reply">「自分の反駁」</p>
+                            <p ng-if="debateInfo.position == 1 && everyStatementData.dissentExplain[0].reply">「相手の反駁」</p>
+                            <div class="panel panel-default " style="cursor: pointer;"  ng-show="everyStatementData.dissentExplain[0].reply" ng-repeat="(i,val) in everyStatementData.dissentExplain track by $index">
+                                <div class="panel-body rebuttalElement"  id="rebuttal{{val.random}}"  ng-click="selectRebuttal(val.random,val.reply,'rebuttal')">
+                                    <p><span class="gk" id="gk{{val.random}}" style="display:none;">選択された</span>反駁:{{val.reply}}</p>
+                                </div>
+                            </div>
+                        </div>
+
+
                         <div  class="panel panel-info" >
                             <div class="panel-heading">
                                 <span>自己評価をしてください</span>
@@ -58,11 +69,15 @@
                                 </div>
 
                                 <br/>
-                                <div class=" col-sm-12 alert alert-info"   role="alert" ng-show="debateInfo.proRate && debateInfo.conRate">
-                                    <a ng-show="debateInfo.analysisFunc == 1" target="_blank" href="https://goo.gl/MGLEAO" class="alert-link">討論の勝者が誰であるか，下のボタンを押して自己判定してください</a>
-                                    <a ng-show="debateInfo.analysisFunc == 0" target="_blank" href="https://goo.gl/e5ZuF3" class="alert-link">討論の勝者が誰であるか，下のボタンを押して自己判定してください</a>
+                                <div class=" col-sm-12 alert alert-info"   role="alert" ng-show="debateInfo.proRate && debateInfo.conRate && debateInfo.group == '第2回目評価実験'">
+                                    <a ng-show="debateInfo.analysisFunc == 1" target="_blank" href="https://goo.gl/MGLEAO" class="alert-link">アンケートの協力お願いします</a>
+                                    <a ng-show="debateInfo.analysisFunc == 0" target="_blank" href="https://goo.gl/e5ZuF3" class="alert-link">アンケートの協力お願いします</a>
                                 </div>
 
+                                <div class=" col-sm-12 alert alert-info"   role="alert" ng-show="debateInfo.proRate && debateInfo.conRate && debateInfo.group == '第1回目評価実験'">
+                                    <p ng-show="debateInfo.analysisFunc == 1"  class="alert-link">アンケートの協力お願いします</p>
+                                    <p ng-show="debateInfo.analysisFunc == 0"  class="alert-link">アンケートの協力お願いします</p>
+                                </div>
 
                             </div>
 

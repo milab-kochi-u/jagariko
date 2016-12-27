@@ -290,6 +290,9 @@
                                 <div class="col-sm-11">
                                         <div class="row">
 
+                                            <span ng-if="_val.status == 'noAnalysisStart'">肯定側の立論また反駁しています</span>
+                                            <span ng-if="_val.status == 'noAnalysisFuncAppealAndState'">否定側の立論また反駁しています</span>
+
                                             <span ng-if="_val.status == 'wait'">また始まっていない</span>
                                             <span ng-if="_val.status == 'start'">肯定側の主張中</span>
                                             <span ng-if="_val.status == 'analysis'">否定側の分析中</span>
