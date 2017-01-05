@@ -11,9 +11,10 @@
                     </div>
                     </div>
 
+
                     <div class="panel-body" style="padding:1px;" ng-show="analysisObject.target == 'dissentExplain'"  ng-repeat="(i,val) in everyStatementData.dissentExplain track by $index">
-                    <span>相手の反駁:</span>
-                    <div class="panel panel-default" style="margin-bottom:3px;padding:1px;">
+                    <span ng-show="analysisObject.i == i">相手の反駁:</span>
+                    <div class="panel panel-default" style="margin-bottom:3px;padding:1px;" ng-show="analysisObject.i == i">
                     <br/>{{everyStatementData.dissentExplain[i].reply}}
                     </div>
                     </div>
@@ -43,17 +44,17 @@
 
             <div ng-show="analysisObject.target == 'dissentExplain'">
                                                                         <div ng-show="analysisDissentExplainData[analysisObject.i].analysisResult[inputStatus.i].claim">
-                                                                        <div ng-class="(inputStatus.name == 'evidence' || inputStatus.name == 'newEvidence')?'panel alert-warning col-sm-12':'panel panel-default col-sm-12'" style="margin-bottom:3px;padding:1px;height: 80px;overflow: auto;" >
+                                                                        <div ng-class="(inputStatus.name == 'evidence' || inputStatus.name == 'newEvidence')?'panel alert-warning col-sm-12':'panel panel-default col-sm-12'" style="margin-bottom:3px;padding:1px;" >
                                                                         主張:{{analysisDissentExplainData[analysisObject.i].analysisResult[inputStatus.i].claim}}
                                                                         </div>
 
                                                                         <div ng-repeat="(n,val) in analysisDissentExplainData[analysisObject.i].analysisResult[inputStatus.i].support track by $index">
-                                                                        <div ng-show="val.warrant" class="panel panel-default col-sm-11 col-sm-offset-1"  style="margin-bottom:3px;padding:1px;height: 80px;overflow: auto;">
+                                                                        <div ng-show="val.warrant" class="panel panel-default col-sm-11 col-sm-offset-1"  style="margin-bottom:3px;padding:1px;">
                                                                         論拠:{{val.warrant}}
                                                                         </div>
 
 
-                                                                        <div ng-show="val.evidence"  ng-class="(inputStatus.name == 'warrant' && inputStatus.j == n)?'panel alert-warning col-sm-10 col-sm-offset-2':'panel panel-default col-sm-10 col-sm-offset-2'" style="margin-bottom:3px;padding:1px;height: 80px;overflow: auto;">
+                                                                        <div ng-show="val.evidence"  ng-class="(inputStatus.name == 'warrant' && inputStatus.j == n)?'panel alert-warning col-sm-10 col-sm-offset-2':'panel panel-default col-sm-10 col-sm-offset-2'" style="margin-bottom:3px;padding:1px;">
                                                                         根拠:{{val.evidence}}
                                                                         </div>
                                                                         </div>

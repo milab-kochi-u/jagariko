@@ -6,5 +6,5 @@
 
 
 module.exports = {
-    wwwPort:8000
+    wwwPort:80
 }

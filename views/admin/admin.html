@@ -161,6 +161,11 @@
 
                     myPost.postData("/admin/increaseMembers",{username:username,name:name,password:password,group:group}).then(function(res){
                         scope.getMembersList()
+
+                        scope.username　= ""
+                        scope.password = ""
+                        scope.name = ""
+                        scope.group = ""
                     })
 
                 }
@@ -210,6 +215,15 @@
 
                     myPost.postData("/admin/updateMembers",{_id:scope.edit_id,username:username,name:name,password:password,group:group}).then(function(res){
                         scope.getMembersList()
+
+
+                        scope.editVal = 0
+                        scope.usernameVal = ""
+                        scope.name = ""
+                        scope.groupVal = ""
+                        scope.passwordVal = ""
+                        scope.edit_id = ""
+
                     })
 
                 }
