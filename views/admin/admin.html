@@ -11,6 +11,15 @@
     <link rel="stylesheet" href="/admin/simple-sidebar.css">
     <![endif]-->
     <script src="/release/angular.min.js"></script>
+
+
+    <script src='/release/textAngular-rangy.min.js'></script>
+    <script src='/release/textAngular-sanitize.min.js'></script>
+    <script src="/release/textAngular.min.js"></script>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,300">
+    <link rel="stylesheet" href="/release/textAngular.css" type="text/css">
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <!-- Latest compiled and minified JavaScript -->
@@ -42,6 +51,10 @@
                 <a href="#" ng-click="changeTab('theme')">テーマ管理</a>
             </li>
 
+            <li>
+                <a href="#" ng-click="changeTab('mail')">メール管理</a>
+            </li>
+
         </ul>
     </div>
     <!-- /#sidebar-wrapper -->
@@ -54,6 +67,7 @@
                     <group ng-show="changeTabVal == 'group'"></group>
                     <member ng-show="changeTabVal == 'member'"></member>
                     <theme ng-show="changeTabVal == 'theme'"></theme>
+                    <mail ng-show="changeTabVal == 'mail'"></mail>
                 </div>
             </div>
         </div>
@@ -66,7 +80,7 @@
 
 <script>
 
-    var myApp = angular.module("myApp",[])
+    var myApp = angular.module("myApp",["textAngular"])
     var myController = myApp.controller("myController",function($scope,myPost){
                 $scope.changeTabVal = "group"
 
@@ -96,6 +110,21 @@
             })
         }
 
+        $scope.getGroupMembersList = function(){
+            if(!$scope.group){
+                return;
+            }
+
+            myPost.postData("/admin/getGroupMembersList",{group:$scope.group}).then(function(res){
+                $scope.groupMembersList = res.data.data
+            })
+        }
+
+        $scope.getDraftList = function(){
+            myPost.postData("/admin/getDraft",{}).then(function(res){
+                $scope.DraftsList = res.data.data
+            })
+        }
     })
 
 
@@ -297,6 +326,133 @@
                 }
             },
             templateUrl:"/angularJSTemplate/admin/theme.html"
+        }
+    })
+
+
+
+
+
+    myApp.directive("mail",function(myPost){
+        return {
+            scope:false,
+            link:function(scope,element){
+                scope.contacts = []
+                scope.getGroupList()
+                scope.getDraftList()
+
+                scope.draft = function(){
+                    myPost.postData("/admin/draftInsert",{subject:scope.subject,content:scope.htmlContent,contacts:scope.contacts}).then(function(res){
+                        scope.getDraftList()
+
+
+                        scope.subject = ""
+                        scope.contacts = []
+                        scope.htmlContent = ""
+                    })
+                }
+
+                //getDraft
+
+                scope.selectContact = function(username,group){
+
+                    var username = username || scope.username.split(",")[0]
+                    var group = group || scope.group
+
+                    var name = scope.username.split(",")[1]
+                    var a = -1;
+
+
+                    for(var i=0;i<scope.contacts.length;i++){
+                        if(scope.contacts[i].group == group){
+                            a = i
+                        }
+                    }
+                    if(a == -1){
+                        scope.contacts.push({group:group,val:[{username:username,name:name}]})
+                    }else{
+                        var b = -1
+                        for(var j=0;j<scope.contacts[a].val.length;j++){
+                            if(username == scope.contacts[a].val[j].username){
+                                scope.contacts[a].val.splice(j,1)
+                                b = j
+                            }
+                        }
+                        if(b == -1){
+                            scope.contacts[a].val.push({username:username,name:name})
+                        }
+
+                    }
+
+                }
+
+
+
+                scope.selectContactVal = function(username,group){
+
+                    var username = username || scope.username.split(",")[0]
+                    var group = group || scope.group
+
+                    var name = scope.username.split(",")[1]
+                    var a = -1;
+
+
+                    for(var i=0;i<scope.contactsVal.length;i++){
+                        if(scope.contactsVal[i].group == group){
+                            a = i
+                        }
+                    }
+                    if(a == -1){
+                        scope.contactsVal.push({group:group,val:[{username:username,name:name}]})
+                    }else{
+                        var b = -1
+                        for(var j=0;j<scope.contactsVal[a].val.length;j++){
+                            if(username == scope.contactsVal[a].val[j].username){
+                                scope.contactsVal[a].val.splice(j,1)
+                                b = j
+                            }
+                        }
+                        if(b == -1){
+                            scope.contactsVal[a].val.push({username:username,name:name})
+                        }
+
+                    }
+
+                }
+
+
+                scope.removeDraft = function(_id){
+                    myPost.postData("/admin/draftRemove",{_id:_id}).then(function(res){
+                        scope.getDraftList()
+                    })
+                }
+
+                scope.editDraft = function(_id){
+                    myPost.postData("/admin/getOneDraft",{_id:_id}).then(function(res){
+                        if(res.data.error == 0){
+                            scope.editVal = 1
+                            scope.subjectVal = res.data.data.subject
+                            scope.contactsVal = res.data.data.contacts
+                            scope.htmlContentVal = res.data.data.content
+                            scope.edit_id = _id
+                            //表单处于编辑状态
+                        }
+                    })
+                }
+
+                scope.addNew = function(){
+                    scope.editVal = 0
+                    scope.subjectVal = ""
+                    scope.contactsVal = ""
+                    scope.htmlContentVal = ""
+                    scope.edit_id = ""
+                }
+
+                scope.updateDraft = function(){
+                    
+                }
+            },
+            templateUrl:"/angularJSTemplate/admin/mail.html"
         }
     })
 </script>

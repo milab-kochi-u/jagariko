@@ -44,6 +44,12 @@ router.post("/getMembers",adminController.getMembersController,checkAdminSession
 router.post("/updateThemes",adminController.updateThemesController,checkAdminSession)
 router.post("/updateMembers",adminController.updateMembersController,checkAdminSession)
 
+router.post("/send",adminController.sendController,checkAdminSession)
 
+router.post("/getGroupMembersList",adminController.getGroupMemberListController,checkAdminSession)
+router.post("/draftInsert",adminController.draftInsertController,checkAdminSession)
+router.post("/getDraft",adminController.getDraftController,checkAdminSession)
+router.post("/draftRemove",adminController.draftRemoveController,checkAdminSession)
+router.post("/getOneDraft",adminController.getOneDraftController,checkAdminSession)
 
 module.exports = router;
