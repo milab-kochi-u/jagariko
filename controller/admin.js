@@ -6,7 +6,7 @@ var mongodb = require("mongodb")
 var tool = require("./tool.js");
 var steps = require('ocsteps');
 
-
+var nodemailer = require('nodemailer');
 
 module.exports = {
 
@@ -143,6 +143,22 @@ module.exports = {
         })()
     },
 
+    getGroupMemberListController:function(req,res){
+        steps(function(){
+            console.log(req.body)
+            if(!req.body.group) return;
+
+            mongo.find("debateMembers",{group:req.body.group},{},function(result){
+                console.log(result)
+                if(result.length == 0){
+                    res.end(JSON.stringify({error: 1, msg: "related data not found"}))
+                }else{
+                    res.end(JSON.stringify({error: 0, data:result}))
+                }
+            })
+        })()
+    },
+
     getMembersController:function(req,res){
         var _id = req.body._id
         if(!_id) return;
@@ -170,7 +186,6 @@ module.exports = {
             }
         })
     },
-
 
     updateThemesController:function(req,res){
         var theme = req.body.theme
@@ -235,10 +250,7 @@ module.exports = {
 
 
     },
-
-
     deleteThemesController:function(req,res){
-
         var _id = req.body._id
         if(!_id) return;
         var objectId = new mongodb.ObjectID(_id)
@@ -252,5 +264,89 @@ module.exports = {
                 }
             })
         })()
+    },
+    sendController:function(req,res){
+
+        var smtpConfig = {
+            host: 'mail.is.kochi-u.ac.jp',
+            port: 465,
+            secure: true, // use SSL
+            auth: {
+                user: 'joshoi',
+                pass: 'villavilla'
+            }
+        };
+
+        var transporter = nodemailer.createTransport(smtpConfig);
+
+        var mailOptions = {
+            from: '"三好研究室" <joshoi@is.kochi-u.ac.jp>', // sender address
+            to: 'xu1718191411@gmail.com', // list of receivers
+            subject: 'Hello ✔', // Subject line
+            text: 'Hello world 🐴', // plaintext body
+            html: '<b>Hello world 🐴</b>' // html body
+        };
+
+        transporter.sendMail(mailOptions, function(error, info){
+            if(error){
+                return console.log(error);
+            }
+            console.log('Message sent: ' + info.response);
+        });
+    },
+    draftInsertController:function(req,res){
+        var subject = req.body.subject
+        var content = req.body.content
+        var contacts = req.body.contacts
+        console.log(subject+":"+content + ":" + contacts)
+        if(!content) return;
+
+        steps(function(){
+            mongo.insert("mailDraft",{subject:subject,contacts:contacts,content:content,date:Date.parse(new Date())},this.hold(function(_res){
+                res.end(JSON.stringify({error: 0, data:_res}))
+            }))
+        })()
+
+
+    },
+    getDraftController:function(req,res){
+        steps(function(){
+            mongo.find("mailDraft",{},{},this.hold(function(result){
+                console.log(result)
+                if(result.length == 0){
+                    res.end(JSON.stringify({error: 1, msg: "related data not found"}))
+                }else{
+                    res.end(JSON.stringify({error: 0, data:result}))
+                }
+            }))
+        })()
+    },
+
+    draftRemoveController:function(req,res){
+        var _id = req.body._id
+        if(!_id) return;
+        var objectId = new mongodb.ObjectID(_id)
+        steps(function(){
+            mongo.remove("mailDraft",{_id:objectId},{},function(result){
+                if(result.result.ok == 1){
+                    res.end(JSON.stringify({error: 0, msg: "successful"}))
+                }else{
+                    res.end(JSON.stringify({error: 1, msg: "failure in delete"}))
+                }
+            })
+        })()
+    },
+    getOneDraftController:function(req,res){
+        var _id = req.body._id
+        if(!_id) return;
+        var objectId = new mongodb.ObjectID(_id)
+        mongo.find("mailDraft",{_id:objectId},{},function(result){
+            console.log(result)
+            if(result.length == 0){
+                res.end(JSON.stringify({error: 1, msg: "related data not found"}))
+            }else{
+                res.end(JSON.stringify({error: 0, data:result[0]}))
+            }
+        })
     }
 }

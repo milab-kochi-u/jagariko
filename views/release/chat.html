@@ -1748,6 +1748,9 @@
                   scope.statementData = ""
 
                   if(angular.equals(scope.addDissentArr, {})){
+
+                      alert("上の分析結果に少なくとも一つを異議付けてください")
+                      return;
                       //如果没有选择质疑的选项那么直接进入下一步的立論的部分
                       scope.statementStatus = {name:"claim",i:0}
 
@@ -2477,6 +2480,10 @@
                     $scope.statementData = ""
 
                     if(angular.equals($scope.addDissentArr, {})){
+
+
+                        alert("上の分析結果に少なくとも一つを異議付けてください")
+                            return;
                         //如果没有选择质疑的选项那么直接进入下一步的立論的部分
                         $scope.statementStatus = {name:"claim",i:0}
 

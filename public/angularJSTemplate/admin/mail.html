@@ -1,0 +1,120 @@
+<div class="row">
+    <p>
+    <h1>
+    メール管理ページ
+    <button type="button" ng-click="addNew()" class="btn btn-default navbar-btn">追加</button>
+    </h1>
+
+    </p>
+</div>
+
+<div class="list-group">
+    <a href="#" ng-click="editDraft(val._id)"  class="list-group-item " ng-repeat="(i,val) in DraftsList">
+        {{val.subject}}
+
+        <span ng-click="removeDraft(val._id)" class="glyphicon glyphicon-remove pull-right"></span>
+    </a>
+</div>
+
+<div class="row" ng-show="editVal == 0">
+新規作成
+<form name="groupform">
+    <div class="form-group">
+        <label>件名</label>
+        <select name="subject" ng-model="subject" class="form-control" required="">
+            <option value="三好研究室第1回目の評価実験実施のお知らせ">三好研究室第1回目の評価実験実施のお知らせ</option>
+            <option value="三好研究室第2回目の評価実験実施のお知らせ">三好研究室第2回目の評価実験実施のお知らせ</option>
+        </select>
+    </div>
+
+
+    <div class="form-group" >
+        <label for="">宛先</label>
+
+        <div class="form-group" ng-repeat="(i,val) in contacts">
+            <p>
+            <button class="btn btn-primary" type="button">
+                {{val.group}} <span class="badge">{{val.val.length}}</span>
+            </button>
+            </p>
+            <p>
+            <span ng-click="selectContact(_val.username,val.group)" style="font-size: 15px;margin:2px;" class="label label-lg label-info " ng-repeat="_val in val.val">{{_val.username}}.{{_val.name}}</span>
+            </p>
+        </div>
+
+        <label for="">グループ名</label>
+        <select ng-change="getGroupMembersList()" name="group" ng-model="group" class="form-control">
+            <option ng-repeat="(i,val) in groupList track by $index"  value="{{val.name}}">{{val.name}}</option>
+        </select>
+
+        <label for="">名前</label>
+        <select name="name" ng-change="selectContact()" ng-model="username" class="form-control">
+            <option ng-repeat="(i,val) in  groupMembersList track by $index" value="{{val.username}},{{val.name}}">{{val.name || val.username}}</option>
+        </select>
+    </div>
+
+    <div class="form-group" >
+        <label for="">送信内容</label>
+
+        <div text-angular ng-model="htmlContent" name="demo-editor"  ta-html-editor-class="border-around"></div>
+    </div>
+</form>
+
+    <div class="form-group">
+        <button type="submit">送信</button>
+        <button ng-click="draft()">下書きとして保存</button>
+    </div>
+
+</div>
+
+<div class="row" ng-show="editVal == 1">
+修正
+    <form name="groupform">
+        <div class="form-group">
+            <label>件名</label>
+            <select name="subject" ng-model="subjectVal" class="form-control" required="">
+                <option value="三好研究室第1回目の評価実験実施のお知らせ">三好研究室第1回目の評価実験実施のお知らせ</option>
+                <option value="三好研究室第2回目の評価実験実施のお知らせ">三好研究室第2回目の評価実験実施のお知らせ</option>
+            </select>
+        </div>
+
+
+        <div class="form-group" >
+            <label for="">宛先</label>
+
+            <div class="form-group" ng-repeat="(i,val) in contactsVal">
+                <p>
+                    <button class="btn btn-primary" type="button">
+                        {{val.group}} <span class="badge">{{val.val.length}}</span>
+                    </button>
+                </p>
+                <p>
+                    <span ng-click="selectContact(_val.username,val.group)" style="font-size: 15px;margin:2px;" class="label label-lg label-info " ng-repeat="_val in val.val">{{_val.username}}.{{_val.name}}</span>
+                </p>
+            </div>
+
+            <label for="">グループ名</label>
+            <select ng-change="getGroupMembersList()" name="group" ng-model="group" class="form-control">
+                <option ng-repeat="(i,val) in groupList track by $index"  value="{{val.name}}">{{val.name}}</option>
+            </select>
+
+            <label for="">名前</label>
+            <select name="name" ng-change="selectContactVal()" ng-model="username" class="form-control">
+                <option ng-repeat="(i,val) in  groupMembersList track by $index" value="{{val.username}},{{val.name}}">{{val.name || val.username}}</option>
+            </select>
+        </div>
+
+        <div class="form-group" >
+            <label for="">送信内容</label>
+
+            <div text-angular ng-model="htmlContentVal" name="demo-editor2"  ta-html-editor-class="border-around"></div>
+        </div>
+    </form>
+
+    <div class="form-group">
+        <button type="submit">送信</button>
+        <button ng-click="updateDraft()">下書きとして修正</button>
+    </div>
+
+</div>
+
