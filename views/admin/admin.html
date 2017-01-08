@@ -55,6 +55,13 @@
                 <a href="#" ng-click="changeTab('mail')">メール管理</a>
             </li>
 
+            <li>
+                <a href="#" ng-click="changeTab('first')">第一回目評価実験</a>
+            </li>
+
+            <li>
+                <a href="#" ng-click="changeTab('second')">第二回目評価実験</a>
+            </li>
         </ul>
     </div>
     <!-- /#sidebar-wrapper -->
@@ -68,6 +75,8 @@
                     <member ng-show="changeTabVal == 'member'"></member>
                     <theme ng-show="changeTabVal == 'theme'"></theme>
                     <mail ng-show="changeTabVal == 'mail'"></mail>
+                    <first ng-show="changeTabVal == 'first'"></first>
+                    <second ng-show="changeTabVal == 'second'"></second>
                 </div>
             </div>
         </div>
@@ -138,15 +147,14 @@
         }
     })
 
-
-
     myApp.directive("group",function(myPost){
         return {
             scope:false,
             link:function(scope){
-                scope._submit = function () {
+                scope._submitGroup = function () {
                     var name = scope.name
                     var desc = scope.desc
+
                     if(!name || !desc) return;
 
                     myPost.postData("/admin/increaseGroup",{name:name,desc:desc}).then(function(res){
@@ -155,7 +163,7 @@
                     })
                 }
 
-                scope.delete = function(_id){
+                scope.deleteGroup = function(_id){
                     myPost.postData("/admin/deleteGroup",{_id:_id}).then(function(res){
                         if(res.error == 1) alert(res.msg)
                         scope.getGroupList()
@@ -168,6 +176,7 @@
             templateUrl:"/angularJSTemplate/admin/group.html"
         }
     })
+
 
     myApp.directive("member",function(myPost){
         return {
@@ -182,18 +191,20 @@
                     var username = scope.username
                     var password = scope.password
                     var name = scope.name
+                    var mail = scope.mail
                     var group = scope.group
 
                     if(!name || !group || !password || !name){
                         return;
                     }
 
-                    myPost.postData("/admin/increaseMembers",{username:username,name:name,password:password,group:group}).then(function(res){
+                    myPost.postData("/admin/increaseMembers",{username:username,name:name,password:password,group:group,mail:mail}).then(function(res){
                         scope.getMembersList()
 
                         scope.username　= ""
                         scope.password = ""
                         scope.name = ""
+                        scope.mail = ""
                         scope.group = ""
                     })
 
@@ -217,7 +228,8 @@
                         if(res.data.error == 0){
                             scope.editVal = 1
                             scope.usernameVal = res.data.data.username
-                            scope.name = res.data.data.name
+                            scope.nameVal = res.data.data.name
+                            scope.mailVal = res.data.data.mail
                             scope.groupVal = res.data.data.group
                             scope.passwordVal = res.data.data.password
                             scope.edit_id = _id
@@ -236,21 +248,22 @@
                     var username = scope.usernameVal
                     var password = scope.passwordVal
                     var name = scope.nameVal
+                    var mail = scope.mailVal
                     var group = scope.groupVal
 
                     if(!username || !group || !password || !name){
                         return;
                     }
 
-                    myPost.postData("/admin/updateMembers",{_id:scope.edit_id,username:username,name:name,password:password,group:group}).then(function(res){
+                    myPost.postData("/admin/updateMembers",{_id:scope.edit_id,username:username,name:name,mail:mail,password:password,group:group}).then(function(res){
                         scope.getMembersList()
-
 
                         scope.editVal = 0
                         scope.usernameVal = ""
                         scope.name = ""
                         scope.groupVal = ""
                         scope.passwordVal = ""
+                        scope.mailVal = ""
                         scope.edit_id = ""
 
                     })
@@ -368,13 +381,17 @@
 
                 //getDraft
 
-                scope.selectContact = function(username,group){
+                scope.selectContact = function(username,group,mail){
+
 
                     var username = username || scope.username.split(",")[0]
+                    var mail = mail || scope.username.split(",")[2]
                     var group = group || scope.group
 
                     var name = scope.username.split(",")[1]
                     var a = -1;
+
+
 
 
                     for(var i=0;i<scope.contacts.length;i++){
@@ -383,7 +400,7 @@
                         }
                     }
                     if(a == -1){
-                        scope.contacts.push({group:group,val:[{username:username,name:name}]})
+                        scope.contacts.push({group:group,val:[{username:username,name:name,mail:mail}]})
                     }else{
                         var b = -1
                         for(var j=0;j<scope.contacts[a].val.length;j++){
@@ -393,21 +410,20 @@
                             }
                         }
                         if(b == -1){
-                            scope.contacts[a].val.push({username:username,name:name})
+                            scope.contacts[a].val.push({username:username,name:name,mail:mail})
                         }
 
                     }
 
                 }
 
+                scope.selectContactVal = function(username,group,mail,name){
 
-
-                scope.selectContactVal = function(username,group){
-
-                    var username = username || scope.username.split(",")[0]
+                    var username = username || scope.usernameVal.split(",")[0]
+                    var mail = mail || scope.usernameVal.split(",")[2]
                     var group = group || scope.group
 
-                    var name = scope.username.split(",")[1]
+                    var name = name || scope.usernameVal.split(",")[1]
                     var a = -1;
 
 
@@ -417,7 +433,7 @@
                         }
                     }
                     if(a == -1){
-                        scope.contactsVal.push({group:group,val:[{username:username,name:name}]})
+                        scope.contactsVal.push({group:group,val:[{username:username,name:name,mail:mail}]})
                     }else{
                         var b = -1
                         for(var j=0;j<scope.contactsVal[a].val.length;j++){
@@ -427,12 +443,15 @@
                             }
                         }
                         if(b == -1){
-                            scope.contactsVal[a].val.push({username:username,name:name})
+                            scope.contactsVal[a].val.push({username:username,name:name,mail:mail})
                         }
 
                     }
 
                 }
+
+
+
 
 
                 scope.removeDraft = function(_id){
@@ -463,12 +482,183 @@
                 }
 
                 scope.updateDraft = function(){
-                    
+                    var subject = scope.subjectVal
+                    var contacts = scope.contactsVal
+                    var htmlContent = scope.htmlContentVal
+
+
+                    if(!subject || !contacts || !htmlContent){
+                        return;
+                    }
+
+                    myPost.postData("/admin/updateMailDraft",{_id:scope.edit_id,subject:scope,subject,contacts:contacts,content:htmlContent}).then(function(res){
+                        scope.getDraftList()
+                        scope.addNew()
+                    })
+                }
+
+
+                scope.sendMail = function(n){
+                    //n = 1 新規
+                    //n = 2 修正
+
+                    if(n == 1){
+                        var subject = scope.subject
+                        var contacts = scope.contacts
+                        var content = scope.htmlContent
+                    }
+
+                    if(n == 2){
+                        var subject = scope.subjectVal
+                        var contacts = scope.contactsVal
+                        var content = scope.htmlContentVal
+                    }
+
+                    myPost.postData("/admin/send",{subject:scope,subject,contacts:contacts,content:content}).then(function(res){
+
+                    })
+
                 }
             },
             templateUrl:"/angularJSTemplate/admin/mail.html"
         }
     })
+
+
+    myApp.directive("first",function(myPost){
+        return{
+            scope:false,
+            link:function(scope,element){
+
+                myPost.postData("/admin/getStatementstatics",{expeOrder:1}).then(function(res){
+                    scope.firstStatementStatics = res.data.data
+                    console.log(scope.firstStatementStatics)
+
+
+                    var members = []
+                    scope.firstStatementStatics.forEach(function(value){
+                        if (members.indexOf(value.pro)==-1) members.push(value.pro);
+                        if (members.indexOf(value.con)==-1) members.push(value.con);
+                    });
+                    scope.members = members;
+
+                    for(var i=0;i<scope.firstStatementStatics.length;i++){
+                        countTotalNum(i,scope.firstStatementStatics[i].statementLog)
+                        changeTime(i,scope.firstStatementStatics[i].time)
+                    }
+
+                    function countTotalNum(_i,statementLog){
+                        var total = 0
+                        var proTotal = 0
+                        var conTotal = 0
+                        var proClaimTotal = 0
+                        var proRebuttalTotal = 0
+                        var proRebuttalNum = 0
+
+                        var conClaimTotal = 0
+                        var conRebuttalTotal = 0
+                        var conRebuttalNum = 0
+
+                        for(var i=0;i<statementLog.length;i++){
+                            total += statementLog[i].statementData.length
+                            if(statementLog[i].position == 1){
+                                proTotal += statementLog[i].statementData.length
+                                proClaimTotal += statementLog[i].statementData.length
+                            }
+
+                            if(statementLog[i].position == 2){
+                                conTotal += statementLog[i].statementData.length
+                                conClaimTotal += statementLog[i].statementData.length
+                            }
+
+                            var dissentExplain = statementLog[i].dissentExplain
+                            for(var j=0;j<dissentExplain.length;j++){
+                                total +=  dissentExplain[j].reply.length
+
+                                if(statementLog[i].position == 1){
+                                    proTotal += dissentExplain[j].reply.length
+                                    proRebuttalTotal += dissentExplain[j].reply.length
+                                    proRebuttalNum ++
+                                }
+
+                                if(statementLog[i].position == 2){
+                                    conTotal += dissentExplain[j].reply.length
+                                    conRebuttalTotal += dissentExplain[j].reply.length
+                                    conRebuttalNum ++
+                                }
+                            }
+                        }
+                        scope.firstStatementStatics[_i].totalLitterNum = total
+                        scope.firstStatementStatics[_i].proTotalLitterNum = proTotal
+                        scope.firstStatementStatics[_i].conTotalLitterNum = conTotal
+                        scope.firstStatementStatics[_i].proClaimTotal = proClaimTotal
+                        scope.firstStatementStatics[_i].proRebuttalTotal = proRebuttalTotal
+                        scope.firstStatementStatics[_i].proRebuttalNum = proRebuttalNum
+                        scope.firstStatementStatics[_i].conClaimTotal = conClaimTotal
+                        scope.firstStatementStatics[_i].conRebuttalTotal = conRebuttalTotal
+                        scope.firstStatementStatics[_i].conRebuttalNum = conRebuttalNum
+                    }
+
+                    function changeTime(_i,time){
+                        scope.firstStatementStatics[_i].time = changeDate(time)
+                    }
+
+                })
+            },
+            templateUrl:"/angularJSTemplate/admin/first.html"
+        }
+    })
+
+    myApp.directive("second",function(myPost){
+        return{
+            scope:false,
+            link:function(scope,element){
+
+            },
+            templateUrl:"/angularJSTemplate/admin/second.html"
+        }
+    })
+
+
+    function changeDate(str){
+        var now_date, now_date_format;
+        now_date = new Date(parseInt(str));
+        now_date_format = now_date.getFullYear();
+
+        if (parseInt(now_date.getMonth()) <= 9) {
+            now_date_format += "-" + "0" + (parseInt(now_date.getMonth()));
+        } else {
+            now_date_format += "-" + (parseInt(now_date.getMonth()));
+        }
+        if (parseInt(now_date.getDate()) <= 9) {
+            now_date_format += "-" + "0" + (parseInt(now_date.getDate()));
+        } else {
+            now_date_format += "-" + (parseInt(now_date.getDate()));
+        }
+
+        if (parseInt(now_date.getHours()) <= 9) {
+            now_date_format += " " + "0" + (parseInt(now_date.getHours()));
+        } else {
+            now_date_format += " " + (parseInt(now_date.getHours()));
+        }
+
+
+        if (parseInt(now_date.getMinutes()) <= 9) {
+            now_date_format += ":" + "0" + (parseInt(now_date.getMinutes()));
+        } else {
+            now_date_format += ":" + (parseInt(now_date.getMinutes()));
+        }
+
+        if (parseInt(now_date.getSeconds()) <= 9) {
+            now_date_format += ":" + "0" + (parseInt(now_date.getSeconds()));
+        } else {
+            now_date_format += ":" + (parseInt(now_date.getSeconds()));
+        }
+
+        return now_date_format;
+
+    }
+
 </script>
 </body>
 </html>

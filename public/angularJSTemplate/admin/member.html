@@ -10,6 +10,7 @@
             <td class="active">No</td>
             <td class="success">学籍番号</td>
             <td class="success">名前</td>
+            <td class="warning">メール</td>
             <td class="warning">グループ</td>
             <td class="danger">試合状態</td>
             <td class="info" >削除</td>
@@ -20,6 +21,7 @@
             <td class="active">{{i}}</td>
             <td class="success">{{val.username}}</td>
             <td class="success">{{val.name}}</td>
+            <td class="warning">{{val.mail}}</td>
             <td class="warning">{{val.group}}</td>
             <td class="danger"><button class="btn btn-warning"><span ng-if="val.debateInvolve">討論中</span><span ng-if="!val.debateInvolve">自由</span></button></td>
             <td class="info"><button class="btn btn-danger" ng-click="deletes(val._id)">削除</button></td>
@@ -42,6 +44,14 @@
             <label>名前 </label>
             <input  class="form-control" name="name" ng-model="name"  placeholder="名前" required>
         </div>
+
+
+
+        <div class="form-group">
+            <label>メール </label>
+            <input  class="form-control" name="mail" ng-model="mail"  placeholder="mail" >
+        </div>
+
 
         <div class="form-group">
             <label>パスワード </label>
@@ -79,6 +89,11 @@
         <div class="form-group">
             <label>名前 </label>
             <input  class="form-control" name="name" ng-model="nameVal"  placeholder="名前" required>
+        </div>
+
+        <div class="form-group">
+            <label>メール </label>
+            <input  class="form-control" name="mail" ng-model="mailVal"  placeholder="メール">
         </div>
 
         <div class="form-group">

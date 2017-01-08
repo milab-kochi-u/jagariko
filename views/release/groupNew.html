@@ -108,43 +108,6 @@
            </div>
 
 
-            <!--
-    <hr/>
-
-
-<div class="row">
-    <div class="col-sm-offset-1 col-sm-3">時間制限</div>
-    <div class="col-sm-6">
-        <label>
-            <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled == 1" disabled name="timeLimit" value="1" >
-            <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled != 1"  name="timeLimit" value="1" >
-            ある
-        </label>
-
-        <label>
-            <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled == 0" disabled  name="timeLimit" value="0" >
-            <input type="radio" ng-model="timeLimit" ng-show="timeLimitDisabled != 0"   name="timeLimit" value="0" >
-            なし
-        </label>
-    </div>
-</div>
-
-            <div class="row" ng-if="timeLimit=='1'">
-                <div class="col-sm-6 col-sm-offset-4">
-                    <select ng-model="timeLimitVal" class="form-control"  >
-                        <option value="1">1時間</option>
-                        <option value="2">2時間</option>
-                        <option value="3">3時間</option>
-                        <option value="4">4時間</option>
-                        <option value="5">1日</option>
-                    </select>
-                </div>
-
-                <div class="row col-sm-11 col-sm-offset-1" style="color:red">
-                    時間制限がある場合、時間制限いないに反応がない方は自動的に降参に判定される
-                </div>
-            </div>
--->
 
             <div class="row">
                 <div class="col-sm-offset-1 col-sm-3">回数</div>
@@ -276,7 +239,6 @@
 
                             <a class="list-group-item row"  ng-if="showDebating" ng-repeat="_val in val.debating">
                                 <div class="col-sm-1">
-
                                     <span ng-if="_val.pro == username || _val.con == username" ng-click="backToRoom(_val._id)" style="font-size:23px;line-height: 36px;cursor: pointer;" class="glyphicon glyphicon-home" aria-hidden="true"></span>
                                     <span ng-if="_val.pro != username && _val.con != username && (!_val.pro || !_val.con)" >
                                         <button ng-if="_val.pro" ng-click="participateRoom(_val.num,_val.rNum,2,_val.timeLimit,_val.analysisFunc,_val.mapFunc,_val.totalNum)"  class="label label-success" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
@@ -285,7 +247,6 @@
                                     <span ng-if="_val.pro != username && _val.con != username && (_val.pro && _val.con)" >
                                        <button ng-click="participateRoom(_val.num,_val.rNum,0,_val.timeLimit,_val.analysisFunc,_val.mapFunc,_val.totalNum)"  class="label label-default" style="height: 30px;margin-top:10px;"><span  style="font-size:23px;line-height:18px;cursor: pointer;"  class="glyphicon glyphicon-arrow-right"></span></button>
                                     </span>
-
                                 </div>
                                 <div class="col-sm-11">
                                         <div class="row">
@@ -307,7 +268,7 @@
                                         <div class="row" style="margin-top:2px">
                                             <div class="row col-sm-3">
                                                 <span style="font-size: 13px;" class="label label-info">肯定側</span>
-                                                <span>{{_val.pro}}</span>
+                                                <span>{{_val.pro}} </span>
                                             </div>
                                             <div class="row col-sm-3">
                                                 <span  style="font-size: 13px;"  class="label label-success">否定側</span>
@@ -328,6 +289,18 @@
                                                 <span ng-show="_val.mapFunc == 0">なし</span>
                                             </div>
                                         </div>
+
+
+                                        <div class="row">
+                                            <div class="row col-sm-3">
+                                                <span>{{_val.proUserInfo.name}} </span>
+                                            </div>
+
+                                            <div class="row col-sm-3">
+                                                <span>{{_val.conUserInfo.name}} </span>
+                                            </div>
+                                        </div>
+
                                 </div>
                             </a>
 
@@ -344,7 +317,6 @@
                                     <div class="row">
 
                                         <span ng-if="_val.status == 'finish'">終了</span>
-
                                         <span>(最終更新: {{toTimeFormat(_val.time)}})</span></div>
                                     <div class="row" style="margin-top:2px">
                                         <div class="row col-sm-3">
@@ -569,8 +541,6 @@
 
         }
 
-
-
         $scope.backToRoom = function(_id){
             myPost.postData("/release/backToRoom",{_id:_id}).then(function(_res){
                     if(_res.data.error == 1){
@@ -615,6 +585,7 @@
 
 
         myPost.postData("/release/getListInformation",{}).then(function(_res){
+            console.log(21111)
             console.log(_res)
             $scope.themes = _res.data
         })

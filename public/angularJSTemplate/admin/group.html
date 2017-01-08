@@ -19,7 +19,7 @@
             <td class="success">{{val.name}}</td>
             <td class="warning">{{val.desc}}</td>
             <td class="danger"><button class="btn btn-warning">編集</button></td>
-            <td class="info"><button class="btn btn-danger" ng-click="delete(val._id)">削除</buttonc></td>
+            <td class="info"><button class="btn btn-danger" ng-click="deleteGroup(val._id)">削除</buttonc></td>
         </tr>
     </table>
 
@@ -38,7 +38,7 @@
             <input class="form-control" ng-model="desc"  name="desc" id="" placeholder="グループ説明" required>
         </div>
     </form>
-        <button  class="btn btn-default" ng-click="_submit()">登録</button>
+        <button  class="btn btn-default" ng-click="_submitGroup()">登録</button>
 
     <div ng-show="groupform.name.$error.required">グループ名を入力してください</div>
     <div ng-show="groupform.desc.$error.required">グループ説明名を入力してください</div>

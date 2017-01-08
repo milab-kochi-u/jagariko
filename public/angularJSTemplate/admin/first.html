@@ -1,0 +1,81 @@
+<h3>テーマ:大学キャンパス内は全体禁煙すべきか?</h3>
+<div class="row">
+    <div class="col-sm-3">
+        総回数:{{firstStatementStatics.length}}回
+    </div>
+    <div class="col-sm-3">
+        参加人数:{{members.length}}人
+    </div>
+</div>
+<div class="list-group">
+    <a href="#" class="list-group-item row" ng-repeat="(i,val) in firstStatementStatics track by $index">
+
+        <div class="row">
+            <div class="col-sm-2">
+                総文字数:{{val.totalLitterNum}}
+            </div>
+            <div class="col-sm-4">
+                実施時間:{{val.time}}
+            </div>
+        </div>
+
+        <hr/>
+        <div class="row">
+            <div class="col-sm-2">
+                肯定側:{{val.proInfo.name}}
+            </div>
+
+            <div class="col-sm-2">
+                肯定側総文字数:{{val.proTotalLitterNum}}
+            </div>
+
+            <div class="col-sm-2">
+                主張文字数:{{val.proClaimTotal}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁文字数:{{val.proRebuttalTotal}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁数:{{val.proRebuttalNum}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁平均文字数:{{val.proRebuttalTotal  / val.proRebuttalNum}}
+            </div>
+
+        </div>
+
+        <hr/>
+        <div class="row">
+             <div class="col-sm-2">
+                否定側:{{val.conInfo.name}}
+             </div>
+
+            <div class="col-sm-2">
+                否定側総文字数:{{val.conTotalLitterNum}}
+            </div>
+
+            <div class="col-sm-2">
+                主張文字数:{{val.conClaimTotal}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁文字数:{{val.conRebuttalTotal}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁数:{{val.conRebuttalNum}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁平均文字数:{{val.conRebuttalTotal  / val.conRebuttalNum}}
+            </div>
+
+
+        </div>
+
+    </a>
+
+</div>

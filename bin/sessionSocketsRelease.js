@@ -482,6 +482,15 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                 socket.emit("confirmAnalysisResultFinish",{})
                 socket.to(session.debateLogin.rNum).broadcast.emit("confirmAnalysisResultFinish",{})
             },function(){
+                //因为添加了批注所以吧analysisData,analysisDissentExplainData在debateStatus里面得数据加以更新,因为最新得analysisData,analysisDissentExplainData里面有批注信息
+                var analysisData = msg.analysisData
+                var analysisDissentExplainData = msg.analysisDissentExplainData
+                everyAnalysisData.analysisData = analysisData
+                everyAnalysisData.analysisDissentExplainData = analysisDissentExplainData
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyAnalysisData:everyAnalysisData}},this.hold(function(){
+
+                }))
+            },function(){
                 everyAnalysisData.rNum = session.debateLogin.rNum
                 everyAnalysisData.num = session.debateLogin.num
                 everyAnalysisData.pro = pro
@@ -525,6 +534,15 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                     socket.to(session.debateLogin.rNum).broadcast.emit("refuseAnalysisResultFinish",{})
                 }))
 
+            },function(){
+                //因为添加了批注所以吧analysisData,analysisDissentExplainData在debateStatus里面得数据加以更新,因为最新得analysisData,analysisDissentExplainData里面有批注信息
+                var analysisData = msg.analysisData
+                var analysisDissentExplainData = msg.analysisDissentExplainData
+                everyAnalysisData.analysisData = analysisData
+                everyAnalysisData.analysisDissentExplainData = analysisDissentExplainData
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyAnalysisData:everyAnalysisData}},this.hold(function(){
+
+                }))
             },function(){
                 everyAnalysisData.rNum = session.debateLogin.rNum
                 everyAnalysisData.num = session.debateLogin.num

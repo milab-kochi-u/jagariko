@@ -7,7 +7,7 @@ var mongo = require("../model/mongo.js");
 var Steps = require('ocsteps');
 
 function initialDatabase(that){
-    var database = ["LatestAnalysisMsg","LatestStatementMsg","analysisLog","debateMembers","debateStatus","statementLog","themes","userStatus","mailDraft"]
+    var database = ["LatestAnalysisMsg","LatestStatementMsg","analysisLog","debateMembers","debateStatus","statementLog","themes","userStatus","mailDraft","group"]
     var members = [
         {
             "username": "miyoshi",

@@ -117,6 +117,18 @@ module.exports = {
     getListInformationController:function(req,res){
         var themes = []
         var debateStatus = []
+        var members = []
+
+        function findUserInfoFromMembers(username,arr){
+            for(var i = 0;i<arr.length;i++) {
+                if(username == arr[i].username){
+                    delete arr[i].password
+                    return arr[i]
+                }
+            }
+
+            return {}
+        }
 
         steps(function(){
             mongo.find("themes",{group:req.session.debateLogin.group},{},this.hold(function(_res){
@@ -127,10 +139,23 @@ module.exports = {
                 debateStatus = _res
             }))
         },function(){
+            mongo.find("debateMembers",{group:req.session.debateLogin.group},{},this.hold(function(_res){
+                members = _res
+            }))
+        },function(){
             for(var i=0;i<themes.length;i++){
                 themes[i].debating = []
                 themes[i].finish = []
                 for(var j=0;j<debateStatus.length;j++){
+
+
+                    var proUserInfo = findUserInfoFromMembers(debateStatus[j].pro,members)
+                    debateStatus[j].proUserInfo = proUserInfo
+
+                    var conUserInfo = findUserInfoFromMembers(debateStatus[j].con,members)
+                    debateStatus[j].conUserInfo = conUserInfo
+
+
                     if(debateStatus[j].finish == false && themes[i].num == debateStatus[j].num){
                        themes[i].debating.push(debateStatus[j])
                     }

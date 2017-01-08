@@ -38,7 +38,7 @@
             </button>
             </p>
             <p>
-            <span ng-click="selectContact(_val.username,val.group)" style="font-size: 15px;margin:2px;" class="label label-lg label-info " ng-repeat="_val in val.val">{{_val.username}}.{{_val.name}}</span>
+            <span ng-click="selectContact(_val.username,val.group,val.mail)" style="font-size: 15px;margin:2px;" class="label label-lg label-info " ng-repeat="_val in val.val track by $index">{{_val.username}}.{{_val.name}}</span>
             </p>
         </div>
 
@@ -49,7 +49,7 @@
 
         <label for="">名前</label>
         <select name="name" ng-change="selectContact()" ng-model="username" class="form-control">
-            <option ng-repeat="(i,val) in  groupMembersList track by $index" value="{{val.username}},{{val.name}}">{{val.name || val.username}}</option>
+            <option ng-repeat="(i,val) in  groupMembersList track by $index" value="{{val.username}},{{val.name}},{{val.mail}}">{{val.name || val.username}}</option>
         </select>
     </div>
 
@@ -61,7 +61,7 @@
 </form>
 
     <div class="form-group">
-        <button type="submit">送信</button>
+        <button type="submit" ng-click="sendMail(1)">送信</button>
         <button ng-click="draft()">下書きとして保存</button>
     </div>
 
@@ -89,7 +89,7 @@
                     </button>
                 </p>
                 <p>
-                    <span ng-click="selectContact(_val.username,val.group)" style="font-size: 15px;margin:2px;" class="label label-lg label-info " ng-repeat="_val in val.val">{{_val.username}}.{{_val.name}}</span>
+                    <span ng-click="selectContactVal(vals.username,val.group,vals.mail,vals.name)" style="font-size: 15px;margin:2px;" class="label label-lg label-info " ng-repeat="vals in val.val track by $index">{{vals.username}},{{vals.name}}</span>
                 </p>
             </div>
 
@@ -99,8 +99,8 @@
             </select>
 
             <label for="">名前</label>
-            <select name="name" ng-change="selectContactVal()" ng-model="username" class="form-control">
-                <option ng-repeat="(i,val) in  groupMembersList track by $index" value="{{val.username}},{{val.name}}">{{val.name || val.username}}</option>
+            <select name="name" ng-change="selectContactVal()" ng-model="usernameVal" class="form-control">
+                <option ng-repeat="(i,val) in  groupMembersList track by $index" value="{{val.username}},{{val.name}},{{val.mail}}">{{val.username}},{{val.name}}</option>
             </select>
         </div>
 
@@ -112,7 +112,7 @@
     </form>
 
     <div class="form-group">
-        <button type="submit">送信</button>
+        <button type="submit" ng-click="sendMail(2)">送信</button>
         <button ng-click="updateDraft()">下書きとして修正</button>
     </div>
 

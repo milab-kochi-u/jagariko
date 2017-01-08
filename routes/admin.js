@@ -51,5 +51,9 @@ router.post("/draftInsert",adminController.draftInsertController,checkAdminSessi
 router.post("/getDraft",adminController.getDraftController,checkAdminSession)
 router.post("/draftRemove",adminController.draftRemoveController,checkAdminSession)
 router.post("/getOneDraft",adminController.getOneDraftController,checkAdminSession)
+router.post("/updateMailDraft",adminController.updateMailDraftController,checkAdminSession)
+router.post("/getStatementstatics",adminController.getStatementstaticsController,checkAdminSession)
+
+
 
 module.exports = router;

@@ -40,12 +40,11 @@
 
         .__balloon:before {
             border:10px solid transparent;
-            border-left-color:#fff;
-            border-right-width:0;
-            right:-9px;
+            border-bottom-color:#fff;
+            border-top-width:0;
+            top:-9px;
             content:"";
             display:block;
-            top:15px;
             position:absolute;
             width:0;
             z-index:1;
@@ -53,12 +52,11 @@
 
         .__balloon:after {
             border:10px solid transparent;
-            border-left-color:#000;
-            border-right-width:0;
-            right:-10px;
+            border-bottom-color:#000;
+            border-top-width:0;
+            top:-10px;
             content:"";
             display:block;
-            top:15px;
             position:absolute;
             width:0;
         }
@@ -114,8 +112,27 @@
         /*END Form Wizard*/
 
 
+
+        textarea {
+            height: 28px;
+            width: 400px;
+        }
+
+        #textarea {
+            -moz-appearance: textfield-multiline;
+            -webkit-appearance: textarea;
+            /*border: 1px solid gray;*/
+            font: medium -moz-fixed;
+            font: -webkit-small-control;
+            height: 68px;
+            margin-top: 2px;
+            overflow: auto;
+            padding: 2px;
+            resize: both;
+
     </style>
 </head>
+
 <body ng-app="myApp" ng-init="LAN='JP'">
 
 <div  class="container" ng-controller="myController" >
@@ -1425,7 +1442,7 @@
         }
     })
 
-    myApp.directive("analysisResult2",function(coreSocket,$compile){
+    myApp.directive("analysisResult2",function(coreSocket,$compile,$rootScope){
       return{
           scope:false,
           link:function(scope,element){
@@ -1441,11 +1458,22 @@
               var RECTWIDTH   //模块的宽度
               var RECTHEIGHT  //模块的高度
               var CLAIMX  //claim模块的横坐标
+              var CLAIMNOTEX //claim备注得横坐标
+              var CLAIMNOTEWIDTH //claim备注模块得宽度
+              var CLAIMNOTEHEIGHT //claim备注模块得高度
+
               var WARRANTX //warrant模块的横坐标
               var EVIDENCEX //element模块的横坐标
               var CLIAMANDWARRANTXINTERVAL
               var WARRANTANDEVIDENCEXINTERVAL
               var LASTY //升降机
+
+              var WARRANTNOTEX  //warrant备注得横坐标
+              var WARRANTNOTEWIDTH //warrant备注模块得宽度
+              var WARRANTNOTEHEIGHT //warrant备注模块得高度
+              var EVIDENCENOTEX //evidence备注得横坐标
+              var EVIDENCENOTEWIDTH //evidence备注模块得宽度
+              var EVIDENCENOTEHEIGHT //evidence备注模块得高度
 
               var DOTTEDLINEX1,DOTTEDLINEX2,DOTTEDLINEX3,DOTTEDLINEX4 //虚线的四个点的横坐标
               var DOTTEDLINEWIDTH  //虚线的长度
@@ -1521,6 +1549,21 @@
                   NEXTBUTTONHEIGHT = NEXTBUTTONWIDTH*0.2
                   NEXTBUTTONX = (_width - LEFT - RIGHT)*0.167454
 
+
+                  CLAIMNOTEX = CLAIMX + RECTWIDTH + 10
+                  CLAIMNOTEWIDTH = RECTWIDTH
+                  CLAIMNOTEHEIGHT = RECTHEIGHT
+
+                  WARRANTNOTEX = WARRANTX
+                  WARRANTNOTEWIDTH = RECTWIDTH
+                  WARRANTNOTEHEIGHT = RECTHEIGHT
+
+                  EVIDENCENOTEX = EVIDENCEX
+                  EVIDENCENOTEWIDTH = RECTWIDTH
+                  EVIDENCENOTEHEIGHT = RECTHEIGHT
+
+
+
                   svg = d3.select(element.find("svg")[0])
                   svg.attr("width","1200px")
                   svg.attr("height","6000px")
@@ -1537,7 +1580,7 @@
                       if(scope.debateInfo.status == "analysis" || scope.debateInfo.status == "bunseki"){
                           drawText("あなたの分析結果が同意されてませんでした、分析しなおしてください",LEFT,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
                           LASTY += 30
-                          drawText("相手のコメント:"+scope.examAnalysisResultComment,LEFT,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
+                          drawText("相手のコメント:"+scope.examAnalysisResultComment || "",LEFT,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
                           LASTY += TITLEANDRECTINTERVALY
                       }
 
@@ -1583,18 +1626,37 @@
                       //如果category == dissentExplain 那么说明这里需要显示是对哪条质疑的解释
                       appendDissentTxt(dissentTxt,DISSENTTXTX,LASTY)
                   }
+
                   for(var i=0;i<data.length;i++){
                       var mainArrowStart // 每一个claim,单独画它和它的support的连接箭头
                       var mainArrowEnd = []
 
                       if(!data[i].claim) return;
                       mainArrowStart = appendClaim(data[i].claim,[category,i,0,"claim",dissentExplainI])
+
+                       //画备注模块
+                      if(scope.debateInfo.status != "appeal" && scope.debateInfo.status != "lookup"){
+                          if(data[i].claimNote == 1){
+                              appendNote(LASTY,[category,i,0,"claim",dissentExplainI],data[i].claimNoteContent)
+                          }
+                      }
+
+
                       dealWithLastY("claim",data,i,0)
 
                       for(var j=0;j<data[i].support.length;j++){
 
                           if(data[i].support[j].warrant){
                               appendWarrant(data[i].support[j].warrant,[category,i,j,"warrant",dissentExplainI])
+
+                              //画备注模块
+                              if(scope.debateInfo.status != "appeal" && scope.debateInfo.status != "lookup"){
+                                  if(data[i].support[j].warrantNote == 1){
+                                      appendNote(LASTY + RECTHEIGHT + 10,[category,i,j,"warrant",dissentExplainI],data[i].support[j].warrantNoteContent)
+                                  }
+                              }
+
+
                               dealWithLastY("warrant",data,i,j)
                           }
 
@@ -1602,6 +1664,19 @@
 
                           if(data[i].support[j].evidence){
                               mainArrowEnd.push(appendEvidence(data[i].support[j].evidence,[category,i,j,"evidence",dissentExplainI]))
+
+                              //画备注模块
+                              if(scope.debateInfo.status != "appeal" && scope.debateInfo.status != "lookup"){
+                                  if(data[i].support[j].evidenceNote == 1){
+                                      appendNote(LASTY + RECTHEIGHT + 10,[category,i,j,"evidence",dissentExplainI],data[i].support[j].evidenceNoteContent)
+                                  }
+
+                                  if(data[i].support[j].warrantNote == 1 || data[i].support[j].evidenceNote == 1){
+                                      LASTY += RECTHEIGHT + 10
+                                  }
+                              }
+
+
                               dealWithLastY("evidence",data,i,j)
                           }else{
                               //如果support不存在的话不管如何升降机往下
@@ -1624,6 +1699,124 @@
               function appendClaim(text,conf){
                   appendRect(text,CLAIMX,LASTY,"claim",conf)
                   return {x:CLAIMX+CLIAMANDWARRANTXINTERVAL/2,y:LASTY+RECTHEIGHT}
+              }
+
+              function appendNote(y,conf,noteContent){
+
+                  var category = conf[0]
+                  var i = conf[1]
+                  var j = conf[2]
+                  var type = conf[3]
+                  var dissentExplainI = conf[4]
+
+
+                  var x,width,height
+                  if(type == "claim"){
+                      x = CLAIMNOTEX
+                      width = CLAIMNOTEWIDTH
+                      height = CLAIMNOTEHEIGHT
+                  }
+
+                  if(type == "warrant"){
+                      x = WARRANTNOTEX
+                      width = WARRANTNOTEWIDTH
+                      height = WARRANTNOTEHEIGHT
+                  }
+
+                  if(type == "evidence"){
+                      x = EVIDENCENOTEX
+                      width = EVIDENCENOTEWIDTH
+                      height = EVIDENCENOTEHEIGHT
+                  }
+
+                  var rect = svg.append("foreignObject")
+
+                  rect.attr("x",x)
+                  rect.attr("y",y)
+                  rect.attr("width",width)
+                  rect.attr("height",height)
+                  rect.attr("class","draw")
+
+                  var div = rect.append('xhtml:div')
+                  div = div.append("div")
+                  div.style("width",width+"px")
+                  div.style("height",height*0.8+"px")
+
+                  if(type == "claim"){
+                      div.attr("class","row col-sm-12 balloon _balloon")
+                  }else{
+                      div.attr("class","row col-sm-12 balloon __balloon")
+                  }
+
+                  div.style("background-color","#fff")
+
+
+                  //div.html('<div id="textarea" contenteditable>I look like a textarea</div>')
+                  var textarea = div.append("div")
+                  textarea.style("width",width*0.9+"px")
+                  textarea.style("height",height*0.7+"px")
+                  var id = "textarea"+conf.join("")
+                  textarea.attr("id",id)
+                  textarea.attr("contenteditable","")
+                  textarea.style("display","none")
+                  textarea.text(noteContent)
+
+                  var textdisplay = div.append("p")
+
+                  textdisplay.style("display","block")
+                  textdisplay.style("word-wrap","break-word")
+                  textdisplay.text(noteContent)
+
+
+                  textarea.on("blur",function(){
+                      textarea.style("display","none")
+                      textdisplay.style("display","block")
+                  })
+
+
+                  div.on("click",function(){
+                      textarea.style("display","block")
+                      textdisplay.style("display","none")
+                  })
+
+                  textarea.on("blur",function(){
+                        var content = document.getElementById(id).innerText
+
+                        if(category == "construct"){
+                            if(type == "claim"){
+                                scope.analysisData.analysisResult[i].claimNoteContent = content
+                            }
+
+                            if(type == "warrant"){
+                                scope.analysisData.analysisResult[i].support[j].warrantNoteContent = content
+                            }
+
+                            if(type == "evidence"){
+                                scope.analysisData.analysisResult[i].support[j].evidenceNoteContent = content
+                            }
+                        }
+
+                        if(category == "dissentExplain"){
+                            if(type == "claim"){
+                                scope.analysisDissentExplainData[dissentExplainI].analysisResult[i].claimNoteContent = content
+                            }
+
+                            if(type == "warrant"){
+                                scope.analysisDissentExplainData[dissentExplainI].analysisResult[i].support[j].warrantNoteContent = content
+                            }
+
+                            if(type == "evidence"){
+                                scope.analysisDissentExplainData[dissentExplainI].analysisResult[i].support[j].evidenceNoteContent = content
+                            }
+                        }
+
+                        textdisplay.text(content)
+
+
+                      console.log(scope.analysisData.analysisResult)
+                  })
+
+
               }
 
               function appendWarrant(text,conf){
@@ -1720,10 +1913,19 @@
 
               function dealWithClick(foreignObject,conf,text){
 
-                  if(conf[3] == "claim"){
-                        return;
-                  }
+
+                  //选择異議的步骤
                   if((scope.debateInfo.status == 'appeal' && scope.debateInfo.position == 2) || (scope.debateInfo.status == 'lookup' && scope.debateInfo.position == 1)){
+
+
+
+                      if(conf[3] == "claim"){
+                          //主張選択できないように
+                          return;
+                      }
+
+
+
                       foreignObject.on("click",function(){
 
                           var borderd = (parseInt(foreignObject.attr("borderd"))+1) % 2
@@ -1737,6 +1939,86 @@
                           }
                       })
                   }
+
+
+                  //如果要拒绝对方的分析结果,那么告诉对方哪个地方分析得不太对
+
+                  //检查对方分析结果得时候,点击元素加批注吧
+
+                  if((scope.debateInfo.status == 'check' && scope.debateInfo.position == 1) || (scope.debateInfo.status == 'kentou' && scope.debateInfo.position == 2)){
+
+
+                      foreignObject.on("click",function(){
+                          var borderd = (parseInt(foreignObject.attr("borderd"))+1) % 2
+                          foreignObject.attr("borderd",borderd)
+                          if(borderd == 1){
+                              this.style.border = "4px solid blue"
+                              footnote(conf)
+                              addDissentArr(conf,text)
+                          }else{
+                              this.style.border = ""
+                              footnote(conf)
+                              removeDissentArr(conf)
+                          }
+
+
+
+                          startDraw()
+                          //重画分析结果图,以便让其显示备注栏
+                      })
+
+
+                      function footnote(conf){
+                          var category = conf[0]
+                          var i = conf[1]
+                          var j = conf[2]
+                          var type = conf[3]
+                          var dissentI = conf[4]
+
+                          if(category == "construct"){
+                              if(type == "claim"){
+
+                                  scope.analysisData.analysisResult[i].claimNote = scope.analysisData.analysisResult[i].claimNote || 0
+                                  scope.analysisData.analysisResult[i].claimNote = (scope.analysisData.analysisResult[i].claimNote + 1) % 2
+                              }
+
+                              if(type == "warrant"){
+                                  scope.analysisData.analysisResult[i].support[j].warrantNote = scope.analysisData.analysisResult[i].support[j].warrantNote || 0
+                                  scope.analysisData.analysisResult[i].support[j].warrantNote = (scope.analysisData.analysisResult[i].support[j].warrantNote + 1 ) % 2
+                              }
+
+                              if(type == "evidence"){
+                                  scope.analysisData.analysisResult[i].support[j].evidenceNote = scope.analysisData.analysisResult[i].support[j].evidenceNote || 0
+                                  scope.analysisData.analysisResult[i].support[j].evidenceNote = (scope.analysisData.analysisResult[i].support[j].evidenceNote + 1 ) % 2
+                              }
+
+                          }
+
+                          if(category == "dissentExplain"){
+
+                              if(type == "claim"){
+
+                                  scope.analysisDissentExplainData[dissentI].analysisResult[i].claimNote = scope.analysisDissentExplainData[dissentI].analysisResult[i].claimNote || 0
+                                  scope.analysisDissentExplainData[dissentI].analysisResult[i].claimNote = (scope.analysisDissentExplainData[dissentI].analysisResult[i].claimNote + 1) % 2
+                              }
+
+                              if(type == "warrant"){
+                                  scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].warrantNote = scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].warrantNote || 0
+                                  scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].warrantNote = (scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].warrantNote + 1 ) % 2
+                              }
+
+                              if(type == "evidence"){
+                                  scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].evidenceNote = scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].evidenceNote || 0
+                                  scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].evidenceNote = (scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].evidenceNote + 1 ) % 2
+                              }
+
+
+                          }
+
+                      }
+
+                  }
+
 
               }
 
@@ -1870,6 +2152,7 @@
                   //调整升降机
                   LASTY += DISSENTTXTANDDISSENTEXPLAININTERVALY + DISSENTTXTHEIGHT
 
+
               }
 
               function painTitle(type){
@@ -1888,6 +2171,16 @@
                   drawDottedLine(DOTTEDLINEX3,DOTTEDLINEX4,LASTY)
 
                   LASTY += TITLEANDRECTINTERVALY
+
+
+
+                  if((scope.debateInfo.status == 'check' && scope.debateInfo.position == 1) || (scope.debateInfo.status == 'kentou' && scope.debateInfo.position == 2)){
+                      drawText("それぞれの主張,論拠,根拠をクリックしたら脚注もできます",TITLEX/2,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
+                      LASTY += TITLEANDRECTINTERVALY/2
+                  }
+
+
+
               }
 
               function drawDottedLine(x1,x2,y){
@@ -3936,11 +4229,11 @@
                 }
 
                 var approval = function(){
-                    coreSocket.emit("confirmAnalysisResult",{comment:scope.examAnalysisResultComment})
+                    coreSocket.emit("confirmAnalysisResult",{comment:scope.examAnalysisResultComment,analysisData:scope.analysisData,analysisDissentExplainData:scope.analysisDissentExplainData})
                 }
 
                 var refuse = function(){
-                    coreSocket.emit("refuseAnalysisResult",{comment:scope.examAnalysisResultComment})
+                    coreSocket.emit("refuseAnalysisResult",{comment:scope.examAnalysisResultComment,analysisData:scope.analysisData,analysisDissentExplainData:scope.analysisDissentExplainData})
                 }
             },
             templateUrl:"/angularJSTemplate/public/examAnalysisResult.html"
