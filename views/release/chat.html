@@ -124,6 +124,9 @@
             /*border: 1px solid gray;*/
             font: medium -moz-fixed;
             font: -webkit-small-control;
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 14px;
+            line-height: 1.42857143;
             height: 68px;
             margin-top: 2px;
             overflow: auto;
@@ -1865,6 +1868,8 @@
                   foreignObject.attr("class","draw")
                   foreignObject.attr("x",x)
                   foreignObject.attr("y",y)
+                  var id = "gkid"+conf.join("")
+
 
                   var div = foreignObject.append('xhtml:div')
                   div.style("width",RECTWIDTH*0.95+"px")
@@ -1874,6 +1879,7 @@
                   panel.attr("borderd",0)
                   panel.attr("class","panel panel-default")
                   panel.style("height","100%")
+                  panel.attr("id",id)
 
                   var head = panel.append("div")
                   head.attr("class","panel-heading")
@@ -1905,26 +1911,30 @@
                   body.attr("class","panel-body")
                   body.style("height","63%")
                   body.style("overflow","auto")
-                  body.text(text)
+                  var p = body.append("p")
+                  p.style("word-break","break-all")
+                  p.text(text)
+
+
+                  var textarea = body.append("div")
+                  textarea.attr("id","textarea")
+                  textarea.attr("contenteditable","")
+                  textarea.text(text)
+                  textarea.style("display","none")
+
 
                   dealWithClick(panel,conf,text)
               }
 
 
               function dealWithClick(foreignObject,conf,text){
-
-
                   //选择異議的步骤
                   if((scope.debateInfo.status == 'appeal' && scope.debateInfo.position == 2) || (scope.debateInfo.status == 'lookup' && scope.debateInfo.position == 1)){
-
-
 
                       if(conf[3] == "claim"){
                           //主張選択できないように
                           return;
                       }
-
-
 
                       foreignObject.on("click",function(){
 
@@ -1938,6 +1948,81 @@
                               removeDissentArr(conf)
                           }
                       })
+                  }
+
+
+                //点击修改
+                  if((scope.debateInfo.status == 'analysis' && scope.debateInfo.position == 2) || (scope.debateInfo.status == 'bunseki' && scope.debateInfo.position == 1)){
+                      foreignObject.on("dblclick",function(){
+                          var id = d3.select(this).attr("id")
+                          d3.select(this).select(".panel-body").select("p").style("display","none")
+                          d3.select(this).select(".panel-body").select("#textarea").style("display","block")
+
+                          var textarea = d3.select(this).select(".panel-body").select("#textarea")
+                          textarea.on("blur",function(){
+                              d3.select(this).style("display","none")
+                              d3.select("#"+id).select("p").style("display","block")
+                              //d3.select("#"+id).select("p").text(d3.select(this).text())
+
+
+                              changeAndEdit(conf,d3.select(this).text())
+
+                              startDraw()
+                              //重新画图,以便显示修改结果
+
+
+
+                              //还没提交以前把最新的analysis data 传给数据库,以便自己和对方都够看到当前即使填写的analysis data信息
+                              console.log("pre submit analysis data")
+                              console.log(scope.analysisData)
+                              console.log(scope.analysisDissentExplainData)
+                              coreSocket.emit("updateGiveAnalysis",{analysisData:scope.analysisData,analysisDissentExplainData:scope.analysisDissentExplainData})
+
+
+                          })
+
+                      })
+
+
+
+                      function changeAndEdit(conf,content){
+                          var category = conf[0]
+                          var i = conf[1]
+                          var j = conf[2]
+                          var type = conf[3]
+                          var dissentI = conf[4]
+
+                          if(category == "construct"){
+                              if(type == "claim"){
+                                  scope.analysisData.analysisResult[i].claim = content
+                              }
+
+                              if(type == "warrant"){
+                                  scope.analysisData.analysisResult[i].support[j].warrant = content
+                              }
+
+                              if(type == "evidence"){
+                                  scope.analysisData.analysisResult[i].support[j].evidence = content
+                              }
+                          }
+
+                          if(category == "dissentExplain"){
+
+                              if(type == "claim"){
+                                  scope.analysisDissentExplainData[dissentI].analysisResult[i].claim = content
+                              }
+
+                              if(type == "warrant"){
+                                  scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].warrant = content
+                              }
+
+                              if(type == "evidence"){
+                                  scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].evidence = content
+                              }
+
+
+                          }
+                      }
                   }
 
 
@@ -2018,6 +2103,14 @@
                       }
 
                   }
+
+
+
+
+
+
+
+
 
 
               }
