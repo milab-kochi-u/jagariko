@@ -71,7 +71,6 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
 
                             if(_res[0].status == "noAnalysisStart"){
 
-
                                 _update = {$set:{status:"noAnalysisFuncAppealAndState",preStatus:_res[0].status,time:Date.parse(new Date())}}
 
                             }else if(_res[0].status == "noAnalysisFuncAppealAndState"){
@@ -84,9 +83,6 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                                     //_res[0].order > (totalNum - 1)
                                     _update = {$set:{status:"noAnalysisfinish",preStatus:_res[0].status,time:Date.parse(new Date())},$inc:{order:1}}
                                 }
-
-
-
 
                             }else{
                                 this.terminate()
@@ -224,6 +220,29 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
         })
 
 
+        socket.on("backToSelectDissent",function(msg){
+            //重新选择异议点
+            var addDissentArr = msg.addDissentArr
+            var sendObj = {}
+            sendObj.statementData = msg.statementData
+            sendObj.dissentExplain = msg.dissentData
+            sendObj.addDissentArr = msg.addDissentArr
+
+
+            socket.emit("backToSelectDissentFinish",sendObj)
+            socket.to(session.debateLogin.rNum).broadcast.emit("backToSelectDissentFinish",sendObj)
+
+            /*
+            steps(function(){
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyStatement:sendObj}},{},this.hold(function(_res){
+
+
+                }))
+            })
+            */
+        })
+
+
         socket.on("giveAnalysis",function(msg){
             var sendObj
             var order
@@ -265,7 +284,7 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                 console.log({num:session.debateLogin.num,rNum:session.debateLogin.rNum})
                 console.log({everyAnalysisData:sendObj})
                 console.log(sendObj.analysisData.analysisResult)
-                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyAnalysisData:sendObj}},this.hold(function(res){
+                mongo.update("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{$set:{everyAnalysisData:sendObj,examAnalysisResultComment:""}},this.hold(function(res){
 
 
                 }))
@@ -551,7 +570,6 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                 everyAnalysisData.confirm = 0 //这里一定要加以区别
                 everyAnalysisData.examAnalysisResultComment = examAnalysisResultComment
                 mongo.insert("analysisLog",everyAnalysisData,{},this.hold(function(_res){
-
                 }))
             })()
 

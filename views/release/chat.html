@@ -375,8 +375,7 @@
                 $scope.dissentData = msg.dissentData
                 $scope.statementStatus = msg.statementStatus
                 $scope.statementData = msg.statementData
-
-
+                $scope.addDissentArr = msg.addDissentArr
             })
 
         })
@@ -395,11 +394,29 @@
 
         })
 
+        coreSocket.on("backToSelectDissentFinish",function(msg){
 
 
 
+                if($scope.debateInfo.status == "state"){
+                    console.log("重新选择异议点 state")
+                    $scope.debateInfo.status = "appeal"
+                    $scope.debateInfo.preStatus = "state"
+                }else if($scope.debateInfo.status == "noberu"){
+                    console.log("重新选择以一点 noberu")
+                    $scope.debateInfo.status = "lookup"
+                    $scope.debateInfo.preStatus = "noberu"
+                }else{
 
+                }
 
+                checkStatus($scope.debateInfo.status,$scope.debateInfo.preStatus)
+
+                $scope.dissentData = msg.dissentData
+                $scope.addDissentArr = msg.addDissentArr
+                $scope.statementData = msg.statementData
+
+        })
 
 
 
@@ -549,6 +566,9 @@
         }
 
 
+        $scope.checkStatus = checkStatus
+
+
         function changeStatusWithAnalysisFunc(status,preStatus){
             if(status == "start" && !preStatus){
                 changeStatusController(["startDebate"])
@@ -575,6 +595,12 @@
                 changeStatusController(["stateDebate"])
             }
 
+
+
+            if(status == "appeal" && preStatus == "state"){
+                changeStatusController(["appealDebate"])
+            }
+
             // status "state" will not inserted into database
 
 
@@ -599,6 +625,12 @@
             if(status == "noberu" && preStatus == "lookup"){
                 changeStatusController(["noberuDebate"])
             }
+
+
+            if(status == "lookup" && preStatus == "noberu"){
+                changeStatusController(["lookupDebate"])
+            }
+
 
             if(status == "analysis" && preStatus == "lookup"){
                 changeStatusController(["analysisDebate"])
@@ -770,6 +802,14 @@
                 scope.submit = function(){
                     coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
                 }
+
+
+                scope.backToAppeal = function(){
+                    //scope.debateInfo.preStatus = "state"
+                    //scope.debateInfo.status = 'appeal'
+                    //scope.checkStatus(scope.debateInfo.status,scope.debateInfo.preStatus)
+                    coreSocket.emit("backToSelectDissent",{dissentData:scope.dissentData,statementData:scope.statementData,addDissentArr:scope.addDissentArr})
+                }
             },
             templateUrl:"/angularJSTemplate/process/stateDebate.html"
         }
@@ -828,6 +868,14 @@
 
                     scope.submit = function(){
                         coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
+                    }
+
+
+
+
+
+                    scope.backToLookUp = function(){
+                        coreSocket.emit("backToSelectDissent",{dissentData:scope.dissentData,statementData:scope.statementData,addDissentArr:scope.addDissentArr})
                     }
             },
             templateUrl:"/angularJSTemplate/process/noberuDebate.html"
@@ -1144,6 +1192,7 @@
                     body.attr("class","panel-body")
 
                     var p = body.append("p")
+                    p.style("word-break","break-all")
                     p.text(text)
 
                     //再画右边的explain
@@ -1197,6 +1246,7 @@
                     body.attr("class","panel-body")
 
                     var p = body.append("p")
+                    p.style("word-break","break-all")
                     p.text(reply)
 
                 }
@@ -1572,11 +1622,20 @@
                   svg.attr("height","6000px")
 
 
-                  scope.addDissentArr = {}
+
+                  if(scope.debateInfo.preStatus == 'state' || scope.debateInfo.preStatus == 'noberu'){
+                      console.log(scope.addDissentArr)
+                  }else{
+                      scope.addDissentArr = {}
+
+                  }
+
               }
 
               function draw(){
                   clearDraw()
+
+
 
                   if(scope.kyaka == 1){
                       //说明是被回退的
@@ -1586,8 +1645,6 @@
                           drawText("相手のコメント:"+scope.examAnalysisResultComment || "",LEFT,LASTY+TITLEFONTSIZE/2,TITLEFONTSIZE)
                           LASTY += TITLEANDRECTINTERVALY
                       }
-
-
                   }
 
                   if((scope.debateInfo.status == "lookup" && scope.debateInfo.position == 1) || (scope.debateInfo.status == "appeal" && scope.debateInfo.position == 2)){
@@ -1905,6 +1962,19 @@
                       edit.attr("id",divId)
                       var html = '<span style="cursor: pointer" class="pull-right" ng-click="edits(\''+conf[0]+'\','+parseInt(conf[1])+','+parseInt(conf[2])+',\''+conf[3]+'\',\''+parseInt(conf[4])+'\')">編集</span>'
                       angular.element(document.getElementById(divId)).append($compile(html)(scope));
+
+
+                        //第一个主張以及第一个根拠不能删除以外,其他的都可以删除
+                      var i = conf[1]
+                      var j = conf[2]
+                      var type = conf[3]
+                      if((type == "claim" && i==0)||(type=="evidence" && i==0 && j==0)){
+
+                      }else{
+                          var html = '<span ng-click="delete(\''+conf[0]+'\','+parseInt(conf[1])+','+parseInt(conf[2])+',\''+conf[3]+'\',\''+parseInt(conf[4])+'\')" class="glyphicon glyphicon-minus-sign" style="color: red;font-size: 20px;line-height: 18px;margin-right: 4px;cursor: pointer;" aria-hidden="true"></span>'
+                          angular.element(document.getElementById(divId)).append($compile(html)(scope));
+                      }
+
                   }
 
                   var body = panel.append("div")
@@ -1924,6 +1994,24 @@
 
 
                   dealWithClick(panel,conf,text)
+
+
+
+
+                  //如果是选择万异议后点返回重新选择异议的画,那么检查看看是不是有已经选择过的异议
+                  if(scope.debateInfo.preStatus == 'noberu' || scope.debateInfo.preStatus == 'state'){
+
+
+                        if(!scope.addDissentArr[conf.join("")]) return;
+
+                        if(scope.addDissentArr[conf.join("")].res == 1){
+                            console.log("ccccccc")
+                            panel.attr("borderd",1)
+                            panel.style("height","100%")
+                            panel.style("border","4px solid yellow")
+                        }
+                  }
+
               }
 
 
@@ -1942,7 +2030,7 @@
                           foreignObject.attr("borderd",borderd)
                           if(borderd == 1){
                               this.style.border = "4px solid yellow"
-                              addDissentArr(conf,text)
+                              addDissentArrFunc(conf,text)
                           }else{
                               this.style.border = ""
                               removeDissentArr(conf)
@@ -2039,11 +2127,11 @@
                           if(borderd == 1){
                               this.style.border = "4px solid blue"
                               footnote(conf)
-                              addDissentArr(conf,text)
+                              //addDissentArrFunc(conf,text)
                           }else{
                               this.style.border = ""
                               footnote(conf)
-                              removeDissentArr(conf)
+                              //removeDissentArr(conf)
                           }
 
 
@@ -2122,10 +2210,18 @@
 
                   scope.statementData = ""
 
+                    console.log("7777777777")
+                    console.log(scope.addDissentArr)
+
+
                   if(angular.equals(scope.addDissentArr, {})){
 
                       alert("上の分析結果に少なくとも一つを異議付けてください")
                       return;
+
+
+
+
                       //如果没有选择质疑的选项那么直接进入下一步的立論的部分
                       scope.statementStatus = {name:"claim",i:0}
 
@@ -2138,10 +2234,19 @@
 
                       }
                   }else{
-
                       scope.statementStatus = {name:"dissent",i:0}
                   }
 
+
+                  var kk = 0
+                  for(var i in scope.addDissentArr){
+                      kk += parseInt(scope.addDissentArr[i].res)
+                  }
+
+                  if(kk == 0 ){
+                      alert("上の分析結果に少なくとも一つを異議付けてください")
+                      return;
+                  }
 
 
                   for(var i in scope.addDissentArr){
@@ -2159,12 +2264,12 @@
 
                   }
 
-                  coreSocket.emit("selectDissent",{dissentData:scope.dissentData,statementStatus:scope.statementStatus,statementData:scope.statementData})
+                  coreSocket.emit("selectDissent",{dissentData:scope.dissentData,statementStatus:scope.statementStatus,statementData:scope.statementData,addDissentArr:scope.addDissentArr})
 
               }
 
 
-              function addDissentArr(conf,text){
+              function addDissentArrFunc(conf,text){
                   // get index
 
                   var _category = conf[0]
@@ -2348,8 +2453,6 @@
 
 
               scope.edits = function(category,i,j,type,dissentExplainI){
-
-
                   if(category == "construct"){
                       scope.inputStatus.i = i
                       scope.inputStatus.j = j
@@ -2371,6 +2474,54 @@
                   //让textarea显示相应的内容
               }
 
+
+              scope.delete = function(category,i,j,type,dissentExplainI){
+
+                  //第一个claim和第一个evidence不能删除
+
+                  if((type == "claim" && i==0)||(type=="evidence" && i==0 && j==0)){
+                            return
+                  }
+
+                  if(category == "construct"){
+                      if(type == "claim"){
+                          scope.analysisData.analysisResult.splice(i,1)
+                      }
+
+                      if(type == "warrant"){
+                          scope.analysisData.analysisResult[i].support[j].warrant = ""
+                      }
+
+                      if(type == "evidence"){
+                          scope.analysisData.analysisResult[i].support.splice(j,1)
+                      }
+                  }else if(category == "dissentExplain"){
+                      if(type == "claim"){
+                          scope.analysisDissentExplainData[dissentExplainI].analysisResult.splice(i,1)
+                      }
+
+                      if(type == "warrant"){
+                          scope.analysisDissentExplainData[dissentExplainI].analysisResult[i].support[j].warrant = ""
+                      }
+
+                      if(type == "evidence"){
+                          scope.analysisDissentExplainData[dissentExplainI].analysisResult[i].support[j].evidence = ""
+                      }
+                  }else{
+
+                  }
+
+                  startDraw()
+                  //重新画图,以便及时显示删除后的信息
+
+
+                  //还没提交以前把最新的analysis data 传给数据库,以便自己和对方都够看到当前即使填写的analysis data信息
+                  console.log("pre submit analysis data")
+                  console.log(scope.analysisData)
+                  console.log(scope.analysisDissentExplainData)
+                  coreSocket.emit("updateGiveAnalysis",{analysisData:scope.analysisData,analysisDissentExplainData:scope.analysisDissentExplainData})
+
+              }
 
 
               function checkIfOriginalDataExists(){
@@ -2400,7 +2551,7 @@
           templateUrl:"/angularJSTemplate/public/analysisResult2.html"
       }
     })
-
+/*
     myApp.directive("analysisResult",function(coreSocket,$compile){
         return {
             scope:false,
@@ -2599,7 +2750,7 @@
                     circle.attr("cx",x + 1.4*RECTWIDTH)
                     circle.style("fill","blue")
                     circle.attr("r",circleR)
-                    */
+
 
                     var foreignObject = svg.append("foreignObject")
                     var hintWidth = 360
@@ -2963,7 +3114,7 @@
             templateUrl:"/angularJSTemplate/public/analysisResult.html"
         }
     })
-
+*/
 // no analysis function process
 
     myApp.directive("noAnalysisStartDebate",function(coreSocket){
@@ -4323,10 +4474,21 @@
 
                 var approval = function(){
                     coreSocket.emit("confirmAnalysisResult",{comment:scope.examAnalysisResultComment,analysisData:scope.analysisData,analysisDissentExplainData:scope.analysisDissentExplainData})
+
+
+
+
                 }
 
                 var refuse = function(){
+                    if(!scope.examAnalysisResultComment){
+                        alert("拒絶の理由をお書きください")
+                        return
+                    }
                     coreSocket.emit("refuseAnalysisResult",{comment:scope.examAnalysisResultComment,analysisData:scope.analysisData,analysisDissentExplainData:scope.analysisDissentExplainData})
+
+
+
                 }
             },
             templateUrl:"/angularJSTemplate/public/examAnalysisResult.html"
