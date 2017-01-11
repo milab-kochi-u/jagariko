@@ -145,12 +145,10 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                             _update = {$set:{status:"analysis",preStatus:_res[0].status,time:Date.parse(new Date())},$inc:{order:1}}
                         }else{
 
-
-
-
                             if(!msg.statementData && msg.dissentData.length == 0){
                                 //说明在准结束的lookup阶段,什么異議都没有选择,直接点了下一步,那么下一步也没有立論了所以直接结束了
-                                _update = {$set:{status:"finish",preStatus:_res[0].status,preFinish:true,finish:true,time:Date.parse(new Date())}}
+                                //_update = {$set:{status:"finish",preStatus:_res[0].status,preFinish:true,finish:true,time:Date.parse(new Date())}}
+                                return;
                             }else{
                                 //说明在准结束的lookup阶段,选择了異議,点击下一步以后需要对異議的部分做解释说明
                                 //这次阐述完后应该结束了
@@ -246,11 +244,11 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
         socket.on("giveAnalysis",function(msg){
             var sendObj
             var order
-            var preFinish
+            //var preFinish
             steps(function() {
                 mongo.find("debateStatus",{num:session.debateLogin.num,rNum:session.debateLogin.rNum},{},this.hold(function(_res){
                     order = _res[0].order
-                    preFinish = _res[0].preFinish
+                    //preFinish = _res[0].preFinish
                     return  _res[0].status
                 }))
             },function(status){
@@ -480,16 +478,15 @@ var sessionSockets = function(sessionSockets,steps,mongo,io) {
                     return  _res[0].status
                 }))
             },function(status){
-                if(status == "check"){
-
+                if(status == "kentou"){
                     if(preFinish){
                         var update = {$set:{preStatus:status,status:"finish",finish:true,time:Date.parse(new Date())}}
                     }else{
-                        var update = {$set:{preStatus:status,status:"appeal",kyaka:0,time:Date.parse(new Date())}}
+                        var update = {$set:{preStatus:status,status:"lookup",kyaka:0,time:Date.parse(new Date())}}
                     }
 
-                }else if(status == "kentou"){
-                    var update = {$set:{preStatus:status,status:"lookup",kyaka:0,time:Date.parse(new Date())}}
+                }else if(status == "check"){
+                    var update = {$set:{preStatus:status,status:"appeal",kyaka:0,time:Date.parse(new Date())}}
                 }else{
 
                 }

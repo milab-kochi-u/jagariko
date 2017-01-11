@@ -1,10 +1,96 @@
-<h3>テーマ:中学校の部活動は必要ですか？</h3>
+<h3>テーマ:中学校の部活動は必要ですか？?</h3>
+<div class="row">
+    <div class="col-sm-3">
+        総回数:{{secondStatementStatics.length}}回
+    </div>
+    <div class="col-sm-3">
+        参加人数:{{members.length}}人
+    </div>
+</div>
 <div class="list-group">
-    <a href="#" class="list-group-item active">
-        Cras justo odio
+    <a href="#" class="list-group-item row" ng-repeat="(i,val) in secondStatementStatics track by $index">
+
+        <div class="row">
+            <div class="col-sm-2">
+                総文字数:{{val.totalLitterNum}}
+            </div>
+            <div class="col-sm-4">
+                実施時間:{{val.time}}
+            </div>
+
+            <div class="col-sm-4">
+                <span>分析機能</span>
+                <span ng-show="val.analysisFunc == 1">あり</span>
+                <span ng-show="val.analysisFunc == 0">なし</span>
+            </div>
+
+
+            <div class="col-sm-4">
+                <span>マップ機能</span>
+                <span ng-show="val.mapFunc == 1">あり</span>
+                <span ng-show="val.mapFunc == 0">なし</span>
+            </div>
+
+
+        </div>
+
+        <hr/>
+        <div class="row">
+            <div class="col-sm-2">
+                肯定側:{{val.proInfo.name}}
+            </div>
+
+            <div class="col-sm-2">
+                肯定側総文字数:{{val.proTotalLitterNum}}
+            </div>
+
+            <div class="col-sm-2">
+                主張文字数:{{val.proClaimTotal}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁文字数:{{val.proRebuttalTotal}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁数:{{val.proRebuttalNum}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁平均文字数:{{val.proRebuttalTotal  / val.proRebuttalNum}}
+            </div>
+
+        </div>
+
+        <hr/>
+        <div class="row">
+            <div class="col-sm-2">
+                否定側:{{val.conInfo.name}}
+            </div>
+
+            <div class="col-sm-2">
+                否定側総文字数:{{val.conTotalLitterNum}}
+            </div>
+
+            <div class="col-sm-2">
+                主張文字数:{{val.conClaimTotal}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁文字数:{{val.conRebuttalTotal}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁数:{{val.conRebuttalNum}}
+            </div>
+
+            <div class="col-sm-2">
+                反駁平均文字数:{{val.conRebuttalTotal  / val.conRebuttalNum}}
+            </div>
+
+
+        </div>
+
     </a>
-    <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
-    <a href="#" class="list-group-item">Morbi leo risus</a>
-    <a href="#" class="list-group-item">Porta ac consectetur ac</a>
-    <a href="#" class="list-group-item">Vestibulum at eros</a>
+
 </div>

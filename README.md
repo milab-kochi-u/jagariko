@@ -94,18 +94,7 @@ dissentExplain  //异议说明时陈述时的主管明亮
 db.serverCmdLineOpts().parsed.storage.dbPath
 mongodump --host mongodb1.example.net --port 37017 --username user --password pass --out /opt/backup/mongodump-2011-10-2488
 
-
-
-
-
-
-
-
-
-
-
-
-
+mongorestore --collection people --db accounts dump/
 
 
 

@@ -3,7 +3,7 @@
  */
 
 module.exports = {
-    dbName:"release_bak",
+    dbName:"release",
     dbPort:27017,
     dbHost:"localhost"
 }

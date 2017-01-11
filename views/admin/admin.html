@@ -613,7 +613,80 @@
         return{
             scope:false,
             link:function(scope,element){
+                myPost.postData("/admin/getStatementstatics",{expeOrder:2}).then(function(res){
+                    scope.secondStatementStatics = res.data.data
+                    console.log(scope.secondStatementStatics)
 
+
+                    var members = []
+                    scope.secondStatementStatics.forEach(function(value){
+                        if (members.indexOf(value.pro)==-1) members.push(value.pro);
+                        if (members.indexOf(value.con)==-1) members.push(value.con);
+                    });
+                    scope.members = members;
+
+                    for(var i=0;i<scope.secondStatementStatics.length;i++){
+                        countTotalNum(i,scope.secondStatementStatics[i].statementLog)
+                        changeTime(i,scope.secondStatementStatics[i].time)
+                    }
+
+                    function countTotalNum(_i,statementLog){
+                        var total = 0
+                        var proTotal = 0
+                        var conTotal = 0
+                        var proClaimTotal = 0
+                        var proRebuttalTotal = 0
+                        var proRebuttalNum = 0
+
+                        var conClaimTotal = 0
+                        var conRebuttalTotal = 0
+                        var conRebuttalNum = 0
+
+                        for(var i=0;i<statementLog.length;i++){
+                            total += statementLog[i].statementData.length
+                            if(statementLog[i].position == 1){
+                                proTotal += statementLog[i].statementData.length
+                                proClaimTotal += statementLog[i].statementData.length
+                            }
+
+                            if(statementLog[i].position == 2){
+                                conTotal += statementLog[i].statementData.length
+                                conClaimTotal += statementLog[i].statementData.length
+                            }
+
+                            var dissentExplain = statementLog[i].dissentExplain
+                            for(var j=0;j<dissentExplain.length;j++){
+                                total +=  dissentExplain[j].reply.length
+
+                                if(statementLog[i].position == 1){
+                                    proTotal += dissentExplain[j].reply.length
+                                    proRebuttalTotal += dissentExplain[j].reply.length
+                                    proRebuttalNum ++
+                                }
+
+                                if(statementLog[i].position == 2){
+                                    conTotal += dissentExplain[j].reply.length
+                                    conRebuttalTotal += dissentExplain[j].reply.length
+                                    conRebuttalNum ++
+                                }
+                            }
+                        }
+                        scope.secondStatementStatics[_i].totalLitterNum = total
+                        scope.secondStatementStatics[_i].proTotalLitterNum = proTotal
+                        scope.secondStatementStatics[_i].conTotalLitterNum = conTotal
+                        scope.secondStatementStatics[_i].proClaimTotal = proClaimTotal
+                        scope.secondStatementStatics[_i].proRebuttalTotal = proRebuttalTotal
+                        scope.secondStatementStatics[_i].proRebuttalNum = proRebuttalNum
+                        scope.secondStatementStatics[_i].conClaimTotal = conClaimTotal
+                        scope.secondStatementStatics[_i].conRebuttalTotal = conRebuttalTotal
+                        scope.secondStatementStatics[_i].conRebuttalNum = conRebuttalNum
+                    }
+
+                    function changeTime(_i,time){
+                        scope.secondStatementStatics[_i].time = changeDate(time)
+                    }
+
+                })
             },
             templateUrl:"/angularJSTemplate/admin/second.html"
         }

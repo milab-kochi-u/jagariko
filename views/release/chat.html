@@ -322,6 +322,7 @@
 
         coreSocket.on("receiveUpdateAnalysis",function(_res){
             $scope.currentAnalysis = _res.everyAnalysisData
+
             $rootScope.$broadcast('reDrawMap');
         })
 
@@ -355,8 +356,8 @@
             var promise = getDebateInformation()
 
 
-            promise.then(function(_msg){
 
+            promise.then(function(_msg){
 
                 if($scope.debateInfo.status == "appeal"){
                     console.log("con select dissent and prepare to do state")
@@ -799,6 +800,18 @@
             scope:false,
 
             link:function(scope,element){
+
+
+
+                if(scope.debateInfo.order == scope.totalNum-1){
+
+                    //说明现在这个阶段不能立論了,因为快要结束了
+                    if(scope.debateInfo.preFinish == 1){
+                        scope.lastStatement = 1
+                    }
+                }
+
+
                 scope.submit = function(){
                     coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
                 }
@@ -825,7 +838,15 @@
                 if(scope.debateInfo.preStatus == 'check' || scope.debateInfo.preStatus == 'kentou'){
                     scope.analysisObject = {target:"preview",i:0}
                 }else{
-                    scope.analysisObject = {target:"construct",i:0}
+                   // scope.analysisObject = {target:"construct",i:0}
+
+                    if(scope.debateInfo.preFinish){
+                        //如果是属于准结束阶段,那么这个时候只有分析異議説明的份儿
+                        scope.analysisObject = {target:"dissentExplain",i:0}
+                    }else{
+                        //如果不是准结束的阶段,那么这个时候要分析立論
+                        scope.analysisObject = {target:"construct",i:0}
+                    }
                 }
             },
             templateUrl:"/angularJSTemplate/process/bunsekiDebate.html"
@@ -857,22 +878,18 @@
         }
     })
 
-    myApp.directive("noberuDebate",function(coreSocket){
+    myApp.directive("noberuDebate",function(coreSocket,$rootScope){
         return{
             scope:false,
             link:function(scope,element){
-                    if(scope.debateInfo.order == scope.totalNum-1){
                         //说明现在这个阶段不能立論了,因为快要结束了
-                        scope.lastStatement = 1
-                    }
+                            scope.lastStatement = 1
 
                     scope.submit = function(){
                         coreSocket.emit("giveStatement",{dissentData:scope.dissentData,statementData:scope.statementData})
                     }
 
-
-
-
+                    //$rootScope.$broadcast("reDrawMap",{})
 
                     scope.backToLookUp = function(){
                         coreSocket.emit("backToSelectDissent",{dissentData:scope.dissentData,statementData:scope.statementData,addDissentArr:scope.addDissentArr})
@@ -1257,243 +1274,243 @@
         }
     })
 
-    myApp.directive("statementResult",function($compile) {
-        return {
-            scope: false,
-            link: function (scope,element) {
-
-
-                var TOP = 15   //最先画的方块距离顶端的距离
-                var LEFT = 80   //最先画的方块距离左边的距离
-                var DISSENTWIDTH = 250 //异议方块的长度
-                var DISSENTHEIGHT = 260//异议方块的高度
-                var DISSENTANDEXPLAINSPACE = 250 //异议方块距离右边的赛解释说明方块的横向距离
-                var DISSENTSPACEY = 80 //异议方块之间间隔的距离
-                var EXPLAINWIDTH = 460
-                var EXPLAINHEIGHT = 260
-                var DISSENTANDLINESPACEY = 90 //异议方块距离下面虚线的纵向距离
-                var DOTTEDLINEX = 40//虚线的左边位移
-                var DOTTEDWIDTH = 360 //虚线的长度
-                var DOTTEDSPACEWIDTH = 300 //虚线间隔的长度
-                var DOTTEDLINEANDCONSTRUCTSPACE = 50 //虚线距离下面方块的纵向距离
-                var CONSTRUCTX = LEFT //结论方块距离左侧的位移
-                var CONSTRUCTWIDTH = 960 //结论方块的长度
-                var CONSTRUCTHEIGHT = 260 //结论方块的高度
-
-                var LASTX = 0
-                var LASTY = 0
-                var svg
-
-                var svg = d3.select(element.find("svg")[0])
-                clearDraw()
-                draw()
-
-                scope.$on('drawStatementResult',function(event, data){
-                    clearDraw()
-                    draw()
-                });
-
-
-                function draw(){
-                    LASTX = LEFT
-                    LASTY = TOP
-                    for(var i = 0;i<scope.dissentData.length;i++){
-                        if(i>0) LASTY += DISSENTSPACEY
-                        appendRect(scope.dissentData[i].txt,1,LASTX,LASTY,DISSENTWIDTH,DISSENTHEIGHT,"dissent"+i)
-                        if(scope.dissentData[i].reply){
-
-                            drawArrow(LASTX+DISSENTWIDTH,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE,LASTY+DISSENTHEIGHT/2,LASTY+DISSENTHEIGHT/2)
-
-                            if(scope.LAN == 'JP'){
-                                drawText("この異議の説明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
-                            }else{
-                                drawText("这里是对质疑的说明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
-                            }
-
-                            appendRect(scope.dissentData[i].reply,0,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE+5,LASTY,EXPLAINWIDTH,EXPLAINHEIGHT,"explain"+i)
-                        }else{
-                            drawPointer(LASTX+DISSENTWIDTH,LASTY+DISSENTHEIGHT/4,200,200)
-                        }
-
-                        LASTY += DISSENTHEIGHT
-                    }
-
-
-                    LASTY += DISSENTANDLINESPACEY
-
-
-
-                    //如果为非准结束阶段,那么是允许立論的,否则不允许立論
-
-                    if(scope.lastStatement != 1){
-
-
-                        drawDottedLine(DOTTEDLINEX,LASTY,DOTTEDLINEX+DOTTEDWIDTH,LASTY)
-
-                        if(scope.LAN == 'JP'){
-                            drawText("ここから立論の部分",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
-                        }else{
-                            drawText("以下是原始阐述说明",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
-                        }
-
-                        drawDottedLine(DOTTEDLINEX+DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY,DOTTEDLINEX+2*DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY)
-
-                        appendRect(scope.statementData,0,CONSTRUCTX,LASTY+DOTTEDLINEANDCONSTRUCTSPACE,CONSTRUCTWIDTH,CONSTRUCTHEIGHT,"constructClaim")
-                        if(scope.statementData){
-                            d3.select("#constructClaim").style("display","block")
-                        }else{
-                            d3.select("#constructClaim").style("display","none")
-                        }
-                    }
-
-
-                }
-
-
-                function clearDraw(){
-                    svg.selectAll(".draw").remove()
-                    LASTX = 0
-                    LASTY = 0
-                }
-
-                function drawDottedLine(x1,y1,x2,y2){
-                    var line = svg.insert("line")
-                            .attr("x1",x1)
-                            .attr("y1",y1)
-                            .attr("x2",x2)
-                            .attr("y2",y2)
-                            .attr("stroke","#000")
-                            .attr("stroke-width",3)
-                            .attr("class","arrow draw")
-                            .attr("stroke-dasharray","4,10")
-                }
-
-                function drawPointer(x,y,width,height){
-                    var foreignObject = svg.append("foreignObject")
-                            .attr("width",width)
-                            .attr("height",height)
-                            .attr("x",x)
-                            .attr("y",y)
-                            .attr("class","draw")
-
-                    var div = foreignObject.append('xhtml:div')
-                    var image = div.append("img")
-
-                    image.attr("src", "/leftPointer.png")
-                            .attr("width", "100")
-                            .attr("height", "100");
-
-                    if(scope.LAN == 'JP'){
-                        drawText("左の異議を説明してください",x+100,y+100/2,20)
-                    }else{
-                        drawText("请对左侧您选择的质疑做阐述说明",x+100,y+100/2,20)
-                    }
-
-                }
-
-                function drawArrow(x1,x2,y1,y2){
-                    var line = svg.insert("line",":first-child")
-                            .attr("x1",x1)
-                            .attr("y1",y1)
-                            .attr("x2",x2)
-                            .attr("y2",y2)
-                            .attr("stroke","#9acfea")
-                            .attr("stroke-width",3)
-                            .attr("class","arrow draw")
-                            .attr("marker-end","url(#arrow)")
-                }
-
-                function drawText(txt,x,y,font){
-                    var text = svg.insert("text")
-                    text.text(txt)
-                    text.attr("x",x)
-                            .attr("y",y)
-                            .attr("font-size",font)
-                            .attr("fill","#8a6d3b")
-                            .attr("class","draw")
-                }
-
-                function appendRect(txt,dissent,x,y,w,h,id){
-                    var foreignObject = svg.append("foreignObject")
-                    foreignObject.attr("width",w)
-                    foreignObject.attr("height",h)
-
-                    foreignObject.attr("x",x)
-                    foreignObject.attr("y",y)
-                    foreignObject.attr("id",id)
-                    foreignObject.attr("class","draw")
-
-
-                    var _div = foreignObject.append('xhtml:div')
-                    var div = _div.append("div")
-                    div.attr("class","alert alert-warning  row")
-                    div.attr("role","alert")
-                    div.attr("style","height: "+ h*0.6 +"px; overflow: auto;margin-bottom:1px")
-
-
-                    var p = div.append("p")
-                    p.html(txt)
-
-
-
-                    if(id != 'constructClaim' && dissent == 1){
-                        //如果是左边的被质疑的模块
-                        var div = _div.append("div")
-                        var button = _div.append("button")
-                        if(scope.LAN == 'JP'){
-                            button.html("異議あり")
-                        }else{
-                            button.html("被质疑")
-                        }
-
-                        button.attr("type","button")
-                        button.attr("class","btn btn-danger pull-right")
-                    }
-
-
-                    if(id != 'constructClaim' && dissent == 0){
-                        //如果是右侧异议解释模块
-                        var div = _div.append("div")
-                        div.attr("class","row")
-                        var divId = "btn"+Math.round(Math.random()*10000)
-                        div.attr("id",divId)
-
-                        var num = parseInt(/explain(\d)/.exec(id)[1])
-
-                        if(scope.LAN == 'JP'){
-                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">編集</button>'
-                        }else{
-                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">修改</button>'
-                        }
-
-
-                        angular.element(document.getElementById(divId)).append($compile(html)(scope));
-                    }
-
-
-                    if(id == 'constructClaim'){
-                        //如果是原始阐述的部分的话
-                        var div = _div.append("div")
-                        div.attr("class","row")
-                        var divId = "btn"+Math.round(Math.random()*10000)
-                        div.attr("id",divId)
-
-
-                        if(scope.LAN == 'JP'){
-                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'claim\',' + num + ')">編集</button>'
-                        }else{
-                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'claim\',' + num + ')">修改</button>'
-                        }
-
-
-                        angular.element(document.getElementById(divId)).append($compile(html)(scope));
-                    }
-
-                }
-            },
-            templateUrl:"/angularJSTemplate/public/statementResult.html"
-        }
-    })
+//    myApp.directive("statementResult",function($compile) {
+//        return {
+//            scope: false,
+//            link: function (scope,element) {
+//
+//
+//                var TOP = 15   //最先画的方块距离顶端的距离
+//                var LEFT = 80   //最先画的方块距离左边的距离
+//                var DISSENTWIDTH = 250 //异议方块的长度
+//                var DISSENTHEIGHT = 260//异议方块的高度
+//                var DISSENTANDEXPLAINSPACE = 250 //异议方块距离右边的赛解释说明方块的横向距离
+//                var DISSENTSPACEY = 80 //异议方块之间间隔的距离
+//                var EXPLAINWIDTH = 460
+//                var EXPLAINHEIGHT = 260
+//                var DISSENTANDLINESPACEY = 90 //异议方块距离下面虚线的纵向距离
+//                var DOTTEDLINEX = 40//虚线的左边位移
+//                var DOTTEDWIDTH = 360 //虚线的长度
+//                var DOTTEDSPACEWIDTH = 300 //虚线间隔的长度
+//                var DOTTEDLINEANDCONSTRUCTSPACE = 50 //虚线距离下面方块的纵向距离
+//                var CONSTRUCTX = LEFT //结论方块距离左侧的位移
+//                var CONSTRUCTWIDTH = 960 //结论方块的长度
+//                var CONSTRUCTHEIGHT = 260 //结论方块的高度
+//
+//                var LASTX = 0
+//                var LASTY = 0
+//                var svg
+//
+//                var svg = d3.select(element.find("svg")[0])
+//                clearDraw()
+//                draw()
+//
+//                scope.$on('drawStatementResult',function(event, data){
+//                    clearDraw()
+//                    draw()
+//                });
+//
+//
+//                function draw(){
+//                    LASTX = LEFT
+//                    LASTY = TOP
+//                    for(var i = 0;i<scope.dissentData.length;i++){
+//                        if(i>0) LASTY += DISSENTSPACEY
+//                        appendRect(scope.dissentData[i].txt,1,LASTX,LASTY,DISSENTWIDTH,DISSENTHEIGHT,"dissent"+i)
+//                        if(scope.dissentData[i].reply){
+//
+//                            drawArrow(LASTX+DISSENTWIDTH,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE,LASTY+DISSENTHEIGHT/2,LASTY+DISSENTHEIGHT/2)
+//
+//                            if(scope.LAN == 'JP'){
+//                                drawText("この異議の説明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
+//                            }else{
+//                                drawText("这里是对质疑的说明",LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE*0.4,LASTY+DISSENTHEIGHT/2,16)
+//                            }
+//
+//                            appendRect(scope.dissentData[i].reply,0,LASTX+DISSENTWIDTH+DISSENTANDEXPLAINSPACE+5,LASTY,EXPLAINWIDTH,EXPLAINHEIGHT,"explain"+i)
+//                        }else{
+//                            drawPointer(LASTX+DISSENTWIDTH,LASTY+DISSENTHEIGHT/4,200,200)
+//                        }
+//
+//                        LASTY += DISSENTHEIGHT
+//                    }
+//
+//
+//                    LASTY += DISSENTANDLINESPACEY
+//
+//
+//
+//                    //如果为非准结束阶段,那么是允许立論的,否则不允许立論
+//
+//                    if(scope.lastStatement != 1){
+//
+//
+//                        drawDottedLine(DOTTEDLINEX,LASTY,DOTTEDLINEX+DOTTEDWIDTH,LASTY)
+//
+//                        if(scope.LAN == 'JP'){
+//                            drawText("ここから立論の部分",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+//                        }else{
+//                            drawText("以下是原始阐述说明",DOTTEDLINEX+DOTTEDWIDTH+50,LASTY+5,16)
+//                        }
+//
+//                        drawDottedLine(DOTTEDLINEX+DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY,DOTTEDLINEX+2*DOTTEDWIDTH+DOTTEDSPACEWIDTH,LASTY)
+//
+//                        appendRect(scope.statementData,0,CONSTRUCTX,LASTY+DOTTEDLINEANDCONSTRUCTSPACE,CONSTRUCTWIDTH,CONSTRUCTHEIGHT,"constructClaim")
+//                        if(scope.statementData){
+//                            d3.select("#constructClaim").style("display","block")
+//                        }else{
+//                            d3.select("#constructClaim").style("display","none")
+//                        }
+//                    }
+//
+//
+//                }
+//
+//
+//                function clearDraw(){
+//                    svg.selectAll(".draw").remove()
+//                    LASTX = 0
+//                    LASTY = 0
+//                }
+//
+//                function drawDottedLine(x1,y1,x2,y2){
+//                    var line = svg.insert("line")
+//                            .attr("x1",x1)
+//                            .attr("y1",y1)
+//                            .attr("x2",x2)
+//                            .attr("y2",y2)
+//                            .attr("stroke","#000")
+//                            .attr("stroke-width",3)
+//                            .attr("class","arrow draw")
+//                            .attr("stroke-dasharray","4,10")
+//                }
+//
+//                function drawPointer(x,y,width,height){
+//                    var foreignObject = svg.append("foreignObject")
+//                            .attr("width",width)
+//                            .attr("height",height)
+//                            .attr("x",x)
+//                            .attr("y",y)
+//                            .attr("class","draw")
+//
+//                    var div = foreignObject.append('xhtml:div')
+//                    var image = div.append("img")
+//
+//                    image.attr("src", "/leftPointer.png")
+//                            .attr("width", "100")
+//                            .attr("height", "100");
+//
+//                    if(scope.LAN == 'JP'){
+//                        drawText("左の異議を説明してください",x+100,y+100/2,20)
+//                    }else{
+//                        drawText("请对左侧您选择的质疑做阐述说明",x+100,y+100/2,20)
+//                    }
+//
+//                }
+//
+//                function drawArrow(x1,x2,y1,y2){
+//                    var line = svg.insert("line",":first-child")
+//                            .attr("x1",x1)
+//                            .attr("y1",y1)
+//                            .attr("x2",x2)
+//                            .attr("y2",y2)
+//                            .attr("stroke","#9acfea")
+//                            .attr("stroke-width",3)
+//                            .attr("class","arrow draw")
+//                            .attr("marker-end","url(#arrow)")
+//                }
+//
+//                function drawText(txt,x,y,font){
+//                    var text = svg.insert("text")
+//                    text.text(txt)
+//                    text.attr("x",x)
+//                            .attr("y",y)
+//                            .attr("font-size",font)
+//                            .attr("fill","#8a6d3b")
+//                            .attr("class","draw")
+//                }
+//
+//                function appendRect(txt,dissent,x,y,w,h,id){
+//                    var foreignObject = svg.append("foreignObject")
+//                    foreignObject.attr("width",w)
+//                    foreignObject.attr("height",h)
+//
+//                    foreignObject.attr("x",x)
+//                    foreignObject.attr("y",y)
+//                    foreignObject.attr("id",id)
+//                    foreignObject.attr("class","draw")
+//
+//
+//                    var _div = foreignObject.append('xhtml:div')
+//                    var div = _div.append("div")
+//                    div.attr("class","alert alert-warning  row")
+//                    div.attr("role","alert")
+//                    div.attr("style","height: "+ h*0.6 +"px; overflow: auto;margin-bottom:1px")
+//
+//
+//                    var p = div.append("p")
+//                    p.html(txt)
+//
+//
+//
+//                    if(id != 'constructClaim' && dissent == 1){
+//                        //如果是左边的被质疑的模块
+//                        var div = _div.append("div")
+//                        var button = _div.append("button")
+//                        if(scope.LAN == 'JP'){
+//                            button.html("異議あり")
+//                        }else{
+//                            button.html("被质疑")
+//                        }
+//
+//                        button.attr("type","button")
+//                        button.attr("class","btn btn-danger pull-right")
+//                    }
+//
+//
+//                    if(id != 'constructClaim' && dissent == 0){
+//                        //如果是右侧异议解释模块
+//                        var div = _div.append("div")
+//                        div.attr("class","row")
+//                        var divId = "btn"+Math.round(Math.random()*10000)
+//                        div.attr("id",divId)
+//
+//                        var num = parseInt(/explain(\d)/.exec(id)[1])
+//
+//                        if(scope.LAN == 'JP'){
+//                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">編集</button>'
+//                        }else{
+//                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'dissent\',' + num + ')">修改</button>'
+//                        }
+//
+//
+//                        angular.element(document.getElementById(divId)).append($compile(html)(scope));
+//                    }
+//
+//
+//                    if(id == 'constructClaim'){
+//                        //如果是原始阐述的部分的话
+//                        var div = _div.append("div")
+//                        div.attr("class","row")
+//                        var divId = "btn"+Math.round(Math.random()*10000)
+//                        div.attr("id",divId)
+//
+//
+//                        if(scope.LAN == 'JP'){
+//                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'claim\',' + num + ')">編集</button>'
+//                        }else{
+//                            var html = '<button class="btn btn-default pull-right" ng-click="edit2(\'claim\',' + num + ')">修改</button>'
+//                        }
+//
+//
+//                        angular.element(document.getElementById(divId)).append($compile(html)(scope));
+//                    }
+//
+//                }
+//            },
+//            templateUrl:"/angularJSTemplate/public/statementResult.html"
+//        }
+//    })
 
     myApp.directive("analysisResult2",function(coreSocket,$compile,$rootScope){
       return{
@@ -2223,6 +2240,7 @@
 
 
                       //如果没有选择质疑的选项那么直接进入下一步的立論的部分
+                      /*
                       scope.statementStatus = {name:"claim",i:0}
 
                       if((scope.debateInfo.order == scope.totalNum-1) && (scope.debateInfo.status == 'lookup')){
@@ -2233,6 +2251,9 @@
                       }else{
 
                       }
+
+                        */
+
                   }else{
                       scope.statementStatus = {name:"dissent",i:0}
                   }
@@ -3368,9 +3389,6 @@
 
                 transportInputInfo("FormInputing")
 
-
-
-
                 function addIntoAnalysisData(name){
                     var i = $scope.inputStatus.i
                     var j = $scope.inputStatus.j
@@ -3408,7 +3426,6 @@
 
                     //每次填写完当前的analysis信息后都更新debateStatus里面的everyAnalysisData字段
                     preSubmit()
-
 
                 }
 
@@ -4084,6 +4101,7 @@
 
                     scope.inputing = function(){
 
+
                         if(scope.statementStatus.name == "claim"){
                             scope.statementData = scope.statement
                         }
@@ -4158,7 +4176,7 @@
                             scope.statementStatus.name = "preview"
                             scope.conceptStatus = "noberu"
                             transportStatementInfo("textInputing")
-                            $rootScope.$broadcast('drawStatementResult');
+                            //$rootScope.$broadcast('drawStatementResult');
                             $rootScope.$broadcast('_drawStatementResult');
                             //submit()
 
@@ -4180,7 +4198,7 @@
                                         scope.statementStatus.name = "preview"
                                         scope.conceptStatus = "noberu"
                                         transportStatementInfo("textInputing")
-                                        $rootScope.$broadcast('drawStatementResult');
+                                        //$rootScope.$broadcast('drawStatementResult');
                                         $rootScope.$broadcast('_drawStatementResult');
                                         //submit()
 
@@ -4199,7 +4217,7 @@
                             scope.statementStatus.name = "preview"
                             scope.conceptStatus = "noberu"
                             transportStatementInfo("textInputing")
-                            $rootScope.$broadcast('drawStatementResult');
+                            //$rootScope.$broadcast('drawStatementResult');
                             $rootScope.$broadcast('_drawStatementResult');
                             //submit()
 
@@ -4727,15 +4745,14 @@
                 analysisMapInformation.then(function(msg){
                     scope.analysisMapInformation = msg
                     scope.analysisMapInformationLen = scope.analysisMapInformation.res.data.length
-                    dealWithData()
+                    dealWithData(2)
                     dealWithDraw()
-
                 })
 
 
                 scope.$on("reDrawMap",function(){
                     setTimeout(function(){
-                            dealWithData()
+                            dealWithData(1)
                             dealWithDraw()
                     },500)
                 })
@@ -4790,7 +4807,10 @@
                     ELEMENTDISSENTCLAIM = {pro:{},con:{}}
                 }
 
-                function dealWithData() {
+                function dealWithData(n) {
+
+                    //n==1 通过触发点击事件强行画图的
+                    //n==2 自然进行的画图
 
                     /*
                     if(!scope.currentAnalysis) {
@@ -4806,8 +4826,16 @@
 
                     if(scope.debateInfo.status == "analysis" || scope.debateInfo.status == "check" || scope.debateInfo.status == "kentou" || scope.debateInfo.status == "bunseki"){
                         if(scope.currentAnalysis){
+
                             //正在分析的时候,或者说是最新的一个分析结果还没有被确定的时候,在最后一项里加入最新的分析结果,因为没有被确认,所以没有被放入分析结果的数据库里
-                            scope.analysisMapInformation.res.data[scope.analysisMapInformationLen] = scope.currentAnalysis
+                            if(scope.debateInfo.status == "analysis" || scope.debateInfo.status == "bunseki"){
+                                if(n == 1){
+                                    scope.analysisMapInformation.res.data[scope.analysisMapInformationLen] = scope.currentAnalysis
+                                }
+                            }else{
+                                scope.analysisMapInformation.res.data[scope.analysisMapInformationLen] = scope.currentAnalysis
+                            }
+
                         }
                     }
 
@@ -5833,7 +5861,13 @@
                             heading.text("立論")
                         }else{
 
-                            heading.text("第"+level+"反駁")
+                            if(!level){
+                                heading.text("反駁")
+                            }else{
+                                heading.text("第"+level+"反駁")
+                            }
+
+
                         }
 
                         body.text(text)
