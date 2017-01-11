@@ -2107,6 +2107,9 @@
                               }
 
                               if(type == "evidence"){
+                                  if(!content){
+                                      content = "根拠なし"
+                                  }
                                   scope.analysisData.analysisResult[i].support[j].evidence = content
                               }
                           }
@@ -2122,6 +2125,9 @@
                               }
 
                               if(type == "evidence"){
+                                  if(!content){
+                                      content = "根拠なし"
+                                  }
                                   scope.analysisDissentExplainData[dissentI].analysisResult[i].support[j].evidence = content
                               }
 
@@ -3384,9 +3390,6 @@
             link:function($scope){
                 $scope.conceptStatus = "analysis"   //concept directive controller
 
-
-
-
                 transportInputInfo("FormInputing")
 
                 function addIntoAnalysisData(name){
@@ -3545,6 +3548,7 @@
                     console.log("submit analysis data")
                     console.log($scope.analysisData)
                     console.log($scope.analysisDissentExplainData)
+
                     coreSocket.emit("giveAnalysis",{analysisData:$scope.analysisData,analysisDissentExplainData:$scope.analysisDissentExplainData})
                 }
 
@@ -3589,7 +3593,7 @@
                             $scope.analysisData.analysisResult[i].support.splice(j,1)
                         }else{
                             $scope.analysisData.analysisResult[i].support[j].warrant = ""
-                            $scope.analysisData.analysisResult[i].support[j].evidence = ""
+                            $scope.analysisData.analysisResult[i].support[j].evidence = "根拠なし"
                         }
 
 
@@ -3623,7 +3627,7 @@
                             $scope.analysisDissentExplainData[_i].analysisResult[i].support.splice(j,1)
                         }else{
                             $scope.analysisDissentExplainData[_i].analysisResult[i].support[j].warrant = ""
-                            $scope.analysisDissentExplainData[_i].analysisResult[i].support[j].evidence = ""
+                            $scope.analysisDissentExplainData[_i].analysisResult[i].support[j].evidence = "根拠なし"
                         }
 
 
@@ -3631,7 +3635,8 @@
 
                     }
 
-
+                    //每次填写完当前的analysis信息后都更新debateStatus里面的everyAnalysisData字段
+                    preSubmit()
 
                     //重新画图
                     $rootScope.$broadcast('click',{});
@@ -3661,6 +3666,9 @@
                     }
 
                     $scope.inputStatus.name = "newEvidence"
+
+                    //每次填写完当前的analysis信息后都更新debateStatus里面的everyAnalysisData字段
+                    preSubmit()
                     //重新画图
                     $rootScope.$broadcast('click',{});
                 }
@@ -4588,8 +4596,6 @@
                     }else{
                         scope.topInfoHeight = 220
                     }
-
-
                 }
 
                 scope.leave = function(){
@@ -4627,12 +4633,22 @@
                 scope.topInfoHeight = 220
 
                 scope.expand = function(){
+
                     scope.expandVal = (scope.expandVal + 1 ) %2
                     $rootScope.$broadcast('reDrawMap',{});
                     //重画地图
+
+
+                    if(scope.debateInfo.mapFunc == 1){
+
+                    }else{
+                        $rootScope.$broadcast('reDrawStatementMap',{});
+                    }
+
                 }
 
                 scope.verticalExpand = function(){
+
                     scope.verticalExpandVal = (scope.verticalExpandVal + 1) % 2
                     if(scope.verticalExpandVal == 0){
                         scope.topInfoHeight = scope.topInfoHeight + 300
@@ -4640,8 +4656,13 @@
                         scope.topInfoHeight = 220
                     }
 
+                    if(scope.debateInfo.mapFunc == 1){
 
-                    $rootScope.$broadcast('reDrawMap',{});
+                        $rootScope.$broadcast('reDrawMap',{});
+                    }else{
+                        $rootScope.$broadcast('reDrawStatementMap',{});
+                    }
+
 
                 }
 
