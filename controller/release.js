@@ -412,12 +412,11 @@ module.exports = {
 
                     if(username == result[0].pro){
                         req.session.debateLogin.position = 1
-                    }
-
-
-                   if(username == result[0].con){
+                    }else if(username == result[0].con){
                        req.session.debateLogin.position = 2
-                   }
+                   }else{
+                        req.session.debateLogin.position = 0
+                    }
 
 
                    req.session.debateLogin.analysisFunc = result[0].analysisFunc
@@ -492,5 +491,118 @@ module.exports = {
                 //只有是在开始阶段,如果对方空缺
             }))
         })()
+    },
+    hyoukaController:function(req,res){
+        var saitenClaim = req.body.saitenClaim
+        var saitenClaimNum = req.body.saitenClaimNum
+        var saitenWarrant = req.body.saitenWarrant
+        var saitenEvidence = req.body.saitenEvidence
+        var saitenEvidenceNum = req.body.saitenEvidenceNum
+        var rebuttalObvious = req.body.rebuttalObvious
+        var username = req.body.username
+        var group = req.body.group
+        var conf = req.body.conf
+        var _id = conf[0]
+        var type = conf[1]
+        var j = conf[2]
+        var objectId = new mongodb.ObjectID(_id)
+
+        var hyouka
+        var dissentExplainHyouka
+
+        steps(function(){
+            mongo.find("statementLog",{_id:objectId},{},this.hold(function(result){
+                    if(result.length == 0){
+                        res.end(JSON.stringify({err:1,msg:"can not find the result by _id"}))
+                    }
+
+                    if(type == "construct"){
+                        if(!result[0].hyouka){
+                            result[0].hyouka = {}
+                        }
+
+                        hyouka = result[0].hyouka //{}
+                    }else if(type == "dissentExplain"){
+                        if(!result[0].everyStatement.dissentExplain){
+                            res.end(JSON.stringify({err:1,msg:"can not find the dissentExplain  by _id"}))
+                            this.terminate()
+                            return;
+                        }
+
+                        if(!result[0].everyStatement.dissentExplain[j]){
+                            res.end(JSON.stringify({err:1,msg:"can not find the dissentExplain  by _id and j"}))
+                            this.terminate()
+                            return;
+                        }
+
+                        if(!result[0].dissentExplainHyouka){
+                            result[0].dissentExplainHyouka = []
+                            for(var g=0;g<result[0].everyStatement.dissentExplain.length;g++){
+                                result[0].dissentExplainHyouka.push({})
+                            }
+                        }
+
+                        dissentExplainHyouka = result[0].dissentExplainHyouka
+                        hyouka = result[0].dissentExplainHyouka[j]
+
+                    }else{
+                        res.end(JSON.stringify({err:1,msg:"unKnow type!"}))
+                        this.terminate()
+                        return;
+                    }
+
+            }))
+        },function(){
+
+                if(tool.isEmpty(hyouka)){
+                    hyouka = {}
+                    hyouka[username] = {username:username,group:group,saitenClaim:saitenClaim,saitenClaimNum:saitenClaimNum,saitenWarrant:saitenWarrant,saitenEvidence:saitenEvidence,saitenEvidenceNum:saitenEvidenceNum,rebuttalObvious:rebuttalObvious}
+
+                    if(type == "dissentExplain"){
+                        dissentExplainHyouka[j] = hyouka
+                        console.log(dissentExplainHyouka)
+                    }
+
+                }else{
+                    if(hyouka[username]){
+                        hyouka[username].saitenClaim = saitenClaim
+                        hyouka[username].saitenClaimNum = saitenClaimNum
+                        hyouka[username].saitenWarrant = saitenWarrant
+                        hyouka[username].saitenEvidence = saitenEvidence
+                        hyouka[username].saitenEvidenceNum = saitenEvidenceNum
+                        hyouka[username].rebuttalObvious = rebuttalObvious
+                    }else{
+                        hyouka[username] = {username:username,group:group,saitenClaim:saitenClaim,saitenClaimNum:saitenClaimNum,saitenWarrant:saitenWarrant,saitenEvidence:saitenEvidence,saitenEvidenceNum:saitenEvidenceNum,rebuttalObvious:rebuttalObvious}
+                    }
+
+                    if(type == "dissentExplain"){
+                        dissentExplainHyouka[j] = hyouka
+                        console.log(dissentExplainHyouka)
+                    }
+
+                }
+
+            console.log(hyouka)
+        },function(){
+            var _update
+            if(type == "construct"){
+                _update = {$set:{hyouka:hyouka}}
+            }else if(type == "dissentExplain"){
+                _update = {$set:{dissentExplainHyouka:dissentExplainHyouka}}
+            }else{
+                res.end(JSON.stringify({err:1,msg:"unKnow type for update!"}))
+            }
+
+            console.log(_update)
+
+            mongo.update("statementLog",{_id:objectId},_update,this.hold(function(__res){
+                res.end(JSON.stringify({err:0,msg:"data"}))
+                this.terminate()
+                return;
+            }))
+        })()
+
+
+
     }
 }

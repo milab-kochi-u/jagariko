@@ -266,12 +266,10 @@
                                             <div class="row col-sm-3">
                                                 <span style="font-size: 13px;" class="label label-info">肯定側</span>
                                                 <span>{{_val.pro}} </span>
-                                                <span>{{_val.proUserInfo.name}}</span>
                                             </div>
                                             <div class="row col-sm-3">
                                                 <span  style="font-size: 13px;"  class="label label-success">否定側</span>
                                                 <span>{{_val.con}}</span>
-                                                <span>{{_val.conUserInfo.name}}</span>
                                             </div>
                                             <div class="row col-sm-3">
                                                 <span style="font-size: 13px;"  class="label label-default">
@@ -542,6 +540,7 @@
         }
 
         $scope.backToRoom = function(_id){
+
             myPost.postData("/release/backToRoom",{_id:_id}).then(function(_res){
                     if(_res.data.error == 1){
                         alert(_res.data.msg)
@@ -680,6 +679,8 @@
             }
 
             if(items.status == "participate"){
+
+
                 myPost.postData("/release/participateRoom",{num:items.num,rNum:items.rNum,position:parseInt(items.position)}).then(function(_res){
                     if(parseInt(_res.data.err) == 0){
                             location = "/release/chat"

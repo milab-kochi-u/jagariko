@@ -138,7 +138,191 @@
 
 <body ng-app="myApp" ng-init="LAN='JP'">
 
+
+
+
+
+
+
 <div  class="container" ng-controller="myController" >
+
+
+    <script type="text/ng-template" id="saiten.html">
+        <div class="modal-header">
+            <h3 class="modal-title" >採点してください</h3>
+        </div>
+        <div class="modal-body" >
+
+
+
+
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title" ng-show="type=='dissentExplain'">反駁</h3>
+                    <h3 class="panel-title" ng-show="type=='construct'">立論</h3>
+                </div>
+                <div ng-show="type=='dissentExplain'" class="panel-body">
+                    <p>反駁対象:{{txt}}</p>
+                    <hr/>
+                    反駁内容:{{text}}
+                </div>
+
+
+                <div ng-show="type=='construct'" class="panel-body">
+                    <p>{{text}}</p>
+                </div>
+
+
+            </div>
+
+
+
+            <div class="row">
+
+                <p ng-show="type=='dissentExplain'">反駁の狙いがはっきりしています？
+
+                <div ng-show="type=='dissentExplain'" class="radio">
+                    <label>
+                        <input ng-model="rebuttalObvious" type="radio" name="rebuttalObvious"  value="1" >
+                        はっきりしています
+                    </label>
+                </div>
+
+                <div ng-show="type=='dissentExplain'" class="radio">
+                    <label>
+                        <input ng-model="rebuttalObvious" type="radio" name="rebuttalObvious" value="2" >
+                        はっきりしていないです
+                    </label>
+                </div>
+                </p>
+
+                <p>1.主張がいくつだと感じましたか</p>
+                <select ng-model="saitenClaimNum" class="form-control">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">3+</option>
+                </select>
+
+
+
+                <p>2.主張が明らかにしていますか?
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenClaim" type="radio" name="saitenClaim" id="optionsRadios1" value="1" >
+                        全ての主張が明らかにしています
+                    </label>
+                </div>
+
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenClaim" type="radio" name="saitenClaim" id="optionsRadios1" value="2" >
+                        一部分の主張が明らかにしています
+                    </label>
+                </div>
+
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenClaim" type="radio" name="saitenClaims" id="optionsRadios1" value="3" >
+                        全て主張が曖昧です
+                    </label>
+                </div>
+
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenClaim" type="radio" name="saitenClaim" id="optionsRadios2" value="4">
+                        主張が全然見えないです
+                    </label>
+                </div>
+                </p>
+
+
+
+                <p>3.根拠がいくつだと感じましたか</p>
+                <select ng-model="saitenEvidenceNum" class="form-control">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">3+</option>
+                </select>
+
+
+                <p>4.根拠が明らかにしていますか
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenEvidence" type="radio" name="saitenEvidence" id="optionsRadios1" value="1" >
+                        全ての根拠が明らかにしています
+                    </label>
+                </div>
+
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenEvidence" type="radio" name="saitenEvidence" id="optionsRadios1" value="2" >
+                        一部分の根拠が明らかにしています
+                    </label>
+                </div>
+
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenEvidence" type="radio" name="saitenEvidence" id="optionsRadios1" value="3" >
+                        全て根拠が曖昧です
+                    </label>
+                </div>
+
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenEvidence" type="radio" name="saitenEvidence" id="optionsRadios2" value="4">
+                        根拠が全然見えないです
+                    </label>
+                </div>
+                </p>
+
+
+                <p>5.論拠が明らかにしていますか
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenWarrant" type="radio" name="saitenWarrant" id="optionsRadios1" value="1" >
+                        全ての論拠が明らかにしています
+                    </label>
+                </div>
+
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenWarrant" type="radio" name="saitenWarrant" id="optionsRadios1" value="2" >
+                        一部分の論拠が明らかにしています
+                    </label>
+                </div>
+
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenWarrant" type="radio" name="saitenWarrant" id="optionsRadios1" value="3" >
+                        全ての論拠が曖昧です
+                    </label>
+                </div>
+
+                <div class="radio">
+                    <label>
+                        <input ng-model="saitenWarrant" type="radio" name="saitenWarrant" id="optionsRadios2" value="4">
+                        論拠が全然見えないです
+                    </label>
+                </div>
+                </p>
+
+
+
+            </div>
+
+            <div class="row">
+
+                <div class="modal-footer" >
+                    <button class="btn btn-primary" type="button" ng-click="ok()">評価</button>
+                    <button class="btn btn-warning" type="button" ng-click="cancel()">締める</button>
+                </div>
+
+            </div>
+        </div>
+    </script>
 
     <wait-debate ng-if="statusController.waitDebate"></wait-debate>
     <start-debate ng-if="statusController.startDebate"></start-debate>
@@ -2033,6 +2217,8 @@
 
 
               function dealWithClick(foreignObject,conf,text){
+
+
                   //选择異議的步骤
                   if((scope.debateInfo.status == 'appeal' && scope.debateInfo.position == 2) || (scope.debateInfo.status == 'lookup' && scope.debateInfo.position == 1)){
 
@@ -5598,7 +5784,7 @@
     })
 
 
-    myApp.directive("statementMapResult2",function(getDebateStatementMapInformation){
+    myApp.directive("statementMapResult2",function(getDebateStatementMapInformation,$uibModal){
         return{
             scope:false,
             link:function(scope,element){
@@ -5629,8 +5815,23 @@
 
                 scope.$on("reDrawStatementMap",function(){
                     setTimeout(function(){
-                        draw(scope.statementMapInformation.res.data)
-                        drawLine(CONNECTLINE)
+
+
+
+
+                        var statementMapInformation = getDebateStatementMapInformation.getDebateStatementMapInformation()
+
+
+                        statementMapInformation.then(function(msg){
+                            scope.statementMapInformation = msg
+                            draw(scope.statementMapInformation.res.data)
+                            drawLine(CONNECTLINE)
+                        })
+
+
+
+
+
                     },500)
                 })
 
@@ -5672,9 +5873,9 @@
                         dealWithData(data)
                         for(var i=0;i<data.length;i++){
                             for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
-                                appendRect(data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement,data[i].everyStatement.dissentExplain[j].level)
+                                appendRect(data[i].everyStatement.dissentExplain[j].txt,data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement,data[i].everyStatement.dissentExplain[j].level,[data[i]._id,"dissentExplain",j],{dissentExplainHyouka:data[i].dissentExplainHyouka,hyouka:data[i].hyouka})
                             }
-                            appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0,0)
+                            appendRect("",data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0,0,[data[i]._id,"construct",0],{dissentExplainHyouka:data[i].dissentExplainHyouka,hyouka:data[i].hyouka})
                         }
                     }
 
@@ -5688,11 +5889,11 @@
                                 //rebuttal
 
                                 for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
-                                    appendRect(data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement,data[i].everyStatement.dissentExplain[j].level)
+                                    appendRect(data[i].everyStatement.dissentExplain[j].txt,data[i].everyStatement.dissentExplain[j].reply,data[i].everyStatement.position,"dissentExplain",data[i].everyStatement.dissentExplain[j].dissent,data[i].everyStatement.dissentExplain[j].random,data[i].everyStatement.dissentExplain[j].indexToStatement,data[i].everyStatement.dissentExplain[j].level,[data[i]._id,"dissentExplain",j],{dissentExplainHyouka:data[i].dissentExplainHyouka,hyouka:data[i].hyouka})
                                 }
                             }
 
-                            appendRect(data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0,0)
+                            appendRect("",data[i].everyStatement.statementData,data[i].everyStatement.position,"construct",data[i].everyStatement.dissent,data[i].everyStatement.statementDataRandom,0,0,[data[i]._id,"construct",0],{dissentExplainHyouka:data[i].dissentExplainHyouka,hyouka:data[i].hyouka})
                         }
                     }
 
@@ -5792,7 +5993,7 @@
 
                 }
 
-                function appendRect(text,position,type,dissent,random,indexToStatement,level){
+                function appendRect(txt,text,position,type,dissent,random,indexToStatement,level,conf,hyouka){
                         if(!text) return
                         var _x,_y
                         if(position == 1){
@@ -5825,6 +6026,8 @@
                         foreignObject.attr("x",_x)
                         foreignObject.attr("y",_y)
                         foreignObject.attr("class","statementMapData")
+
+                        doClick(txt,text,foreignObject,type,random,conf,hyouka)
 
                         //处理異議説明的连接线
                         if(dissent == 1){
@@ -5895,6 +6098,27 @@
                 }
 
 
+                function doClick(txt,text,obj,type,random,conf,hyouka){
+
+                        obj.on("click",function(){
+                            if(scope.debateInfo.position == 0){
+
+                                $uibModal.open({
+                                    controller: 'ruleConfirmCtrl',
+                                    templateUrl: 'saiten.html',
+                                    resolve: {
+                                        items: function () {
+                                            return {txt:txt,text:text,debateInfo:scope.debateInfo,username:scope.username,group:scope.group,conf:conf,type:type,hyoukaResult:hyouka}
+                                        }
+                                    }
+                                })
+
+                            }
+
+                        })
+                }
+
+
 
                 function dealWithData(data){
                     for(var s=0;s<data.length;s++){
@@ -5910,10 +6134,16 @@
                         if(data[s].everyStatement.dissentExplain){
                             for(var k=0;k<data[s].everyStatement.dissentExplain.length;k++){
                                 var res = indexAndRandom(data[s].everyStatement.dissentExplain[k].random)
+
                                 if(res.res > 0){
                                     scope.statementMapInformation.res.data[s].everyStatement.dissentExplain[k].dissent = 1
                                 }else{
                                     scope.statementMapInformation.res.data[s].everyStatement.dissentExplain[k].dissent = 0
+                                }
+
+                                var txt = findTxt(data[s].everyStatement.dissentExplain[k].indexToStatement)
+                                if(txt.res > 0){
+                                    scope.statementMapInformation.res.data[s].everyStatement.dissentExplain[k].txt = txt.txt
                                 }
                             }
                         }
@@ -5931,9 +6161,35 @@
                                 }
                             }
                         }
-
                     }
                     return {res:0}
+                }
+
+
+
+                function findTxt(indexToStatement){
+
+                    var data = scope.statementMapInformation.res.data
+                    for(var i=0;i<data.length;i++){
+
+
+
+                        if(data[i].everyStatement.statementDataRandom == indexToStatement){
+                            return {res:1,txt:data[i].everyStatement.statementData}
+                        }
+
+
+
+                        if(data[i].everyStatement.dissentExplain){
+                            for(var j=0;j<data[i].everyStatement.dissentExplain.length;j++){
+                                if(data[i].everyStatement.dissentExplain[j].random == indexToStatement){
+                                    return {res:1,txt:data[i].everyStatement.dissentExplain[j].reply}
+                                }
+                            }
+                        }
+                    }
+                    return {res:0}
+
                 }
 
 
@@ -6279,6 +6535,107 @@
             templateUrl:"/angularJSTemplate/public/infoTable.html"
         }
     })
+
+
+
+
+
+    myApp.controller('ruleConfirmCtrl', function ($scope,$uibModalInstance,items,myPost,$rootScope,getDebateStatementMapInformation) {
+
+        var type = items.type
+        $scope.type = type
+        var conf = items.conf
+        var username = items.username
+        $scope.text = items.text
+        $scope.txt = items.txt
+        var hyoukaResult = items.hyoukaResult
+
+
+        var hyouka = hyoukaResult.hyouka
+        var dissentExplainHyouka = hyoukaResult.dissentExplainHyouka
+
+
+
+
+        if(type == "construct"){
+
+            if(hyouka){
+                if(hyouka[username]){
+                    $scope.saitenClaim = hyouka[username].saitenClaim
+                    $scope.saitenClaimNum = hyouka[username].saitenClaimNum
+                    $scope.saitenWarrant = hyouka[username].saitenWarrant
+                    $scope.saitenEvidence = hyouka[username].saitenEvidence
+                    $scope.saitenEvidenceNum = hyouka[username].saitenEvidenceNum
+                    $scope.rebuttalObvious = hyouka[username].rebuttalObvious
+                }
+            }
+
+        }
+
+        if(type == "dissentExplain"){
+            if(dissentExplainHyouka){
+                if(dissentExplainHyouka[conf[2]]){
+                    if(dissentExplainHyouka[conf[2]][username]){
+                        $scope.saitenClaim = dissentExplainHyouka[conf[2]][username].saitenClaim
+                        $scope.saitenClaimNum = dissentExplainHyouka[conf[2]][username].saitenClaimNum
+                        $scope.saitenWarrant = dissentExplainHyouka[conf[2]][username].saitenWarrant
+                        $scope.saitenEvidence = dissentExplainHyouka[conf[2]][username].saitenEvidence
+                        $scope.saitenEvidenceNum = dissentExplainHyouka[conf[2]][username].saitenEvidenceNum
+                        $scope.rebuttalObvious = dissentExplainHyouka[conf[2]][username].rebuttalObvious
+                    }
+                }
+            }
+        }
+
+
+
+        $scope.ok = function (){
+
+            var saitenClaim = $scope.saitenClaim
+            var saitenClaimNum = $scope.saitenClaimNum
+            var saitenWarrant = $scope.saitenWarrant
+            var saitenEvidence = $scope.saitenEvidence
+            var saitenEvidenceNum = $scope.saitenEvidenceNum
+
+            var group = items.group
+            var debateInfo = items.debateInfo
+
+
+            var rebuttalObvious = $scope.rebuttalObvious
+
+
+            if(!saitenClaim || !saitenWarrant || !saitenEvidence || !username || !group || !debateInfo || !conf || !saitenClaimNum || !saitenEvidenceNum){
+                return;
+            }
+
+            if(type == "dissentExplain"){
+
+                if(!rebuttalObvious){
+                    return;
+                }
+            }
+
+            myPost.postData("/release/hyouka",{saitenClaim:saitenClaim,saitenClaimNum:saitenClaimNum,saitenWarrant:saitenWarrant,saitenEvidence:saitenEvidence,saitenEvidenceNum:saitenEvidenceNum,username:username,group:group,conf:conf,saitenEvidenceNum:saitenEvidenceNum,rebuttalObvious:rebuttalObvious}).then(function(_res){
+                if(_res.data.err == 0){
+                    $scope.cancel()
+                    $rootScope.$broadcast('reDrawStatementMap',{});
+
+
+                }else{
+                    alert(_res.data.msg)
+                }
+            })
+
+            console.log(items)
+        }
+
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+    });
+
+
+
 
     function initData($scope){
         $scope.debateInfo = {

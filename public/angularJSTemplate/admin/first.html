@@ -21,55 +21,65 @@
 
         <hr/>
         <div class="row">
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 肯定側:{{val.proInfo.name}}
             </div>
+            <div class="col-sm-1">
+                {{val.pro}}
+            </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 肯定側総文字数:{{val.proTotalLitterNum}}
             </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 主張文字数:{{val.proClaimTotal}}
             </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 反駁文字数:{{val.proRebuttalTotal}}
             </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 反駁数:{{val.proRebuttalNum}}
             </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 反駁平均文字数:{{val.proRebuttalTotal  / val.proRebuttalNum}}
             </div>
+
+            <div class="col-sm-1"></div>
+
 
         </div>
 
         <hr/>
         <div class="row">
-             <div class="col-sm-2">
+             <div class="col-sm-1">
                 否定側:{{val.conInfo.name}}
              </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
+                {{val.con}}
+            </div>
+
+            <div class="col-sm-1">
                 否定側総文字数:{{val.conTotalLitterNum}}
             </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 主張文字数:{{val.conClaimTotal}}
             </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 反駁文字数:{{val.conRebuttalTotal}}
             </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 反駁数:{{val.conRebuttalNum}}
             </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-1">
                 反駁平均文字数:{{val.conRebuttalTotal  / val.conRebuttalNum}}
             </div>
 

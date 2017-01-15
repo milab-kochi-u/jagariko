@@ -143,6 +143,11 @@ router.post("/backToRoom",releaseController.backToRoomController)
 
 
 
+router.post("/backToRoom",checkSession)
+router.post("/hyouka",releaseController.hyoukaController)
+
+
+
 
 
 
